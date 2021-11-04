@@ -120,7 +120,7 @@ Intro_block4 = vis.ImageStim(win,
 
 # Manipulation images
 if confidence_labels == 0:
-    FastFast = vis.ImageStim(win, image=my_directory+'\\Exp2_DotMotion_Instructions\\Exp_2DotMotion_FastFast_b.JPG',
+    FastFast = vis.ImageStim(win, image=my_directory+'\\Exp2_DotMotion_Instructions\\Exp2_DotMotion_FastFast_b.JPG',
                              pos=(0, 0))
     AccAcc = vis.ImageStim(win, image=my_directory+'\\Exp2_DotMotion_Instructions\\Exp2_DotMotion_AccAcc_b.JPG',
                            pos=(0, 0))
@@ -166,7 +166,7 @@ end = vis.TextStim(win, text='The end! Thank you for participating.\n\nPlease wa
 
 # Define keys
 choice_keys = ['c', 'n', 'escape']  # left, right, escape
-cj_keys = ['', '"', 'escape']
+cj_keys = ['2', '3', '4', '8', '9', '0', 'escape']
 
 # Creating DotMotion stimulus
 DotMotion = vis.DotStim(win, units='pix', nDots=120, fieldShape='circle', dotSize=4, color='white', speed=1,
@@ -381,28 +381,17 @@ for block in range(1,blocks):
                 RTconf = clock.getTime()
 
                 # Convert conf_press into numeric value from 0 (probably error) to 1 probably correct
-                for temp in range(0,2):
+                for temp in range(0,6):
                     if conf_press[0] == cj_keys[temp]:
                         cj = temp
                 # Reverse order for half
                 if confidence_labels == 0:
-                    cj = 1 - cj
-
-                # Evaluating confidence press
-                if ACC == 1 and cj == 1:
-                    conf_ACC = 1
-                elif ACC == 0 and cj == 1:
-                    conf_ACC = 0
-                elif ACC == 1 and cj == 0:
-                    conf_ACC = 0
-                elif ACC == 0 and cj == 0:
-                    conf_ACC = 1
+                    cj = 6 - cj
 
             else:
                 conf_press = 'none'
                 cj = -99
                 RTconf = -99
-                conf_ACC = -99
 
             # Store data of current trial
             thisExp.addData("withinblocktrial", trial)
@@ -416,7 +405,6 @@ for block in range(1,blocks):
             thisExp.addData("cj", cj)
             thisExp.addData("rtconf", RTconf)
             thisExp.addData("coherence", p_coherence)
-            thisExp.addData("metacognition", conf_ACC)
             thisExp.addData("slow_trial", SlowTrial)
             if block > 3:
                 thisExp.addData("manipulation", manipulations[n_manipulations])

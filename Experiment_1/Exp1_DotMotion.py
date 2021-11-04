@@ -20,8 +20,8 @@ from time import sleep
 pilot = 0  # Put to 0 for the real experiment
 
 # Number of blocks/trials
-nb_training_trials = 6  # Trials per training block; divisible by 3 (because 3 coherence manipulations) (24)
-nb_main_trials = 6  # Trials per main block; divisible by 3 (because 3 coherence manipulations) (60)
+nb_training_trials = 24  # Trials per training block; divisible by 3 (because 3 coherence manipulations) (24)
+nb_main_trials = 60  # Trials per main block; divisible by 3 (because 3 coherence manipulations) (60)
 nb_main_blocks = 12  # Without training blocks; divisible by 4 (because speed/accuracy manipulations) (12)
 
 # Block 1

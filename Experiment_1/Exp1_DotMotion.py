@@ -44,18 +44,18 @@ time_warning = 2
 
 # Create a Data folder if it doesn't exist yet
 my_directory = os.getcwd()
-if not os.path.isdir('DotMotion_Data'):
-    os.mkdir('DotMotion_Data')
+if not os.path.isdir('Exp1_DotMotion_Data'):
+    os.mkdir('Exp1_DotMotion_Data')
 
 # GUI
 if pilot:
     sub = 0; age = 30; gender = 'Man'; handedness = 'Right'
-    file_name = "DotMotion_Data/DotsTask_sub%d" % sub
+    file_name = "Exp1_DotMotion_Data/DotsTask_sub%d" % sub
 else:
     info = {"Subject number": 0, "gender": ['Woman', 'Man', 'X'], "age": 0, "handedness": ['Left', 'Right']}
     myDlg = gui.DlgFromDict(dictionary=info, title="DotsTask", show=True)
     sub = info['Subject number']; age = info['age']; gender = info['gender']; handedness = info['handedness']
-    file_name = "DotMotion_Data/DotsTask_sub%d" % sub
+    file_name = "Exp1_DotMotion_Data/DotsTask_sub%d" % sub
     if os.path.isfile(file_name):
         print('This subject number already exists!')
         core.quit()
@@ -103,27 +103,27 @@ Introduction = vis.TextStim(win, text="Welcome to this experiment!\n\nOn each tu
                                       "\n\n\n\n\n\n\n\n\n\n\n\n\n"
                                       "In this example, most of the dots move to the left.", pos=(0, 0.15), height=.05)
 Intro_block1 = vis.ImageStim(win,
-                             image=my_directory+'\\DotMotion_Instructions\\DotMotion_Intro_Block1.JPG', pos=(0, 0))
+                             image=my_directory+'\\Exp1_DotMotion_Instructions\\Exp1_DotMotion_Intro_Block1.JPG', pos=(0, 0))
 Intro_block2 = vis.ImageStim(win,
-                             image=my_directory+'\\DotMotion_Instructions\\DotMotion_Intro_Block2.JPG', pos=(0, 0))
+                             image=my_directory+'\\Exp1_DotMotion_Instructions\\Exp1_DotMotion_Intro_Block2.JPG', pos=(0, 0))
 Intro_block3a = vis.ImageStim(win,
-                              image=my_directory+'\\DotMotion_Instructions\\DotMotion_Intro_Block3a.JPG', pos=(0, 0))
+                              image=my_directory+'\\Exp1_DotMotion_Instructions\\Exp1_DotMotion_Intro_Block3a.JPG', pos=(0, 0))
 Intro_block3b = vis.ImageStim(win,
-                              image=my_directory+'\\DotMotion_Instructions\\DotMotion_Intro_Block3b.JPG', pos=(0, 0))
+                              image=my_directory+'\\Exp1_DotMotion_Instructions\\Exp1_DotMotion_Intro_Block3b.JPG', pos=(0, 0))
 Intro_block4 = vis.ImageStim(win,
-                             image=my_directory+'\\DotMotion_Instructions\\DotMotion_Intro_Block4.JPG', pos=(0, 0))
+                             image=my_directory+'\\Exp1_DotMotion_Instructions\\Exp1_DotMotion_Intro_Block4.JPG', pos=(0, 0))
 
 # Manipulation images
 if confidence_labels == 0:
-    FastFast = vis.ImageStim(win, image=my_directory+'\\DotMotion_Instructions\\DotMotion_FastFast_b.JPG', pos=(0, 0))
-    AccAcc = vis.ImageStim(win, image=my_directory+'\\DotMotion_Instructions\\DotMotion_AccAcc_b.JPG', pos=(0, 0))
-    FastAcc = vis.ImageStim(win, image=my_directory+'\\DotMotion_Instructions\\DotMotion_FastAcc_b.JPG', pos=(0, 0))
-    AccFast = vis.ImageStim(win, image=my_directory+'\\DotMotion_Instructions\\DotMotion_AccFast_b.JPG', pos=(0, 0))
+    FastFast = vis.ImageStim(win, image=my_directory+'\\Exp1_DotMotion_Instructions\\Exp1_DotMotion_FastFast_b.JPG', pos=(0, 0))
+    AccAcc = vis.ImageStim(win, image=my_directory+'\\Exp1_DotMotion_Instructions\\Exp1_DotMotion_AccAcc_b.JPG', pos=(0, 0))
+    FastAcc = vis.ImageStim(win, image=my_directory+'\\Exp1_DotMotion_Instructions\\Exp1_DotMotion_FastAcc_b.JPG', pos=(0, 0))
+    AccFast = vis.ImageStim(win, image=my_directory+'\\Exp1_DotMotion_Instructions\\Exp1_DotMotion_AccFast_b.JPG', pos=(0, 0))
 elif confidence_labels == 1:
-    FastFast = vis.ImageStim(win, image=my_directory+'\\DotMotion_Instructions\\DotMotion_FastFast_a.JPG', pos=(0, 0))
-    AccAcc = vis.ImageStim(win, image=my_directory+'\\DotMotion_Instructions\\DotMotion_AccAcc_a.JPG', pos=(0, 0))
-    FastAcc = vis.ImageStim(win, image=my_directory+'\\DotMotion_Instructions\\DotMotion_FastAcc_a.JPG', pos=(0, 0))
-    AccFast = vis.ImageStim(win, image=my_directory+'\\DotMotion_Instructions\\DotMotion_AccFast_a.JPG', pos=(0, 0))
+    FastFast = vis.ImageStim(win, image=my_directory+'\\Exp1_DotMotion_Instructions\\Exp1_DotMotion_FastFast_a.JPG', pos=(0, 0))
+    AccAcc = vis.ImageStim(win, image=my_directory+'\\Exp1_DotMotion_Instructions\\Exp1_DotMotion_AccAcc_a.JPG', pos=(0, 0))
+    FastAcc = vis.ImageStim(win, image=my_directory+'\\Exp1_DotMotion_Instructions\\Exp1_DotMotion_FastAcc_a.JPG', pos=(0, 0))
+    AccFast = vis.ImageStim(win, image=my_directory+'\\Exp1_DotMotion_Instructions\\Exp1_DotMotion_AccFast_a.JPG', pos=(0, 0))
 
 # Manipulations labels
 decision_Fast = vis.TextStim(win, text='Make FAST decisions', pos=(0, 0.3), height=.07)

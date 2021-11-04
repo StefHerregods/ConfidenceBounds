@@ -175,7 +175,7 @@ DotMotion = vis.DotStim(win, units='pix', nDots=120, fieldShape='circle', dotSiz
 # Initialize variable
 ACC = 0
 
-# Creating random order of manipulations
+# Order of manipulations: Latin square counterbalanced across participants
 if manipulation_order == 1:
     manipulations = ['FastFast', 'AccFast', 'AccAcc', 'FastAcc', 'FastFast', 'AccFast', 'AccAcc', 'FastAcc', 'FastFast',
                      'AccFast', 'AccAcc', 'FastAcc']

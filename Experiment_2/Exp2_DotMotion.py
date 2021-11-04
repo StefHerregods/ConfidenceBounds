@@ -151,11 +151,13 @@ warning = vis.TextStim(win, text='Too slow... Please respond faster', pos=(0, 0)
 # Confidence labels, counterbalance the order between participants
 cj_text = vis.TextStim(win, text='How confident are you that you made the correct choice?', pos=(0, 0.3), height=.07)
 if confidence_labels == 0:
-    cj_labels = vis.TextStim(win, text='High confidence                             Low confidence',
-                             pos=(0, -0.15), height=.07)
+    cj_labels = vis.ImageStim(win,
+                              image=my_directory+'\\Exp2_DotMotion_Instructions\\Exp2_DotMotion_ConfidenceLabels_b.JPG',
+                              pos=(0, 0))
 elif confidence_labels == 1:
-    cj_labels = vis.TextStim(win, text='Low confidence                             High confidence',
-                             pos=(0, -0.15), height=.07)
+    cj_labels = vis.ImageStim(win,
+                              image=my_directory+'\\Exp2_DotMotion_Instructions\\Exp2_DotMotion_ConfidenceLabels_a.JPG',
+                              pos=(0, 0))
 
 # Space to continue
 space = vis.TextStim(win, text='Press space to continue', pos=(0, -0.7), height=0.05)

@@ -25,21 +25,21 @@ nb_main_trials = 60  # Trials per main block; divisible by 3 (because 3 coherenc
 nb_main_blocks = 12  # Without training blocks; divisible by 4 (because speed/accuracy manipulations) (12)
 
 # Block 1
-min_accuracy_1 = 0.85  # Minimum accuracy to necessary to continue to the next block
-p_coherence_1 = 0.5  # Percentage coherence
+min_accuracy_1 = 0.85  # Minimum accuracy to necessary to continue to the next block (0.85)
+p_coherence_1 = 0.5  # Percentage coherence (0.5)
 
 # Block 2
-min_accuracy_2 = 0.6
+min_accuracy_2 = 0.6  # (0.6)
 
 # Block 2 (and every block afterwards)
-p_coherence_a = 0.10  # Low coherence manipulation
-p_coherence_b = 0.20  # Medium coherence manipulation
-p_coherence_c = 0.40  # High coherence manipulation
+p_coherence_a = 0.10  # Low coherence manipulation (0.10)
+p_coherence_b = 0.20  # Medium coherence manipulation (0.20)
+p_coherence_c = 0.40  # High coherence manipulation (0.40)
 
 # Timing
-time_cross = 1  # Time fixation cross (+ 0.5s when manipulations are shown)
-time_fb = 1  # Time feedback
-time_warning = 2
+time_cross = 1  # Time fixation cross (+ 0.5s when manipulations are shown) (1)
+time_fb = 1  # Time feedback (1)
+time_warning = 2  # (2)
 
 
 # Create a Data folder if it doesn't exist yet

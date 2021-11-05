@@ -453,7 +453,8 @@ for block in range(1,blocks):
                                           '%\nAverage decision reaction time: ' + str(round(RT_mean, 2)) +
                                           ' seconds\nAverage confidence reaction time: ' + str(round(RTconf_mean, 2)) +
                                           ' seconds\n\n' + str(nb_main_blocks-(n_manipulations+1)) +
-                                          ' more block(s) to go', pos=(0, 0), height=.05)
+                                          ' more block(s) to go\nRemember to try and use all confidence options '
+                                          'equally', pos=(0, 0), height=.05)
 
         pause.draw(); space.draw(); win.flip()
         event.waitKeys(keyList='space')

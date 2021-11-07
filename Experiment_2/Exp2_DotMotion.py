@@ -342,9 +342,9 @@ for block in range(1,blocks):
                 resp = 'x'
                 SlowTrial = 1
                 n_slowtrials = n_slowtrials + 1
-                warning.draw()
+                warning.draw(); space.draw()
                 win.flip()
-                sleep(time_warning)
+                event.waitKeys(keyList='space')
             win.flip()
 
             if resp == ['escape']:

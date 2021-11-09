@@ -162,20 +162,30 @@ ggplot(data = data_viable, aes(x = manipulation, y = rt)) +
 # RT manipulations (averages)
 
 ggplot(data = df_participant_manipulation, aes(x = manipulation, y = rt_mean, group = sub)) +
-  geom_point() +
+  geom_line() +
   theme_bw() +
   coord_flip() +
   theme(legend.position = "none") +
   scale_x_discrete(labels = c("AccAcc" = "Accurate decision\nAccurate confidence rating", "AccFast" = "Accurate decision\nFast confidence rating", "FastFast" = "Fast decision\nFast confidence rating", "FastAcc" = "Fast decision\nAccurate confidence rating")) +
   labs(x = "Manipulation", y = "Decision reaction time")
 
-# Confidence rating RT manipulations
+# Confidence rating RT manipulations (all)
 
 ggplot(data = data_viable, aes(x = manipulation, y = rtconf)) +
   geom_boxplot(outlier.shape = NA)  +
   theme_bw() +
   coord_flip() +
   geom_jitter(width=0.1,alpha=0.2) +
+  theme(legend.position = "none") +
+  scale_x_discrete(labels = c("AccAcc" = "Accurate decision\nAccurate confidence rating", "AccFast" = "Accurate decision\nFast confidence rating", "FastFast" = "Fast decision\nFast confidence rating", "FastAcc" = "Fast decision\nAccurate confidence rating")) +
+  labs(x = "Manipulation", y = "Confidence rating reaction time")
+
+# Confidence rating RT manipulations (averages)
+
+ggplot(data = df_participant_manipulation, aes(x = manipulation, y = rtconf_mean, group = sub)) +
+  geom_line() +
+  theme_bw() +
+  coord_flip() +
   theme(legend.position = "none") +
   scale_x_discrete(labels = c("AccAcc" = "Accurate decision\nAccurate confidence rating", "AccFast" = "Accurate decision\nFast confidence rating", "FastFast" = "Fast decision\nFast confidence rating", "FastAcc" = "Fast decision\nAccurate confidence rating")) +
   labs(x = "Manipulation", y = "Confidence rating reaction time")

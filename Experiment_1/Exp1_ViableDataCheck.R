@@ -137,30 +137,32 @@ ggplot(data=attempted_blocks_training, aes(x=as.factor(block), y=repetitions)) +
 
 # RT manipulations (all)
 
-ggplot(data = data_viable, aes(x = manipulation, y = rt, color = manipulation)) +
+ggplot(data = data_viable, aes(x = manipulation, y = rt)) +
   geom_boxplot(outlier.shape = NA)  +
   theme_bw() +
   coord_flip() +
   geom_jitter(width=0.1,alpha=0.2) +
   theme(legend.position = "none") +
   theme(axis.ticks = element_blank()) +
-  scale_x_discrete()
+  scale_x_discrete(labels = c("AccAcc" = "Accurate decision\nAccurate confidence rating", "AccFast" = "Accurate decision\nFast confidence rating", "FastFast" = "Fast decision\nFast confidence rating", "FastAcc" = "Fast decision\nAccurate confidence rating")) +
+  labs(x = "Manipulation", y = "Decision reaction time")
 
 # RT manipulations (averages)
 
 
 
-# Confidence RT manipulations
+# Confidence rating RT manipulations
 
-ggplot(data = data_viable, aes(x = manipulation, y = rtconf, color = manipulation)) +
+ggplot(data = data_viable, aes(x = manipulation, y = rtconf)) +
   geom_boxplot(outlier.shape = NA)  +
   theme_bw() +
   coord_flip() +
   geom_jitter(width=0.1,alpha=0.2) +
   theme(legend.position = "none") +
   theme(axis.ticks = element_blank()) +
-  scale_x_discrete()
-
+  scale_x_discrete(labels = c("AccAcc" = "Accurate decision\nAccurate confidence rating", "AccFast" = "Accurate decision\nFast confidence rating", "FastFast" = "Fast decision\nFast confidence rating", "FastAcc" = "Fast decision\nAccurate confidence rating")) +
+  labs(x = "Manipulation", y = "Confidence rating reaction time")
+  
 # Proportion correct responses
 
 ggplot(data = df_participant, aes(x = as.factor(difficulty), y = p_correct)) +

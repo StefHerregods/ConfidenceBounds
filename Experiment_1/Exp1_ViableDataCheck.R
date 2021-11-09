@@ -98,13 +98,13 @@ df_participant <- data.frame(sub, p_correct, difficulty, p_correct_tot)
 
 sub <- NULL
 manipulation <- NULL
-rt <- NULL
-rtconf <- NULL
+rt_mean <- NULL
+rtconf_mean <- NULL
 for (i in unique(data_viable$sub)){
   for (j in unique(data_viable$manipulation)){
     temp <- subset(data_viable, sub == i & manipulation == j)
     sub <- append(sub, i)
-    manipulation <- append(manipulation, i)
+    manipulation <- append(manipulation, j)
     rt_mean <- append(rt_mean, mean(temp$rt))
     rtconf_mean <- append(rtconf_mean, mean(temp$rtconf))
   }
@@ -156,13 +156,18 @@ ggplot(data = data_viable, aes(x = manipulation, y = rt)) +
   coord_flip() +
   geom_jitter(width=0.1,alpha=0.2) +
   theme(legend.position = "none") +
-  theme(axis.ticks = element_blank()) +
   scale_x_discrete(labels = c("AccAcc" = "Accurate decision\nAccurate confidence rating", "AccFast" = "Accurate decision\nFast confidence rating", "FastFast" = "Fast decision\nFast confidence rating", "FastAcc" = "Fast decision\nAccurate confidence rating")) +
   labs(x = "Manipulation", y = "Decision reaction time")
 
 # RT manipulations (averages)
 
-
+ggplot(data = df_participant_manipulation, aes(x = manipulation, y = rt_mean, group = sub)) +
+  geom_point() +
+  theme_bw() +
+  coord_flip() +
+  theme(legend.position = "none") +
+  scale_x_discrete(labels = c("AccAcc" = "Accurate decision\nAccurate confidence rating", "AccFast" = "Accurate decision\nFast confidence rating", "FastFast" = "Fast decision\nFast confidence rating", "FastAcc" = "Fast decision\nAccurate confidence rating")) +
+  labs(x = "Manipulation", y = "Decision reaction time")
 
 # Confidence rating RT manipulations
 
@@ -172,7 +177,6 @@ ggplot(data = data_viable, aes(x = manipulation, y = rtconf)) +
   coord_flip() +
   geom_jitter(width=0.1,alpha=0.2) +
   theme(legend.position = "none") +
-  theme(axis.ticks = element_blank()) +
   scale_x_discrete(labels = c("AccAcc" = "Accurate decision\nAccurate confidence rating", "AccFast" = "Accurate decision\nFast confidence rating", "FastFast" = "Fast decision\nFast confidence rating", "FastAcc" = "Fast decision\nAccurate confidence rating")) +
   labs(x = "Manipulation", y = "Confidence rating reaction time")
   

@@ -96,7 +96,20 @@ df_participant <- data.frame(sub, p_correct, difficulty, p_correct_tot)
 
 # Calculating averages per participant and condition
 
-
+sub <- NULL
+manipulation <- NULL
+rt <- NULL
+rtconf <- NULL
+for (i in unique(data_viable$sub)){
+  for (j in unique(data_viable$manipulation)){
+    temp <- subset(data_viable, sub == i & manipulation == j)
+    sub <- append(sub, i)
+    manipulation <- append(manipulation, i)
+    rt_mean <- append(rt_mean, mean(temp$rt))
+    rtconf_mean <- append(rtconf_mean, mean(temp$rtconf))
+  }
+}  
+df_participant_manipulation <- data.frame(sub, manipulation, rt_mean, rtconf_mean)
 
 # Training blocks required
 
@@ -116,7 +129,7 @@ for (i in unique(data_full$sub)){
   }
 }  
 attempted_blocks <- data.frame(sub, block, repetitions)
-attempted_blocks_training <- subset(attempted_blocks, block==1 | block == 2)
+attempted_blocks_training <- subset(attempted_blocks, block==1 | block == 2 | block == 3)
 
 ggplot(data=attempted_blocks,aes(fill=as.factor(block),y=repetitions,x=sub)) +  # Plot of all blocks
   geom_bar(position = position_stack(reverse = TRUE), stat='identity') +

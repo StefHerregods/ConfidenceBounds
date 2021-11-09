@@ -8,7 +8,7 @@ setwd('C:\\Users\\herre\\OneDrive\\Bureaublad\\Internship\\Results\\Exp1_results
 alpha <- 0.05
 
 # (a) Checking viability of the data
-# See preregistration for more information
+# See preregistration experiment 1 for more information
 
 # Step 0: loading data
 
@@ -76,12 +76,14 @@ for (i in 1:40){
 # Calculating averages per participant
 
 sub <- NULL
+p_correct_tot <- NULL
 p_correct <- NULL
 difficulty <- NULL
 for (i in unique(data_viable$sub)){
   table <- prop.table(table(data_viable$cor[data_viable$sub==i], data_viable$coherence[data_viable$sub==i]),2)
   for (j in 1:3){
     sub <- append(sub,i)
+    p_correct_tot <- append(p_correct_tot,prop.table(table(data_viable$cor[data_viable$sub==i]))[2])
   }
   p_correct <- append(p_correct,table[2,1])
   difficulty <- append(difficulty,0.1)
@@ -90,7 +92,7 @@ for (i in unique(data_viable$sub)){
   p_correct <- append(p_correct,table[2,3])
   difficulty <- append(difficulty,0.4)
 }
-df_participant <- data.frame(sub, p_correct, difficulty)
+df_participant <- data.frame(sub, p_correct, difficulty, p_correct_tot)
 
 # Calculating averages per participant and condition
 
@@ -151,5 +153,10 @@ ggplot(data = data_viable, aes(x = manipulation, y = rtconf, color = manipulatio
 
 # Proportion correct responses
 
-ggplot(data = df_participant, aes(group = difficulty, y = p_correct)) +
-  geom_boxplot() 
+ggplot(data = df_participant, aes(x = as.factor(difficulty), y = p_correct)) +
+  geom_boxplot() +
+  labs(x = "Coherence level", y = "Percentage correct responses")
+
+plot(df_participant$sub, df_participant$p_correct_tot, pch = 19, xlab = "Subject number", ylab = "Percentage correct responses")
+plot(df_participant$p_correct_tot, df_participant$p_correct, col = sub, pch = 19, xlab = "Total percentage correct responses", ylab = "Percentage correct responses for each coherence level")
+

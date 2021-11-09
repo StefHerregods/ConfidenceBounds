@@ -147,7 +147,6 @@ ggplot(data=attempted_blocks_training, aes(x=as.factor(block), y=repetitions)) +
   geom_boxplot(width=0.4) +
   labs(x = "Training blocks", y = "Number of repetitions")
 
-
 # RT manipulations (all)
 
 ggplot(data = data_viable, aes(x = manipulation, y = rt)) +

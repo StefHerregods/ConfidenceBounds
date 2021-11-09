@@ -116,13 +116,23 @@ for (i in unique(data_full$sub)){
   }
 }  
 attempted_blocks <- data.frame(sub, block, repetitions)
-ggplot(data=attempted_blocks,aes(fill=as.factor(block),y=repetitions,x=sub)) +
-  geom_bar(position = position_stack(reverse = TRUE), stat='identity') +
-  coord_flip()
+attempted_blocks_training <- subset(attempted_blocks, block==1 | block == 2)
 
-attempted_blocks <- subset(attempted_blocks, block==1 | block == 2)
-ggplot(data=attempted_blocks, aes(x=as.factor(block), y=repetitions)) +
-  geom_jitter(width=0.4,height=0)
+ggplot(data=attempted_blocks,aes(fill=as.factor(block),y=repetitions,x=sub)) +  # Plot of all blocks
+  geom_bar(position = position_stack(reverse = TRUE), stat='identity') +
+  coord_flip() +
+  labs(x = "Subject number", y = "Number of repetitions", fill = "Training block")
+
+ggplot(data=attempted_blocks_training,aes(fill=as.factor(block),y=repetitions,x=sub)) +  # Plot of training block 1 and 2
+  geom_bar(position = position_stack(reverse = TRUE), stat='identity') +
+  coord_flip() +
+  labs(x = "Subject number", y = "Number of repetitions", fill = "Training block") +
+  geom_hline(yintercept = 7, linetype = "dashed") +
+  annotate(geom="text", x=38, y=11, label="Cutoff", fontface = "bold")
+
+ggplot(data=attempted_blocks_training, aes(x=as.factor(block), y=repetitions)) +  # Box plot training blocks
+  geom_boxplot(width=0.4) +
+  labs(x = "Training blocks", y = "Number of repetitions")
 
 
 # RT manipulations (all)

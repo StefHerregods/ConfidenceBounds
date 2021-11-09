@@ -1,4 +1,6 @@
-# Used to check for (a) viability of the data and (b) irregularities in the data
+# Project: Confidence bounds (2021-2022)
+# Script checks for (a) viability of the data (as described in preregistration experiment 1) 
+# and (b) irregularities in data of experiment 1
 
 library(ggplot2)
 

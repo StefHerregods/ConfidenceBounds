@@ -39,7 +39,7 @@ p_coherence_c = 0.40  # High coherence manipulation (0.40)
 # Timing
 time_cross = 1  # Time fixation cross (+ 0.5s when manipulations are shown) (1)
 time_fb = 1  # Time feedback (1)
-time_warning = 2  # (2)
+time_warning = 2  # Time warning (2)
 
 
 # Create a Data folder if it doesn't exist yet

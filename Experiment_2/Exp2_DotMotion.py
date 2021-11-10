@@ -175,6 +175,7 @@ DotMotion = vis.DotStim(win, units='pix', nDots=120, fieldShape='circle', dotSiz
 
 # Initialize variable
 ACC = 0
+n_manipulations = 0
 
 # Order of manipulations: Latin square counterbalanced across participants
 if manipulation_order == 1:
@@ -189,7 +190,6 @@ elif manipulation_order == 3:
 elif manipulation_order == 4:
     manipulations = ['AccFast', 'AccAcc', 'FastAcc', 'FastFast', 'AccFast', 'AccAcc', 'FastAcc', 'FastFast', 'AccFast',
                      'AccAcc', 'FastAcc', 'FastFast']
-n_manipulations = 0
 
 # Practice trials 1 = 1
 # Practice trials 2 = 2 (lower coherence)

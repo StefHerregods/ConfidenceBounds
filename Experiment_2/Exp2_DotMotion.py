@@ -167,7 +167,7 @@ end = vis.TextStim(win, text='The end! Thank you for participating.\n\nPlease wa
 
 # Define keys
 choice_keys = ['c', 'n', 'escape']  # left, right, escape
-cj_keys = ['2', '3', '4', '8', '9', '0', 'escape']
+cj_keys = ['1', '2', '3', '8', '9', '0', 'escape']
 
 # Creating DotMotion stimulus
 DotMotion = vis.DotStim(win, units='pix', nDots=120, fieldShape='circle', dotSize=4, color='white', speed=1,

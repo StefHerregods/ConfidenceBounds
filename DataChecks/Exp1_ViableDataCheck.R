@@ -4,7 +4,7 @@
 
 library(ggplot2)
 
-setwd('C:\\Users\\herre\\OneDrive\\Bureaublad\\Internship\\Results\\Exp1_results_temp')
+setwd('C:\\Users\\herre\\OneDrive\\Bureaublad\\Internship\\Results\\Exp1_results_temp_2')
 
 
 alpha <- 0.05
@@ -71,6 +71,9 @@ for (i in 1:40){
     }
   }
 }
+unique(data_viable$sub[data_viable$check2 == FALSE])
+unique(data_viable$sub[data_viable$check3 == FALSE])
+unique(data_viable$sub[data_viable$check4 == FALSE])
 
 
 # (b) Checking for irregularities in the data 
@@ -170,6 +173,11 @@ ggplot(data = df_participant_manipulation, aes(x = manipulation, y = rt_mean, gr
   scale_x_discrete(labels = c("AccAcc" = "Accurate decision\nAccurate confidence rating", "AccFast" = "Accurate decision\nFast confidence rating", "FastFast" = "Fast decision\nFast confidence rating", "FastAcc" = "Fast decision\nAccurate confidence rating")) +
   labs(x = "Manipulation", y = "Decision reaction time")
 
+ggplot(data = df_participant_manipulation, aes(x = manipulation, y = rt_mean, group = sub)) +
+  geom_jitter() +
+  scale_x_discrete(labels = c("AccAcc" = "Accurate decision\nAccurate confidence rating", "AccFast" = "Accurate decision\nFast confidence rating", "FastFast" = "Fast decision\nFast confidence rating", "FastAcc" = "Fast decision\nAccurate confidence rating")) +
+  labs(x = "Manipulation", y = "Decision reaction time")
+
 # Confidence rating RT manipulations (all)
 
 ggplot(data = data_viable, aes(x = manipulation, y = rtconf)) +
@@ -199,4 +207,8 @@ ggplot(data = df_participant, aes(x = as.factor(difficulty), y = p_correct)) +
 
 plot(df_participant$sub, df_participant$p_correct_tot, pch = 19, xlab = "Subject number", ylab = "Percentage correct responses")
 plot(df_participant$p_correct_tot, df_participant$p_correct, col = sub, pch = 19, xlab = "Total percentage correct responses", ylab = "Percentage correct responses for each coherence level")
+
+# Plot per condition averages RT, % correct
+# Mean confidence, confidence RT
+# RT histogram over alle proefpersonen heen voor confidence en voor decision-making
 

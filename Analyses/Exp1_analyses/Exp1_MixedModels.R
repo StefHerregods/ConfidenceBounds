@@ -68,6 +68,21 @@ confint(modelA_3)
 # (vs think carefully about their ratings), 
 # with no effect on decision accuracy and decision reaction times.
 
+# Effect on confidence rating reaction time
+
+modelB_1 <- lmer(rtconf ~ 1 + (1|sub), REML = FALSE, data = df)  # Intercept only model
+summary(modelB_1)
+confint(modelB_1)
+
+modelB_2 <- lmer(rtconf ~ 1 + rt_manipulation + rtconf_manipulation + (1|sub), REML = FALSE, data = df)  # Adding manipulations
+summary(modelB_2)
+confint(modelB_2)
+
+anova(modelB_1, modelB_2)
+
+modelB_3 <- lmer(rtconf ~ 1 + rt_manipulation + rtconf_manipulation + (1 + rt_manipulation + rtconf_manipulation|sub), REML = FALSE, data = df)  # Adding manipulations
+summary(modelB_3)
+confint(modelB_3)
 
 # (c) Faster and more accurate decisions, and faster and more accurate 
 # confidence ratings in easier trials than in more difficult trials.

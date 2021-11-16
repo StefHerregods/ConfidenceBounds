@@ -5,7 +5,7 @@
 library(ggplot2)
 library(forcats)
 
-setwd('C:\\Users\\herre\\OneDrive\\Bureaublad\\Internship\\Results\\Exp1_results_temp_2')
+setwd('C:\\Users\\herre\\OneDrive\\Bureaublad\\Internship\\Results\\Exp1_results_temp_2') # _2
 
 
 alpha <- 0.05
@@ -220,7 +220,7 @@ plot(df_participant$p_correct_tot, df_participant$p_correct, col = sub, pch = 19
 
 # RT histograms over all participants 
 
-# Data manipulations
+# Necessary data manipulations
 data_viable$Response <- as.factor(data_viable$cor)  
 data_viable$Condition <- as.factor(data_viable$manipulation) 
 data_viable$rt_manipulation <- fct_collapse(data_viable$Condition, rt_fast = c("FastFast","FastAcc"), rt_slow = c("AccFast", "AccAcc"))

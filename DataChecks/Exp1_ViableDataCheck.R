@@ -75,7 +75,7 @@ unique(data_viable$sub[data_viable$check2 == FALSE])
 unique(data_viable$sub[data_viable$check3 == FALSE])
 unique(data_viable$sub[data_viable$check4 == FALSE])
 
-data_viable <- subset(data_viable, c(check2 == TRUE, check3 == TRUE, check4 == TRUE))
+data_viable <- subset(data_viable, c(check2 == TRUE && check3 == TRUE && check4 == TRUE))
 
 
 # (b) Checking for irregularities in the data 
@@ -217,7 +217,28 @@ ggplot(data = df_participant, aes(x = as.factor(difficulty), y = p_correct)) +
 plot(df_participant$sub, df_participant$p_correct_tot, pch = 19, xlab = "Subject number", ylab = "Percentage correct responses")
 plot(df_participant$p_correct_tot, df_participant$p_correct, col = sub, pch = 19, xlab = "Total percentage correct responses", ylab = "Percentage correct responses for each coherence level")
 
-# Plot per condition averages RT, % correct
-# Mean confidence, confidence RT
-# RT histogram over alle proefpersonen heen voor confidence en voor decision-making
+# RT histograms over all participants 
+
+# RT of correct versus wrong response
+data_viable$Response <- as.factor(data_viable$cor)  
+ggplot(data = data_viable, aes(x = rt, color = Response, fill = Response)) +
+  geom_histogram(alpha=0.5, position= "identity", bins = 28) +
+  scale_color_manual(labels = c("Correct", "Wrong"), values=c("#C0392B", "#27AE60")) +
+  scale_fill_manual(labels = c("Correct", "Wrong"), values=c("#C0392B", "#27AE60")) +
+  xlab("Reaction time") +
+  ylab("Count")
+
+# Confidence RT of correct versus wrong response
+ggplot(data = data_viable, aes(x = rtconf, color = Response, fill = Response)) +
+  geom_histogram(alpha=0.5, position= "identity", bins = 28) +
+  xlim(0, 5) +
+  scale_color_manual(labels = c("Correct", "Wrong"), values=c("#C0392B", "#27AE60")) +
+  scale_fill_manual(labels = c("Correct", "Wrong"), values=c("#C0392B", "#27AE60"))
+
+# RT of fast versus accurate manipulation
+data_viable$factor.manipulation <- as.factor(data_viable$manipulations)  
+ggplot(data = data_viable, aes(x = rt, color = manipulation, fill = factor.cor)) +
+  geom_histogram(alpha=0.5, position= "identity", bins = 28) +
+  scale_color_manual(values=c("#C0392B", "#27AE60")) +
+  scale_fill_manual(values=c("#C0392B", "#27AE60"))
 

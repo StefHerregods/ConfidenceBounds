@@ -174,13 +174,13 @@ ggplot(data = df_participant_manipulation, aes(x = manipulation, y = rt_mean, gr
   coord_flip() +
   theme(legend.position = "none") +
   scale_x_discrete(labels = c("AccAcc" = "Accurate decision\nAccurate confidence rating", "AccFast" = "Accurate decision\nFast confidence rating", "FastFast" = "Fast decision\nFast confidence rating", "FastAcc" = "Fast decision\nAccurate confidence rating")) +
-  labs(x = "Manipulation", y = "Decision reaction time")
+  labs(x = "Manipulation", y = "Mean decision reaction time")
 
 ggplot(data = df_participant_manipulation, aes(x = manipulation, y = rt_mean), shape = 5) +
   geom_jitter(width = 0.1, shape = 16, size = 3, colour = "Blue", alpha = 0.3) +
   stat_summary(aes(y = rt_mean,group=1), fun.y=mean, colour="Blue", size = 4, shape = 95) +
   scale_x_discrete(labels = c("AccAcc" = "Accurate decision\nAccurate confidence rating", "AccFast" = "Accurate decision\nFast confidence rating", "FastFast" = "Fast decision\nFast confidence rating", "FastAcc" = "Fast decision\nAccurate confidence rating")) +
-  labs(x = "Manipulation", y = "Decision reaction time")
+  labs(x = "Manipulation", y = "Mean decision reaction time")
 
 # Confidence rating RT manipulations (all)
 
@@ -201,13 +201,13 @@ ggplot(data = df_participant_manipulation, aes(x = manipulation, y = rtconf_mean
   coord_flip() +
   theme(legend.position = "none") +
   scale_x_discrete(labels = c("AccAcc" = "Accurate decision\nAccurate confidence rating", "AccFast" = "Accurate decision\nFast confidence rating", "FastFast" = "Fast decision\nFast confidence rating", "FastAcc" = "Fast decision\nAccurate confidence rating")) +
-  labs(x = "Manipulation", y = "Confidence rating reaction time")
+  labs(x = "Manipulation", y = "Mean confidence rating reaction time")
 
 ggplot(data = df_participant_manipulation, aes(x = manipulation, y = rtconf_mean), shape = 5) +
   geom_jitter(width = 0.1, shape = 16, size = 3, colour = "Blue", alpha = 0.3) +
   stat_summary(aes(y = rtconf_mean,group=1), fun.y=mean, colour="Blue", size = 4, shape = 95) +
   scale_x_discrete(labels = c("AccAcc" = "Accurate decision\nAccurate confidence rating", "AccFast" = "Accurate decision\nFast confidence rating", "FastFast" = "Fast decision\nFast confidence rating", "FastAcc" = "Fast decision\nAccurate confidence rating")) +
-  labs(x = "Manipulation", y = "Decision reaction time")
+  labs(x = "Manipulation", y = "Mean confidence rating reaction time")
   
 # Proportion correct responses
 

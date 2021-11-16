@@ -70,32 +70,38 @@ modelA_1 <- lmer(rt ~ 1 + (1|sub), REML = FALSE, data = df)  # Intercept only mo
 summary(modelA_1)
 confint(modelA_1)
 
-modelA_2 <- lmer(rt ~ 1 + rt_manipulation + rtconf_manipulation + (1|sub), REML = FALSE, data = df)  # Adding manipulations
+modelA_2 <- lmer(rt ~ 1 + rt_manipulation + rtconf_manipulation + coherence + (1|sub), REML = FALSE, data = df)  # Adding manipulations
 summary(modelA_2)
 confint(modelA_2)
 
 anova(modelA_1, modelA_2)
 
-modelA_3 <- lmer(rt ~ 1 + rt_manipulation * rtconf_manipulation + (1|sub), REML = FALSE, data = df)  # Adding manipulations
+modelA_3 <- lmer(rt ~ 1 + rt_manipulation * rtconf_manipulation  * coherence + (1|sub), REML = FALSE, data = df)  # Adding manipulations
 summary(modelA_3)
 confint(modelA_3)
 
 anova(modelA_2, modelA_3)
 
-modelA_4 <- lmer(rt ~ 1 + rt_manipulation * rtconf_manipulation + (1 + rt_manipulation + rtconf_manipulation|sub), REML = FALSE, data = df)  # Adding manipulations
+modelA_4 <- lmer(rt ~ 1 + rt_manipulation * rtconf_manipulation + rt_manipulation * coherence + (1|sub), REML = FALSE, data = df)  # Adding manipulations
 summary(modelA_4)
 confint(modelA_4)
 
-anova(modelA_3, modelA_4)
+#anova(modelA_3, modelA_4)
+
+#modelA_5 <- lmer(rt ~ 1 + rt_manipulation * rtconf_manipulation + rt_manipulation * coherence + (1 + rt_manipulation + rtconf_manipulation + coherence|sub), REML = FALSE, data = df)  # Adding manipulations
+#summary(modelA_5)
+#confint(modelA_5)
+
+#anova(modelA_4, modelA_5
 
 # Assumptions
 
-modelA_3_resid <- resid(modelA_3)
-modelA_3_fit <- fitted(modelA_3)
-qqnorm(modelA_3_resid)
-qqline(modelA_3_resid)
-df_temp <- data.frame(cbind(modelA_3_fit, modelA_3_resid))
-ggplot(df_temp, aes(x = modelA_3_fit, y = modelA_3_resid)) + geom_point() + geom_smooth(se = F) + geom_hline(aes(yintercept=0))
+modelA_4_resid <- resid(modelA_4)
+modelA_4_fit <- fitted(modelA_4)
+qqnorm(modelA_4_resid)
+qqline(modelA_4_resid)
+df_temp <- data.frame(cbind(modelA_4_fit, modelA_4_resid))
+ggplot(df_temp, aes(x = modelA_4_fit, y = modelA_4_resid)) + geom_point() + geom_smooth(se = F) + geom_hline(aes(yintercept=0))
 
 
 # (b) Faster confidence reaction times and less accurate confidence ratings 
@@ -120,13 +126,13 @@ modelB_1 <- lmer(rtconf ~ 1 + (1|sub), REML = FALSE, data = df)  # Intercept onl
 summary(modelB_1)
 confint(modelB_1)
 
-modelB_2 <- lmer(rtconf ~ 1 + rt_manipulation + rtconf_manipulation + (1|sub), REML = FALSE, data = df)  # Adding manipulations
+modelB_2 <- lmer(rtconf ~ 1 + rt_manipulation + rtconf_manipulation + coherence + (1|sub), REML = FALSE, data = df)  # Adding manipulations
 summary(modelB_2)
 confint(modelB_2)
 
 anova(modelB_1, modelB_2)
 
-modelB_3 <- lmer(rtconf ~ 1 + rt_manipulation * rtconf_manipulation + (1|sub), REML = FALSE, data = df)  # Adding manipulations
+modelB_3 <- lmer(rtconf ~ 1 + rt_manipulation * rtconf_manipulation * coherence + (1|sub), REML = FALSE, data = df)  # Adding manipulations
 summary(modelB_3)
 confint(modelB_3)
 

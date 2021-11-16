@@ -37,14 +37,14 @@ df <- df[df$rtconf < 10,]
 
 for (i in 1:nrow(df)){
   if (df$manipulation[i] %in% c("AccAcc", "AccFast")){
-    df$rt_manipulation[i] <- "Acc"
+    df$rt_manipulation[i] <- 1  # 1 for accurate decision-making
   } else {
-    df$rt_manipulation[i] <- "Fast"
+    df$rt_manipulation[i] <- 0  # 2 for fast decision-making
   }
   if (df$manipulation[i] %in% c("AccAcc", "FastAcc")){
-    df$rtconf_manipulation[i] <- "Acc"
+    df$rtconf_manipulation[i] <- 1  # 1 for accurate confidence ratings
   } else {
-    df$rtconf_manipulation[i] <- "Fast"
+    df$rtconf_manipulation[i] <- 0  # 2 for fast confidence ratings
   }  
 }
 

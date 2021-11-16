@@ -86,6 +86,17 @@ modelA_4 <- lmer(rt ~ 1 + rt_manipulation * rtconf_manipulation + (1 + rt_manipu
 summary(modelA_4)
 confint(modelA_4)
 
+anova(modelA_3, modelA_4)
+
+# Assumptions
+
+modelA_3_resid <- resid(modelA_3)
+modelA_3_fit <- fitted(modelA_3)
+qqnorm(modelA_3_resid)
+qqline(modelA_3_resid)
+df_temp <- data.frame(cbind(modelA_3_fit, modelA_3_resid))
+ggplot(df_temp, aes(x = modelA_3_fit, y = modelA_3_resid)) + geom_point() + geom_smooth(se = F) + geom_hline(aes(yintercept=0))
+
 
 # (b) Faster confidence reaction times and less accurate confidence ratings 
 # (i.e., confidence ratings that are less precise in the prediction of accuracy)

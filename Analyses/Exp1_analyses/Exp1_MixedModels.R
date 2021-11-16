@@ -25,7 +25,16 @@ for (i in 1:40){
 
 df <- df[df$block > 3,] 
 
+# Remove too slow trials
+
+df <- df[df$slow_trial == 0,]
+
+# !!! Remove too slow confidence rating trials !!!
+
+df <- df[df$rtconf < 10,]
+
 # Separating decision and confidence rating manipulations
+
 for (i in 1:nrow(df)){
   if (df$manipulation[i] %in% c("AccAcc", "AccFast")){
     df$rt_manipulation[i] <- "Acc"
@@ -45,6 +54,16 @@ for (i in 1:nrow(df)){
 # asked to respond quickly (vs accurately), 
 # without an effect on confidence reaction times and confidence ratings.
 
+
+# Exploration
+
+# Random slopes necessary?
+df %>%
+  ggplot(aes(x = rt_manipulation, y = rt)) +
+  geom_point() +
+  geom_point(stat = "summary", fun = "mean", colour = 'red', size = 3) +
+  facet_wrap(vars(sub))
+
 # Effect on decision reaction time
 
 modelA_1 <- lmer(rt ~ 1 + (1|sub), REML = FALSE, data = df)  # Intercept only model
@@ -57,9 +76,15 @@ confint(modelA_2)
 
 anova(modelA_1, modelA_2)
 
-modelA_3 <- lmer(rt ~ 1 + rt_manipulation + rtconf_manipulation + (1 + rt_manipulation + rtconf_manipulation|sub), REML = FALSE, data = df)  # Adding manipulations
+modelA_3 <- lmer(rt ~ 1 + rt_manipulation * rtconf_manipulation + (1|sub), REML = FALSE, data = df)  # Adding manipulations
 summary(modelA_3)
 confint(modelA_3)
+
+anova(modelA_2, modelA_3)
+
+modelA_4 <- lmer(rt ~ 1 + rt_manipulation * rtconf_manipulation + (1 + rt_manipulation + rtconf_manipulation|sub), REML = FALSE, data = df)  # Adding manipulations
+summary(modelA_4)
+confint(modelA_4)
 
 
 # (b) Faster confidence reaction times and less accurate confidence ratings 
@@ -67,6 +92,16 @@ confint(modelA_3)
 # when participants are asked to give quick confidence ratings 
 # (vs think carefully about their ratings), 
 # with no effect on decision accuracy and decision reaction times.
+
+
+# Exploration
+
+# Random slopes necessary?
+df %>%
+  ggplot(aes(x = rtconf_manipulation, y = rtconf)) +
+  geom_point() +
+  geom_point(stat = "summary", fun = "mean", colour = 'red', size = 3) +
+  facet_wrap(vars(sub))
 
 # Effect on confidence rating reaction time
 
@@ -80,9 +115,18 @@ confint(modelB_2)
 
 anova(modelB_1, modelB_2)
 
-modelB_3 <- lmer(rtconf ~ 1 + rt_manipulation + rtconf_manipulation + (1 + rt_manipulation + rtconf_manipulation|sub), REML = FALSE, data = df)  # Adding manipulations
+modelB_3 <- lmer(rtconf ~ 1 + rt_manipulation * rtconf_manipulation + (1|sub), REML = FALSE, data = df)  # Adding manipulations
 summary(modelB_3)
 confint(modelB_3)
+
+anova(modelB_2, modelB_3)
+
+modelB_4 <- lmer(rtconf ~ 1 + rt_manipulation + rtconf_manipulation + (1 + rt_manipulation + rtconf_manipulation|sub), REML = FALSE, data = df)  # Adding manipulations
+summary(modelB_4)
+confint(modelB_4)
+
+anova(modelB_2, modelB_4)
+
 
 # (c) Faster and more accurate decisions, and faster and more accurate 
 # confidence ratings in easier trials than in more difficult trials.

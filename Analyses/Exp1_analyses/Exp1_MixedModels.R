@@ -40,13 +40,26 @@ for (i in 1:nrow(df)){
 }
 
 
-
 # Hypothesis (a)
 # Faster decision reaction times and lower accuracy when participants are 
 # asked to respond quickly (vs accurately), 
 # without an effect on confidence reaction times and confidence ratings.
 
+# Effect on decision reaction time
 
+modelA_1 <- lmer(rt ~ 1 + (1|sub), REML = FALSE, data = df)  # Intercept only model
+summary(modelA_1)
+confint(modelA_1)
+
+modelA_2 <- lmer(rt ~ 1 + rt_manipulation + rtconf_manipulation + (1|sub), REML = FALSE, data = df)  # Adding manipulations
+summary(modelA_2)
+confint(modelA_2)
+
+anova(modelA_1, modelA_2)
+
+modelA_3 <- lmer(rt ~ 1 + rt_manipulation + rtconf_manipulation + (1 + rt_manipulation + rtconf_manipulation|sub), REML = FALSE, data = df)  # Adding manipulations
+summary(modelA_3)
+confint(modelA_3)
 
 
 # (b) Faster confidence reaction times and less accurate confidence ratings 

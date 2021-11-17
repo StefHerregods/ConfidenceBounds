@@ -2,8 +2,8 @@
 # Internship project: Confidence bounds
 
 # TO DO:
-# KeyboardFigure cj
-# Change intro- and instruction figures
+# figuren scherpstellen
+# pauze op figuur
 
 # RANDOM DOT MOTION TASK (Does the majority of dots move left or right? How confident are you about your choice?)
 # Participants complete multiple blocks of consecutive dot motion trials
@@ -443,7 +443,7 @@ for block in range(1,blocks):
                                           str(round(p_accuracy, 2)) +
                                           '%\nAverage decision reaction time: ' + str(round(RT_mean, 2)) +
                                           ' seconds\nAverage confidence reaction time: ' + str(round(RTconf_mean, 2)) +
-                                          ' seconds\n\n' + str(nb_main_blocks-(n_manipulations+1)) +
+                                          ' seconds\n\n\n' + str(nb_main_blocks-(n_manipulations+1)) +
                                           ' more block(s) to go\nRemember to try and use all confidence options '
                                           'equally', pos=(0, 0), height=.05)
 

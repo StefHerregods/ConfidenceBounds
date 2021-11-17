@@ -122,24 +122,14 @@ Intro_block4 = vis.ImageStim(win,
                              pos=(0, 0))
 
 # Manipulation images
-if confidence_labels == 0:
-    FastFast = vis.ImageStim(win, image=my_directory+'\\Exp2_DotMotion_Instructions\\Exp2_DotMotion_FastFast_b.JPG',
-                             pos=(0, 0))
-    AccAcc = vis.ImageStim(win, image=my_directory+'\\Exp2_DotMotion_Instructions\\Exp2_DotMotion_AccAcc_b.JPG',
-                           pos=(0, 0))
-    FastAcc = vis.ImageStim(win, image=my_directory+'\\Exp2_DotMotion_Instructions\\Exp2_DotMotion_FastAcc_b.JPG',
-                            pos=(0, 0))
-    AccFast = vis.ImageStim(win, image=my_directory+'\\Exp2_DotMotion_Instructions\\Exp2_DotMotion_AccFast_b.JPG',
-                            pos=(0, 0))
-elif confidence_labels == 1:
-    FastFast = vis.ImageStim(win, image=my_directory+'\\Exp2_DotMotion_Instructions\\Exp2_DotMotion_FastFast_a.JPG',
-                             pos=(0, 0))
-    AccAcc = vis.ImageStim(win, image=my_directory+'\\Exp2_DotMotion_Instructions\\Exp2_DotMotion_AccAcc_a.JPG',
-                           pos=(0, 0))
-    FastAcc = vis.ImageStim(win, image=my_directory+'\\Exp2_DotMotion_Instructions\\Exp2_DotMotion_FastAcc_a.JPG',
-                            pos=(0, 0))
-    AccFast = vis.ImageStim(win, image=my_directory+'\\Exp2_DotMotion_Instructions\\Exp2_DotMotion_AccFast_a.JPG',
-                            pos=(0, 0))
+FastFast = vis.ImageStim(win, image=my_directory+'\\Exp2_DotMotion_Instructions\\Exp2_DotMotion_FastFast.JPG',
+                         pos=(0, 0))
+AccAcc = vis.ImageStim(win, image=my_directory+'\\Exp2_DotMotion_Instructions\\Exp2_DotMotion_AccAcc.JPG',
+                       pos=(0, 0))
+FastAcc = vis.ImageStim(win, image=my_directory+'\\Exp2_DotMotion_Instructions\\Exp2_DotMotion_FastAcc.JPG',
+                        pos=(0, 0))
+AccFast = vis.ImageStim(win, image=my_directory+'\\Exp2_DotMotion_Instructions\\Exp2_DotMotion_AccFast.JPG',
+                        pos=(0, 0))
 
 # Manipulations labels
 decision_Fast = vis.TextStim(win, text='Make FAST decisions', pos=(0, 0.3), height=.07)
@@ -376,8 +366,6 @@ for block in range(1,blocks):
 
             # Ask for confidence about the choice after from the third block on
             if block > 2 and resp != 'x':
-                if block == 3:
-                    cj_keyboardfigure.draw()  # !!!
                 cj_labels.draw()
                 win.flip()
                 clock.reset()

@@ -1,6 +1,10 @@
 # september/october 2021
 # Internship project: Confidence bounds
 
+# TO DO:
+# KeyboardFigure cj
+# Change intro- and instruction figures
+
 # RANDOM DOT MOTION TASK (Does the majority of dots move left or right? How confident are you about your choice?)
 # Participants complete multiple blocks of consecutive dot motion trials
 # 3 training blocks with increasing complexity introduce participants to the task
@@ -148,7 +152,6 @@ warning = vis.TextStim(win, text='Too slow... Please respond faster', pos=(0, 0)
 
 
 # Confidence labels, counterbalance the order between participants
-cj_text = vis.TextStim(win, text='How confident are you that you made the correct choice?', pos=(0, 0.3), height=.07)
 if confidence_labels == 0:
     cj_labels = vis.ImageStim(win,
                               image=my_directory+'\\Exp2_DotMotion_Instructions\\Exp2_DotMotion_ConfidenceLabels_b.JPG',
@@ -373,7 +376,8 @@ for block in range(1,blocks):
 
             # Ask for confidence about the choice after from the third block on
             if block > 2 and resp != 'x':
-                cj_text.draw()
+                if block == 3:
+                    cj_keyboardfigure.draw()  # !!!
                 cj_labels.draw()
                 win.flip()
                 clock.reset()

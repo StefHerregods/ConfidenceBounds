@@ -87,11 +87,17 @@ sub <- NULL
 p_correct_tot <- NULL
 p_correct <- NULL
 difficulty <- NULL
+metacognition_mean <- NULL
+cj_mean <- NULL
 for (i in unique(data_viable$sub)){
   table <- prop.table(table(data_viable$cor[data_viable$sub==i], data_viable$coherence[data_viable$sub==i]),2)
   for (j in 1:3){
+    k <- switch(j, 0.1, 0.2, 0.4)
+    temp <- subset(data_viable, sub == i & coherence == k)
     sub <- append(sub,i)
     p_correct_tot <- append(p_correct_tot,prop.table(table(data_viable$cor[data_viable$sub==i]))[2])
+    metacognition_mean <- append(metacognition_mean,mean(temp$metacognition))
+    cj_mean <- append(cj_mean,mean(temp$cj))
   }
   p_correct <- append(p_correct,table[2,1])
   difficulty <- append(difficulty,0.1)
@@ -100,7 +106,7 @@ for (i in unique(data_viable$sub)){
   p_correct <- append(p_correct,table[2,3])
   difficulty <- append(difficulty,0.4)
 }
-df_participant <- data.frame(sub, p_correct, difficulty, p_correct_tot)
+df_participant <- data.frame(sub, p_correct, difficulty, p_correct_tot, cj_mean, metacognition_mean)
 
 # Calculating averages per participant and condition
 
@@ -215,7 +221,7 @@ ggplot(data = df_participant_manipulation, aes(x = manipulation, y = rtconf_mean
   scale_x_discrete(labels = c("AccAcc" = "Accurate decision\nAccurate confidence rating", "AccFast" = "Accurate decision\nFast confidence rating", "FastFast" = "Fast decision\nFast confidence rating", "FastAcc" = "Fast decision\nAccurate confidence rating")) +
   labs(x = "Manipulation", y = "Mean confidence rating reaction time")
   
-# Proportion correct responses
+# Accuracy plots
 
 ggplot(data = df_participant, aes(x = as.factor(difficulty), y = p_correct)) +
   geom_boxplot() +
@@ -235,6 +241,32 @@ ggplot(data = df_participant_manipulation, aes(x = manipulation, y = cor_mean), 
   stat_summary(aes(y = cor_mean, group=1), fun.y=mean, colour="Blue", size = 4, shape = 95) +
   scale_x_discrete(labels = c("AccAcc" = "Accurate decision\nAccurate confidence rating", "AccFast" = "Accurate decision\nFast confidence rating", "FastFast" = "Fast decision\nFast confidence rating", "FastAcc" = "Fast decision\nAccurate confidence rating")) +
   labs(x = "Manipulation", y = "Mean accuracy")
+
+# Confidence rating plots
+
+ggplot(data = df_participant, aes(x = difficulty, y = cj_mean), shape = 5) +
+  geom_jitter(width = 0.1, shape = 16, size = 3, colour = "Blue", alpha = 0.3) +
+  stat_summary(aes(y = cor_mean, group=1), fun.y=mean, colour="Blue", size = 4, shape = 95) +
+  scale_x_discrete(labels = c("AccAcc" = "Accurate decision\nAccurate confidence rating", "AccFast" = "Accurate decision\nFast confidence rating", "FastFast" = "Fast decision\nFast confidence rating", "FastAcc" = "Fast decision\nAccurate confidence rating")) +
+  labs(x = "Manipulation", y = "Mean confidence rating") #!!!
+
+ggplot(data = df_participant_manipulation, aes(x = manipulation, y = cj_mean), shape = 5) +
+  geom_jitter(width = 0.1, shape = 16, size = 3, colour = "Blue", alpha = 0.3) +
+  stat_summary(aes(y = cj_mean, group=1), fun.y=mean, colour="Blue", size = 4, shape = 95) +
+  scale_x_discrete(labels = c("AccAcc" = "Accurate decision\nAccurate confidence rating", "AccFast" = "Accurate decision\nFast confidence rating", "FastFast" = "Fast decision\nFast confidence rating", "FastAcc" = "Fast decision\nAccurate confidence rating")) +
+  labs(x = "Manipulation", y = "Mean confidence rating")
+
+ggplot(data = df_participant, aes(x = difficulty, y = metacognition_mean), shape = 5) +
+  geom_jitter(width = 0.1, shape = 16, size = 3, colour = "Blue", alpha = 0.3) +
+  stat_summary(aes(y = cor_mean, group=1), fun.y=mean, colour="Blue", size = 4, shape = 95) +
+  scale_x_discrete(labels = c("AccAcc" = "Accurate decision\nAccurate confidence rating", "AccFast" = "Accurate decision\nFast confidence rating", "FastFast" = "Fast decision\nFast confidence rating", "FastAcc" = "Fast decision\nAccurate confidence rating")) +
+  labs(x = "Manipulation", y = "Mean confidence rating") #!!!
+
+ggplot(data = df_participant_manipulation, aes(x = manipulation, y = metacognition_mean), shape = 5) +
+  geom_jitter(width = 0.1, shape = 16, size = 3, colour = "Blue", alpha = 0.3) +
+  stat_summary(aes(y = metacognition_mean, group=1), fun.y=mean, colour="Blue", size = 4, shape = 95) +
+  scale_x_discrete(labels = c("AccAcc" = "Accurate decision\nAccurate confidence rating", "AccFast" = "Accurate decision\nFast confidence rating", "FastFast" = "Fast decision\nFast confidence rating", "FastAcc" = "Fast decision\nAccurate confidence rating")) +
+  labs(x = "Manipulation", y = "Mean confidence rating")
 
 
 # RT histograms over all participants 
@@ -278,8 +310,6 @@ ggplot(data = data_viable, aes(x = rtconf, color = rtconf_manipulation, fill = r
   scale_fill_manual(labels = c("Accurate", "Fast"), values=c("#F39C12", "#1F618D")) +
   xlab("Confidence rating reaction time") +
   ylab("Count")
-
-plot(data_viable$rtconf, ylim=c(0,1))
 
 # mean graphs
 # standard error (sd gecontroleerd voor pp)

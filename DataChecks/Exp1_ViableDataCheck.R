@@ -186,7 +186,7 @@ ggplot(data = df_participant_manipulation, aes(x = manipulation, y = rt_mean), s
   geom_jitter(width = 0.1, shape = 16, size = 3, colour = "Blue", alpha = 0.3) +
   stat_summary(aes(y = rt_mean,group=1), fun.y=mean, colour="Blue", size = 4, shape = 95) +
   scale_x_discrete(labels = c("AccAcc" = "Accurate decision\nAccurate confidence rating", "AccFast" = "Accurate decision\nFast confidence rating", "FastFast" = "Fast decision\nFast confidence rating", "FastAcc" = "Fast decision\nAccurate confidence rating")) +
-  labs(x = "Manipulation", y = "Mean decision reaction time")  # violin
+  labs(x = "Manipulation", y = "Mean decision reaction time")  # violin?
 
 # Confidence rating RT manipulations (all)
 
@@ -224,12 +224,17 @@ ggplot(data = df_participant, aes(x = as.factor(difficulty), y = p_correct)) +
 plot(df_participant$sub, df_participant$p_correct_tot, pch = 19, xlab = "Subject number", ylab = "Percentage correct responses")
 plot(df_participant$p_correct_tot, df_participant$p_correct, col = sub, pch = 19, xlab = "Total percentage correct responses", ylab = "Percentage correct responses for each coherence level")
 
+ggplot(data = df_participant, aes(x = as.factor(difficulty), y = p_correct), shape = 5) +
+  geom_jitter(width = 0.1, shape = 16, size = 3, colour = "Blue", alpha = 0.3) +
+  stat_summary(aes(y = p_correct, group=1), fun.y=mean, colour="Blue", size = 4, shape = 95) +
+  scale_x_discrete(labels = c("AccAcc" = "Accurate decision\nAccurate confidence rating", "AccFast" = "Accurate decision\nFast confidence rating", "FastFast" = "Fast decision\nFast confidence rating", "FastAcc" = "Fast decision\nAccurate confidence rating")) +
+  labs(x = "Coherence", y = "Mean accuracy") 
+
 ggplot(data = df_participant_manipulation, aes(x = manipulation, y = cor_mean), shape = 5) +
   geom_jitter(width = 0.1, shape = 16, size = 3, colour = "Blue", alpha = 0.3) +
-  stat_summary(aes(y = cor_mean,group=1), fun.y=mean, colour="Blue", size = 4, shape = 95) +
+  stat_summary(aes(y = cor_mean, group=1), fun.y=mean, colour="Blue", size = 4, shape = 95) +
   scale_x_discrete(labels = c("AccAcc" = "Accurate decision\nAccurate confidence rating", "AccFast" = "Accurate decision\nFast confidence rating", "FastFast" = "Fast decision\nFast confidence rating", "FastAcc" = "Fast decision\nAccurate confidence rating")) +
   labs(x = "Manipulation", y = "Mean accuracy")
-
 
 
 # RT histograms over all participants 

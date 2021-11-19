@@ -5,7 +5,7 @@
 library(ggplot2)
 library(forcats)
 
-setwd('C:\\Users\\herre\\OneDrive\\Bureaublad\\Internship\\Results\\Exp1_results_temp_3') # temp(_2) tot
+setwd('C:\\Users\\herre\\OneDrive\\Bureaublad\\Internship\\Results\\Exp1_results_tot') # temp(_2) tot
 
 
 alpha <- 0.05
@@ -194,11 +194,11 @@ ggplot(data = df_participant_manipulation, aes(x = manipulation, y = rt_mean), s
   scale_x_discrete(labels = c("AccAcc" = "Accurate decision\nAccurate confidence rating", "AccFast" = "Accurate decision\nFast confidence rating", "FastFast" = "Fast decision\nFast confidence rating", "FastAcc" = "Fast decision\nAccurate confidence rating")) +
   labs(x = "Manipulation", y = "Mean decision reaction time")  
 
-# Test with eror bars
+# Test with error bars
 
-# test with connecting lines
+# Test with connecting lines
 ggplot(data = df_participant_manipulation, aes(x = manipulation, y = rt_mean), shape = 5) +
-  geom_line(aes(group = sub), alpha = 0.1) +
+  geom_line(aes(group = sub), alpha = 0.2) +
   geom_point(shape = 16, size = 3, colour = "Blue", alpha = 0.3) +
   stat_summary(aes(y = rt_mean,group=1), fun.y=mean, colour="Blue", size = 4, shape = 95) +
   scale_x_discrete(labels = c("AccAcc" = "Accurate decision\nAccurate confidence rating", "AccFast" = "Accurate decision\nFast confidence rating", "FastFast" = "Fast decision\nFast confidence rating", "FastAcc" = "Fast decision\nAccurate confidence rating")) +
@@ -314,7 +314,7 @@ ggplot(data = data_viable, aes(x = rt, color = rt_manipulation, fill = rt_manipu
 
 # Confidence RT of fast versus accurate confidence rating manipulation
 ggplot(data = data_viable, aes(x = rtconf, color = rtconf_manipulation, fill = rtconf_manipulation)) +
-  geom_histogram(alpha=0.5, position= "identity", bins = 60) +
+  geom_histogram(alpha=0.5, position= "identity", bins = 100) +
   xlim(0, 5) +
   scale_color_manual(labels = c("Accurate", "Fast"), values=c("#F39C12", "#1F618D")) +
   scale_fill_manual(labels = c("Accurate", "Fast"), values=c("#F39C12", "#1F618D")) +

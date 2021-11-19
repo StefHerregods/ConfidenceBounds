@@ -6,6 +6,7 @@
 # Activating packages
 
 library(lme4)
+library(lmerTest)
 
 
 # Loading data
@@ -79,6 +80,7 @@ anova(modelA_1, modelA_2)
 modelA_3 <- lmer(rt ~ 1 + rt_manipulation * rtconf_manipulation  * coherence + (1|sub), REML = FALSE, data = df)  # Adding manipulations
 summary(modelA_3)
 confint(modelA_3)
+anova(modelA_3)
 
 anova(modelA_2, modelA_3)
 

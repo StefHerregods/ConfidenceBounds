@@ -373,13 +373,13 @@ for block in range(1,blocks):
                 conf_press = event.waitKeys(keyList=cj_keys)
                 RTconf = clock.getTime()
 
-                # Convert conf_press into numeric value from 0 (probably error) to 1 probably correct
-                for temp in range(0,6):
+                # Convert conf_press into numeric value from 1 (sure error) to 6 (sure correct)
+                for temp in range(1,7):
                     if conf_press[0] == cj_keys[temp]:
                         cj = temp
                 # Reverse order for half
                 if confidence_labels == 0:
-                    cj = 6 - cj
+                    cj = 7 - cj
 
             else:
                 conf_press = 'none'

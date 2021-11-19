@@ -380,7 +380,7 @@ for block in range(1,blocks):
                 conf_press = event.waitKeys(keyList=cj_keys)
                 RTconf = clock.getTime()
 
-                # Convert conf_press into numeric value from 0 (probably error) to 1 probably correct
+                # Convert conf_press into numeric value from 0 (probably error) to 1 (probably correct)
                 for temp in range(0,2):
                     if conf_press[0] == cj_keys[temp]:
                         cj = temp

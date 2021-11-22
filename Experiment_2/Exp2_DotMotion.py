@@ -2,8 +2,10 @@
 # Internship project: Confidence bounds
 
 # TO DO:
-# figuren scherpstellen
-# pauze op figuur
+# volledige test
+# doorsturen
+# eerste check
+
 
 # RANDOM DOT MOTION TASK (Does the majority of dots move left or right? How confident are you about your choice?)
 # Participants complete multiple blocks of consecutive dot motion trials
@@ -318,7 +320,7 @@ for block in range(1,blocks):
             clock.reset()
 
             # Dot motion settings
-            resp = []; event.clearEvents(); RT = 0
+            resp = []; conf_press = []; event.clearEvents(); RT = 0
             DotMotion.coherence = p_coherence
             DotMotion.dir = direction
 
@@ -365,14 +367,25 @@ for block in range(1,blocks):
                 sleep(time_fb)
 
             # Ask for confidence about the choice after from the third block on
-            if block > 2 and resp != 'x':
+            while RTconf < 5 and resp != 'x':
                 cj_labels.draw()
                 win.flip()
                 clock.reset()
                 event.clearEvents()
                 conf_press = event.waitKeys(keyList=cj_keys)
                 RTconf = clock.getTime()
+                if len(conf_press) > 0:
+                    break
+            if RTconf >= 5:
+                conf_press = 'x'
+                SlowTrial = 1
+                n_slowtrials = n_slowtrials + 1
+                warning.draw(); space.draw()
+                win.flip()
+                event.waitKeys(keylist='space')
+            win.flip()
 
+                # !!! to do
                 # Convert conf_press into numeric value from 1 (sure error) to 6 (sure correct)
                 for temp in range(1,7):
                     if conf_press[0] == cj_keys[temp]:
@@ -414,7 +427,7 @@ for block in range(1,blocks):
             thisExp.nextEntry()
 
             # Add data to variables
-            if resp != 'x':
+            if resp != 'x' and conf_press != 'x':
                 accuracy = accuracy + ACC
                 RT_mean = RT_mean + RT
                 RTconf_mean = RTconf_mean + RTconf

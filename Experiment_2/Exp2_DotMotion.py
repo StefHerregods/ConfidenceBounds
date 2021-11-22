@@ -107,19 +107,19 @@ Introduction = vis.TextStim(win, text="Welcome to this experiment!\n\nOn each tu
                                       "In this example, most of the dots move to the left.", pos=(0, 0.15), height=.05)
 Intro_block1 = vis.ImageStim(win,
                              image=my_directory+'\\Exp2_DotMotion_Instructions\\Exp2_DotMotion_Intro_Block1.JPG',
-                             pos=(0, 0))
+                             pos=(0, 0.1))
 Intro_block2 = vis.ImageStim(win,
                              image=my_directory+'\\Exp2_DotMotion_Instructions\\Exp2_DotMotion_Intro_Block2.JPG',
-                             pos=(0, 0))
+                             pos=(0, 0.1))
 Intro_block3a = vis.ImageStim(win,
                               image=my_directory+'\\Exp2_DotMotion_Instructions\\Exp2_DotMotion_Intro_Block3a.JPG',
-                              pos=(0, 0))
+                              pos=(0, 0.1))
 Intro_block3b = vis.ImageStim(win,
                               image=my_directory+'\\Exp2_DotMotion_Instructions\\Exp2_DotMotion_Intro_Block3b.JPG',
-                              pos=(0, 0))
+                              pos=(0, 0.1))
 Intro_block4 = vis.ImageStim(win,
                              image=my_directory+'\\Exp2_DotMotion_Instructions\\Exp2_DotMotion_Intro_Block4.JPG',
-                             pos=(0, 0))
+                             pos=(0, 0.1))
 
 # Manipulation images
 FastFast = vis.ImageStim(win, image=my_directory+'\\Exp2_DotMotion_Instructions\\Exp2_DotMotion_FastFast.JPG',
@@ -152,7 +152,7 @@ elif confidence_labels == 1:
                               pos=(0, 0))
 
 # Space to continue
-space = vis.TextStim(win, text='Press space to continue', pos=(0, -0.7), height=0.05)
+space = vis.TextStim(win, text='Press space to continue', pos=(0, -0.85), height=0.05)
 
 # Ending screen
 end = vis.TextStim(win, text='The end! Thank you for participating.\n\nPlease wait in silence until everyone is ready.',

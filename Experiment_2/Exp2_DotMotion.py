@@ -1,9 +1,6 @@
 # november 2021
 # Internship project: Confidence bounds
 
-# To do:
-# bug confidence rating waitkeys
-
 # RANDOM DOT MOTION TASK (variant with 6 confidence options)
 # (Does the majority of dots move left or right? How confident are you about your choice?)
 # Participants complete multiple blocks of consecutive dot motion trials
@@ -386,9 +383,9 @@ for block in range(1,blocks):
 
                 # Convert conf_press into numeric value from 1 (sure error) to 6 (sure correct)
                 if SlowTrial == 0:
-                    for temp in range(1,7):
+                    for temp in range(0,6):
                         if conf_press[0] == cj_keys[temp]:
-                            cj = temp
+                            cj = temp + 1
                     # Reverse order for half
                     if confidence_labels == 0:
                         cj = 7 - cj

@@ -1,13 +1,8 @@
-# september/october 2021
+# november 2021
 # Internship project: Confidence bounds
 
-# TO DO:
-# volledige test
-# doorsturen
-# eerste check
-
-
-# RANDOM DOT MOTION TASK (Does the majority of dots move left or right? How confident are you about your choice?)
+# RANDOM DOT MOTION TASK (variant with 6 confidence options)
+# (Does the majority of dots move left or right? How confident are you about your choice?)
 # Participants complete multiple blocks of consecutive dot motion trials
 # 3 training blocks with increasing complexity introduce participants to the task
 # Manipulations: coherence (~ difficulty), accuracy/speed of the decision and accuracy/speed of the confidence ratings

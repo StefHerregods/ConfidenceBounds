@@ -367,32 +367,37 @@ for block in range(1,blocks):
                 sleep(time_fb)
 
             # Ask for confidence about the choice after from the third block on
-            while RTconf < 5 and resp != 'x':
-                cj_labels.draw()
+            if block > 2:
+                while RTconf < 5 and resp != 'x':
+                    cj_labels.draw()
+                    win.flip()
+                    clock.reset()
+                    event.clearEvents()
+                    conf_press = event.waitKeys(keyList=cj_keys)
+                    RTconf = clock.getTime()
+                    if len(conf_press) > 0:
+                        break
+                if RTconf >= 5:
+                    conf_press = 'x'
+                    SlowTrial = 1
+                    n_slowtrials = n_slowtrials + 1
+                    warning.draw(); space.draw()
+                    win.flip()
+                    event.waitKeys(keylist='space')
                 win.flip()
-                clock.reset()
-                event.clearEvents()
-                conf_press = event.waitKeys(keyList=cj_keys)
-                RTconf = clock.getTime()
-                if len(conf_press) > 0:
-                    break
-            if RTconf >= 5:
-                conf_press = 'x'
-                SlowTrial = 1
-                n_slowtrials = n_slowtrials + 1
-                warning.draw(); space.draw()
-                win.flip()
-                event.waitKeys(keylist='space')
-            win.flip()
 
-                # !!! to do
                 # Convert conf_press into numeric value from 1 (sure error) to 6 (sure correct)
-                for temp in range(1,7):
-                    if conf_press[0] == cj_keys[temp]:
-                        cj = temp
-                # Reverse order for half
-                if confidence_labels == 0:
-                    cj = 7 - cj
+                if SlowTrial == 0:
+                    for temp in range(1,7):
+                        if conf_press[0] == cj_keys[temp]:
+                            cj = temp
+                    # Reverse order for half
+                    if confidence_labels == 0:
+                        cj = 7 - cj
+                else:
+                    conf_press = 'none'
+                    cj = -99
+                    RTconf = -99
 
             else:
                 conf_press = 'none'

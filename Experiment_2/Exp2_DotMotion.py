@@ -1,6 +1,9 @@
 # november 2021
 # Internship project: Confidence bounds
 
+# To do:
+# bug confidence rating waitkeys
+
 # RANDOM DOT MOTION TASK (variant with 6 confidence options)
 # (Does the majority of dots move left or right? How confident are you about your choice?)
 # Participants complete multiple blocks of consecutive dot motion trials
@@ -315,7 +318,7 @@ for block in range(1,blocks):
             clock.reset()
 
             # Dot motion settings
-            resp = []; conf_press = []; event.clearEvents(); RT = 0
+            resp = []; conf_press = []; event.clearEvents(); RT = 0; RTconf = 0
             DotMotion.coherence = p_coherence
             DotMotion.dir = direction
 
@@ -362,13 +365,13 @@ for block in range(1,blocks):
                 sleep(time_fb)
 
             # Ask for confidence about the choice after from the third block on
-            if block > 2:
-                while RTconf < 5 and resp != 'x':
+            if block > 2 and resp != 'x':
+                clock.reset()
+                event.clearEvents()
+                while RTconf < 5:
                     cj_labels.draw()
                     win.flip()
-                    clock.reset()
-                    event.clearEvents()
-                    conf_press = event.waitKeys(keyList=cj_keys)
+                    conf_press = event.getKeys(keyList=cj_keys)
                     RTconf = clock.getTime()
                     if len(conf_press) > 0:
                         break
@@ -378,7 +381,7 @@ for block in range(1,blocks):
                     n_slowtrials = n_slowtrials + 1
                     warning.draw(); space.draw()
                     win.flip()
-                    event.waitKeys(keylist='space')
+                    event.waitKeys(keyList='space')
                 win.flip()
 
                 # Convert conf_press into numeric value from 1 (sure error) to 6 (sure correct)

@@ -5,7 +5,7 @@
 library(ggplot2)
 library(forcats)
 
-setwd('C:\\Users\\herre\\OneDrive\\Bureaublad\\Internship\\Results\\Exp1_results_tot') # temp(_2) tot
+setwd('C:\\Users\\herre\\OneDrive\\Bureaublad\\Internship\\Results\\Exp1_results_temp_4') # temp(_2) tot
 
 
 alpha <- 0.05
@@ -329,3 +329,5 @@ ggplot(data = data_viable, aes(x = rtconf, color = rtconf_manipulation, fill = r
 
 # accuraatheid per conditie mean plot
 # confidence mena per conditie
+
+# coherence distance change

@@ -1,10 +1,10 @@
 # 29 November 2021
-# Merging all experiment 1 data + adding batch-number
+# Merging all experiment 2 data + adding batch-number
 
 
 # Setting working directory
 
-setwd("C:\\Users\\herre\\OneDrive\\Bureaublad\\Internship\\Results\\Exp1_Results")
+setwd("C:\\Users\\herre\\OneDrive\\Bureaublad\\Internship\\Results\\Exp2_Results")
 
 # Initialize data_full
 
@@ -18,7 +18,7 @@ for (j in 1:9){
   
   for (i in 1:40){
     
-    file_name <- paste0("Exp1_Batch",j,"\\DotsTask_sub",i,".csv",collapse="")
+    file_name <- paste0("Exp2_Batch",j,"\\DotsTask_sub",i,".csv",collapse="")
     if (file.exists(file_name)){
       
       data_temp <- read.csv(file=file_name)
@@ -32,5 +32,4 @@ for (j in 1:9){
 
 # Save full data set
 
-write.csv(data_full,"Exp1_data_full.csv")
-
+write.csv(data_full,"Exp2_data_full.csv")

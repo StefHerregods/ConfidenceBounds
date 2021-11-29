@@ -11,13 +11,12 @@ setwd('C:\\Users\\herre\\OneDrive\\Bureaublad\\Internship\\Results\\Exp1_results
 alpha <- 0.05
 
 # (a) Checking viability of the data
-# See preregistration experiment 1 for more information
+# See preregistration experiment 2 for more information
 
 # Step 0: loading data
 
 data_viable <- NULL
 data_full <- NULL
-last_block <- NULL
 
 for (i in 1:40){
   
@@ -37,7 +36,6 @@ for (i in 1:40){
     # Step 1: Did not finish 
     
     final_block <- max(data_temp$block)
-    last_block <- append(last_block,final_block)
     if (final_block == 15){
       final_trial <- max(data_temp$ï..withinblocktrial[data_temp$block == 15])
       if (final_trial == 59){

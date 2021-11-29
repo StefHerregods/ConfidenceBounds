@@ -1,40 +1,58 @@
-# Project: Confidence bounds (2021-2022)
+# November 2021
 # Script checks for (a) viability of the data (as described in preregistration experiment 2) 
 # and (b) irregularities in data of experiment 2
+
+
+
+# Variables
+
+alpha <- 0.05  # Significance level
+batches <- 10  # change to amount of batches Exp 2
+
+# Setting working directory
+
+setwd("C:\\Users\\herre\\OneDrive\\Bureaublad\\Internship\\Results\\Exp1_results_tot") # temp(_2) tot
+
+# Loading required packages
 
 library(ggplot2)
 library(forcats)
 
-setwd('C:\\Users\\herre\\OneDrive\\Bureaublad\\Internship\\Results\\Exp1_results_tot') # temp(_2) tot
 
-
-alpha <- 0.05
 
 # (a) Checking viability of the data
 # See preregistration experiment 2 for more information
 
-# Step 0: loading data
 
-data_viable <- NULL
-data_full <- NULL
+# Loading data
 
+data_full <- read.csv(file="Exp2_data_full.csv")
+colnames(data_full)[1] <- gsub('^...','',colnames(data_full)[1])
+
+# Add data checks
+data_full$check1 <- FALSE
+data_full$check2 <- FALSE
+data_full$check3 <- FALSE
+data_full$check4 <- FALSE
+
+# Loop through participants
 for (i in 1:40){
-  
-  file_name <- paste0("DotsTask_sub",i,".csv",collapse="")
-  if (file.exists(file_name)){
-    
-    data_temp <- read.csv(file=file_name)
-    data_temp$subject <- i
-    
-    data_full <- rbind(data_temp,data_full)
-    
-    data_temp$check1 <- FALSE
-    data_temp$check2 <- FALSE
-    data_temp$check3 <- FALSE
-    data_temp$check4 <- FALSE
-    
-    # Step 1: Did not finish 
-    
+  for (j in 1:batches){
+    if (length(data_full$batch[data_full$batch == j & data_full$subject == i]) > 0){
+      
+      # Check 1: Finishing the experiment
+      final_block <- max(data_full$block[data_full$batch == j & data_full$subject == i])
+      final_trial <- max(data_full$withinblocktrial[data_full$batch == j & data_full$subject == i & data_full$block == 15])
+      if (final_block == 15 & final_trial == 59){
+        data_full$check1[data_full$batch == j & data_full$subject == i] <- TRUE  
+      }
+      
+    }
+  }
+}
+
+
+
     final_block <- max(data_temp$block)
     if (final_block == 15){
       final_trial <- max(data_temp$ï..withinblocktrial[data_temp$block == 15])

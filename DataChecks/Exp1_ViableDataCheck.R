@@ -1,11 +1,11 @@
-# Project: Confidence bounds (2021-2022)
+# November 2021
 # Script checks for (a) viability of the data (as described in preregistration experiment 1) 
 # and (b) irregularities in data of experiment 1
 
 library(ggplot2)
 library(forcats)
 
-setwd('C:\\Users\\herre\\OneDrive\\Bureaublad\\Internship\\Results\\Exp1_results_temp_4') # temp(_2) tot
+setwd("C:\\Users\\herre\\OneDrive\\Bureaublad\\Internship\\Results\\Exp1_results_temp_4") # temp(_2) tot
 
 
 alpha <- 0.05

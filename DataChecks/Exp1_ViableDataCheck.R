@@ -17,7 +17,6 @@ alpha <- 0.05
 
 data_viable <- NULL
 data_full <- NULL
-last_block <- NULL
 
 for (i in 1:40){
   
@@ -37,7 +36,6 @@ for (i in 1:40){
     # Step 1: Did not finish 
     
     final_block <- max(data_temp$block)
-    last_block <- append(last_block,final_block)
     if (final_block == 15){
       final_trial <- max(data_temp$ï..withinblocktrial[data_temp$block == 15])
       if (final_trial == 59){

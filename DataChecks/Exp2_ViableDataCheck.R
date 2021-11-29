@@ -11,7 +11,7 @@ batches <- 10  # change to amount of batches Exp 2
 
 # Setting working directory
 
-setwd("C:\\Users\\herre\\Desktop\\Exp2_Results") 
+setwd("C:\\Users\\herre\\Desktop\\Internship\\Results\\Exp2_Results") 
 
 # Loading required packages
 

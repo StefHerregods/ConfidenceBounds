@@ -31,4 +31,4 @@ for (j in 1:9){
 
 # Save full data set
 
-write.csv(data_full,"Exp2_data_full.csv")
+write.csv(data_full,"Exp2_data_full.csv",row.names=FALSE)

@@ -4,7 +4,7 @@
 
 # Setting working directory
 
-setwd("C:\\Users\\herre\\OneDrive\\Bureaublad\\Internship\\Results\\Exp1_Results")
+setwd("C:\\Users\\herre\\Desktop\\Internship\\Results\\Exp2_Results")
 
 # Initialize data_full
 

@@ -5,7 +5,7 @@
 library(ggplot2)
 library(forcats)
 
-setwd("C:\\Users\\herre\\OneDrive\\Bureaublad\\Internship\\Results\\Exp1_results_temp_4") # temp(_2) tot
+setwd("C:\\Users\\herre\\Desktop\\Internship\\Results\\Exp1_Results") # temp(_2) tot
 
 
 alpha <- 0.05

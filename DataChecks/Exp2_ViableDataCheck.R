@@ -11,7 +11,7 @@ batches <- 10  # change to amount of batches Exp 2
 
 # Setting working directory
 
-setwd("C:\\Users\\herre\\OneDrive\\Bureaublad\\Internship\\Results\\Exp1_results_tot") # temp(_2) tot
+setwd("C:\\Users\\herre\\Desktop\\Exp2_Results") 
 
 # Loading required packages
 

@@ -40,43 +40,45 @@ data_full$check4 <- FALSE
 for (i in unique(data_full$sub)){
   for (j in unique(data_full$batch)){
 
-    # Check 1: Finishing the experiment
+    data_temp <- subset(data_full, data_full$batch == j & data_full$sub == i)
+    
+    # Check 1: Not finishing the experiment
 
-    final_block <- suppressWarnings(max(subset(data_full, data_full$batch == j 
-                                               & data_full$sub == i, 
-                                               select = block)))
-    final_trial <- suppressWarnings(max(subset(data_full, data_full$batch == j 
-                                               & data_full$sub == i & 
-                                                 data_full$block == final_block, 
+    final_block <- suppressWarnings(max(subset(data_temp, select = block)))
+    final_trial <- suppressWarnings(max(subset(data_temp, 
+                                               data_temp$block == final_block, 
                                                select = withinblocktrial)))
     if (final_block == 15 & final_trial == 59){
       data_full$check1[data_full$batch == j & data_full$sub == i] <- TRUE  
-
-      
-    
-      
     }
+      
+    # Check 2: Requiring more than 7 training blocks
+    
+    training_blocks <- suppressWarnings(
+      max(data_temp$block_repetition[data_temp$block == 1]) + 
+      max(data_temp$block_repetition[data_temp$block == 2]) + 
+      max(data_temp$block_repetition[data_temp$block == 3]))
+    if (training_blocks <= 7){
+      data_full$check2[data_full$batch == j & data_full$sub == i] <- TRUE
+    }
+    
+    # Check 3: Same confidence rating in more than 95% of the trials
+    
+    data_temp <- data_temp[data_temp$block > 3,] # Remove training trials
+    data_temp <- data_temp[data_temp$slow_trial == 0,]  # Remove too slow trials
+    max_p_cj <- suppressWarnings(max(prop.table(table(data_temp$cj))))
+    if (0.05 <= max_p_cj & max_p_cj <= 0.95){
+      data_full$check3[data_full$batch == j & data_full$sub == i] <- TRUE
+    }
+    
   }
 }
 
 
 
 
-        # Step 2: Required more than 7 training blocks
-        
-        training_blocks <- max(data_temp$block_repetition[data_temp$block == 1]) + max(data_temp$block_repetition[data_temp$block == 2]) + max(data_temp$block_repetition[data_temp$block == 3])
-        if (training_blocks <= 7){
-          data_temp$check2 <- TRUE
-        } 
-        
-        # Step 3: Same confidence rating in more than 95% of the trials
-        
-        data_temp <- data_temp[data_temp$block > 3,] # Remove training trials
-        data_temp <- data_temp[data_temp$slow_trial == 0,]  # Remove too slow trials
-        confidence_average <- mean(data_temp$cj)
-        if (0.05 <= confidence_average && confidence_average <= 0.95){
-          data_temp$check3 <- TRUE
-        }
+
+
         
         # Step 4: Performance at chance level as assessed by a binomial test
         

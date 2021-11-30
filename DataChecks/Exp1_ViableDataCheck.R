@@ -1,331 +1,96 @@
-# November 2021
-# Script checks for (a) viability of the data (as described in preregistration experiment 1) 
-# and (b) irregularities in data of experiment 1
-
-library(ggplot2)
-library(forcats)
-
-setwd("C:\\Users\\herre\\Desktop\\Internship\\Results\\Exp1_Results") # temp(_2) tot
+# October 2021
+# Script checks for viability of the data as described in the preregistration of
+# experiment 1: https://doi.org/10.17605/OSF.IO/Z2UCM
 
 
-alpha <- 0.05
 
-# (a) Checking viability of the data
-# See preregistration experiment 1 for more information
+# Variables
 
-# Step 0: loading data
+alpha <- 0.05  # Significance level
 
-data_viable <- NULL
-data_full <- NULL
+# Setting working directory
 
-for (i in 1:40){
-  
-  file_name <- paste0("DotsTask_sub",i,".csv",collapse="")
-  if (file.exists(file_name)){
-    
-    data_temp <- read.csv(file=file_name)
-    data_temp$subject <- i
-    
-    data_full <- rbind(data_temp,data_full)
-    
-    data_temp$check1 <- FALSE
-    data_temp$check2 <- FALSE
-    data_temp$check3 <- FALSE
-    data_temp$check4 <- FALSE
-    
-    # Step 1: Did not finish 
-    
-    final_block <- max(data_temp$block)
-    if (final_block == 15){
-      final_trial <- max(data_temp$ï..withinblocktrial[data_temp$block == 15])
-      if (final_trial == 59){
-        data_temp$check1 <- TRUE
-        
-        # Step 2: Required more than 7 training blocks
-        
-        training_blocks <- max(data_temp$block_repetition[data_temp$block == 1]) + max(data_temp$block_repetition[data_temp$block == 2]) + max(data_temp$block_repetition[data_temp$block == 3])
-        if (training_blocks <= 7){
-          data_temp$check2 <- TRUE
-        } 
-        
-        # Step 3: Same confidence rating in more than 95% of the trials
-        
-        data_temp <- data_temp[data_temp$block > 3,] # Remove training trials
-        data_temp <- data_temp[data_temp$slow_trial == 0,]  # Remove too slow trials
-        confidence_average <- mean(data_temp$cj)
-        if (0.05 <= confidence_average && confidence_average <= 0.95){
-          data_temp$check3 <- TRUE
-        }
-        
-        # Step 4: Performance at chance level as assessed by a binomial test
-        
-        correct_responses <- sum(data_temp$cor)
-        total_responses <- nrow(data_temp)
-        binomial <- binom.test(correct_responses,total_responses,1/2,alternative="greater")
-        if (binomial[3] <= alpha){ # is this correct?
-          data_temp$check4 <- TRUE
-        }
-        data_viable <- rbind(data_viable,data_temp) 
-      } 
-    }
-  }
-}
-unique(data_viable$sub[data_viable$check2 == FALSE])
-unique(data_viable$sub[data_viable$check3 == FALSE])
-unique(data_viable$sub[data_viable$check4 == FALSE])
+setwd("C:\\Users\\herre\\Desktop\\Internship\\Results\\Exp1_Results") 
 
-data_viable <- subset(data_viable, c(check2 == TRUE & check3 == TRUE & check4 == TRUE))
+# Loading data
 
+data_full <- read.csv(file="Exp1_data_full.csv")
+colnames(data_full)[1] <- gsub('^...','',colnames(data_full)[1])
 
-# (b) Checking for irregularities in the data 
+# Add data checks
 
-# Calculating averages per participant
+data_full$check1 <- FALSE
+data_full$check2 <- FALSE
+data_full$check3 <- FALSE
+data_full$check4 <- FALSE
 
-sub <- NULL
-p_correct_tot <- NULL
-p_correct <- NULL
-difficulty <- NULL
-metacognition_mean <- NULL
-cj_mean <- NULL
-for (i in unique(data_viable$sub)){
-  table <- prop.table(table(data_viable$cor[data_viable$sub==i], data_viable$coherence[data_viable$sub==i]),2)
-  for (j in 1:3){
-    k <- switch(j, 0.1, 0.2, 0.4)
-    temp <- subset(data_viable, sub == i & coherence == k)
-    sub <- append(sub,i)
-    p_correct_tot <- append(p_correct_tot,prop.table(table(data_viable$cor[data_viable$sub==i]))[2])
-    metacognition_mean <- append(metacognition_mean,mean(temp$metacognition))
-    cj_mean <- append(cj_mean,mean(temp$cj))
-  }
-  p_correct <- append(p_correct,table[2,1])
-  difficulty <- append(difficulty,0.1)
-  p_correct <- append(p_correct,table[2,2])
-  difficulty <- append(difficulty,0.2)
-  p_correct <- append(p_correct,table[2,3])
-  difficulty <- append(difficulty,0.4)
-}
-df_participant <- data.frame(sub, p_correct, difficulty, p_correct_tot, cj_mean, metacognition_mean)
+# Loop through participants
 
-# Calculating averages per participant and condition
-
-sub <- NULL
-manipulation <- NULL
-rt_mean <- NULL
-rtconf_mean <- NULL
-cor_mean <- NULL
-cj_mean <- NULL
-metacognition_mean <- NULL
-for (i in unique(data_viable$sub)){
-  for (j in unique(data_viable$manipulation)){
-    temp <- subset(data_viable, sub == i & manipulation == j)
-    sub <- append(sub, i)
-    manipulation <- append(manipulation, j)
-    rt_mean <- append(rt_mean, mean(temp$rt))
-    rtconf_mean <- append(rtconf_mean, mean(temp$rtconf))
-    cor_mean <- append(cor_mean, mean(temp$cor))
-    cj_mean <- append(cj_mean, mean(temp$cj))
-    metacognition_mean <- append(metacognition_mean, mean(temp$metacognition))
-  }
-}  
-df_participant_manipulation <- data.frame(sub, manipulation, rt_mean, rtconf_mean, cor_mean, cj_mean, metacognition_mean)
-
-# Training blocks required
-
-sub <- NULL
-block <- NULL
-repetitions <- NULL
 for (i in unique(data_full$sub)){
-  for (j in unique(data_full$block)){
-    temp <- subset(data_full, sub == i & block == j)
-    sub <- append(sub, i)
-    block <- append(block, j)
-    if (max(temp$block_repetition) == -Inf){
-      repetitions <- append(repetitions, 0)
-    } else {
-      repetitions <- append(repetitions, max(temp$block_repetition))
+  for (j in unique(data_full$batch)){
+    
+    data_temp <- subset(data_full, data_full$batch == j & data_full$sub == i)
+    
+    # Check 1: Not finishing the experiment
+    
+    final_block <- suppressWarnings(max(subset(data_temp, select = block)))
+    final_trial <- suppressWarnings(max(subset(data_temp, 
+                                               data_temp$block == final_block, 
+                                               select = withinblocktrial)))
+    if (final_block == 15 & final_trial == 59){
+      data_full$check1[data_full$batch == j & data_full$sub == i] <- TRUE
     }
+    
+    # Check 2: Requiring more than 7 training blocks
+    
+    training_blocks <- suppressWarnings(
+      max(data_temp$block_repetition[data_temp$block == 1]) + 
+      max(data_temp$block_repetition[data_temp$block == 2]) + 
+      max(data_temp$block_repetition[data_temp$block == 3]))
+    if (training_blocks <= 7){
+      data_full$check2[data_full$batch == j & data_full$sub == i] <- TRUE
+    }
+    
+    # Check 3: Same confidence rating in more than 95% of the trials
+    
+    data_temp <- data_temp[data_temp$block > 3,] # Remove training trials
+    data_temp <- data_temp[data_temp$slow_trial == 0,]  # Remove too slow trials
+    if (!(is.na(mean(data_temp$cj)))){
+      confidence_average <- mean(data_temp$cj)
+      if (0.05 <= confidence_average & confidence_average <= 0.95){
+        data_full$check3[data_full$batch == j & data_full$sub == i] <- TRUE
+      }
+    }
+    
+    # Check 4: Performance at chance level as assessed by a binomial test
+    
+    correct_responses <- sum(data_temp$cor)
+    total_responses <- nrow(data_temp)
+    if (total_responses > 0){
+      binomial <- binom.test(correct_responses,total_responses,1/2,alternative="greater")
+      if (binomial[3] <= alpha){ 
+        data_full$check4[data_full$batch == j & data_full$sub == i] <- TRUE
+      }
+    }
+    
   }
-}  
-attempted_blocks <- data.frame(sub, block, repetitions)
-attempted_blocks_training <- subset(attempted_blocks, block==1 | block == 2 | block == 3)
+}
 
-ggplot(data=attempted_blocks,aes(fill=as.factor(block),y=repetitions,x=sub)) +  # Plot of all blocks
-  geom_bar(position = position_stack(reverse = TRUE), stat='identity') +
-  coord_flip() +
-  labs(x = "Subject number", y = "Number of repetitions", fill = "Training block")
+# What participants have non-viable data?
 
-ggplot(data=attempted_blocks_training,aes(fill=as.factor(block),y=repetitions,x=sub)) +  # Plot of training block 1 and 2
-  geom_bar(position = position_stack(reverse = TRUE), stat='identity') +
-  coord_flip() +
-  labs(x = "Subject number", y = "Number of repetitions", fill = "Training block") +
-  geom_hline(yintercept = 7, linetype = "dashed") +
-  annotate(geom="text", x=38, y=11, label="Cutoff", fontface = "bold")
+for (batch in unique(data_full$batch)){
+  print(paste0("Batch ",batch,":",collapse=""))
+  print(unique(data_full$sub[data_full$check1 == FALSE & data_full$batch == batch]))
+  print(unique(data_full$sub[data_full$check2 == FALSE & data_full$batch == batch]))
+  print(unique(data_full$sub[data_full$check3 == FALSE & data_full$batch == batch]))
+  print(unique(data_full$sub[data_full$check4 == FALSE & data_full$batch == batch]))
+}
 
-ggplot(data=attempted_blocks_training, aes(x=as.factor(block), y=repetitions)) +  # Box plot training blocks
-  geom_boxplot(width=0.4) +
-  labs(x = "Training blocks", y = "Number of repetitions")
+# Subset viable data from full data
 
-# RT manipulations (all)
+data_viable <- subset(data_full, check1 == T & check2 == T & check3 == T & 
+                        check4 == T & block > 3 & slow_trial == 0)
 
-ggplot(data = data_viable, aes(x = manipulation, y = rt)) +
-  geom_boxplot(outlier.shape = NA)  +
-  theme_bw() +
-  coord_flip() +
-  geom_jitter(width=0.1,alpha=0.2) +
-  theme(legend.position = "none") +
-  scale_x_discrete(labels = c("AccAcc" = "Accurate decision\nAccurate confidence rating", "AccFast" = "Accurate decision\nFast confidence rating", "FastFast" = "Fast decision\nFast confidence rating", "FastAcc" = "Fast decision\nAccurate confidence rating")) +
-  labs(x = "Manipulation", y = "Decision reaction time")
+# Save viable data
 
-# RT manipulations (averages)
-
-ggplot(data = df_participant_manipulation, aes(x = manipulation, y = rt_mean, group = sub)) +
-  geom_line() +
-  theme_bw() +
-  coord_flip() +
-  theme(legend.position = "none") +
-  scale_x_discrete(labels = c("AccAcc" = "Accurate decision\nAccurate confidence rating", "AccFast" = "Accurate decision\nFast confidence rating", "FastFast" = "Fast decision\nFast confidence rating", "FastAcc" = "Fast decision\nAccurate confidence rating")) +
-  labs(x = "Manipulation", y = "Mean decision reaction time")
-
-ggplot(data = df_participant_manipulation, aes(x = manipulation, y = rt_mean), shape = 5) +
-  geom_jitter(width = 0.1, shape = 16, size = 3, colour = "Blue", alpha = 0.3) +
-  stat_summary(aes(y = rt_mean,group=1), fun.y=mean, colour="Blue", size = 4, shape = 95) +
-  scale_x_discrete(labels = c("AccAcc" = "Accurate decision\nAccurate confidence rating", "AccFast" = "Accurate decision\nFast confidence rating", "FastFast" = "Fast decision\nFast confidence rating", "FastAcc" = "Fast decision\nAccurate confidence rating")) +
-  labs(x = "Manipulation", y = "Mean decision reaction time")  
-
-# Test with error bars
-
-# Test with connecting lines
-ggplot(data = df_participant_manipulation, aes(x = manipulation, y = rt_mean), shape = 5) +
-  geom_line(aes(group = sub), alpha = 0.2) +
-  geom_point(shape = 16, size = 3, colour = "Blue", alpha = 0.3) +
-  stat_summary(aes(y = rt_mean,group=1), fun.y=mean, colour="Blue", size = 4, shape = 95) +
-  scale_x_discrete(labels = c("AccAcc" = "Accurate decision\nAccurate confidence rating", "AccFast" = "Accurate decision\nFast confidence rating", "FastFast" = "Fast decision\nFast confidence rating", "FastAcc" = "Fast decision\nAccurate confidence rating")) +
-  labs(x = "Manipulation", y = "Mean decision reaction time")  
-
-# Confidence rating RT manipulations (all)
-
-ggplot(data = data_viable, aes(x = manipulation, y = rtconf)) +
-  geom_boxplot(outlier.shape = NA)  +
-  theme_bw() +
-  coord_flip() +
-  geom_jitter(width=0.1,alpha=0.2) +
-  theme(legend.position = "none") +
-  scale_x_discrete(labels = c("AccAcc" = "Accurate decision\nAccurate confidence rating", "AccFast" = "Accurate decision\nFast confidence rating", "FastFast" = "Fast decision\nFast confidence rating", "FastAcc" = "Fast decision\nAccurate confidence rating")) +
-  labs(x = "Manipulation", y = "Confidence rating reaction time")
-
-# Confidence rating RT manipulations (averages)
-
-ggplot(data = df_participant_manipulation, aes(x = manipulation, y = rtconf_mean, group = sub)) +
-  geom_line() +
-  theme_bw() +
-  coord_flip() +
-  theme(legend.position = "none") +
-  scale_x_discrete(labels = c("AccAcc" = "Accurate decision\nAccurate confidence rating", "AccFast" = "Accurate decision\nFast confidence rating", "FastFast" = "Fast decision\nFast confidence rating", "FastAcc" = "Fast decision\nAccurate confidence rating")) +
-  labs(x = "Manipulation", y = "Mean confidence rating reaction time")
-
-ggplot(data = df_participant_manipulation, aes(x = manipulation, y = rtconf_mean), shape = 5) +
-  geom_jitter(width = 0.1, shape = 16, size = 3, colour = "Blue", alpha = 0.3) +
-  stat_summary(aes(y = rtconf_mean,group=1), fun.y=mean, colour="Blue", size = 4, shape = 95) +
-  scale_x_discrete(labels = c("AccAcc" = "Accurate decision\nAccurate confidence rating", "AccFast" = "Accurate decision\nFast confidence rating", "FastFast" = "Fast decision\nFast confidence rating", "FastAcc" = "Fast decision\nAccurate confidence rating")) +
-  labs(x = "Manipulation", y = "Mean confidence rating reaction time")
-  
-# Accuracy plots
-
-ggplot(data = df_participant, aes(x = as.factor(difficulty), y = p_correct)) +
-  geom_boxplot() +
-  labs(x = "Coherence level", y = "Percentage correct responses")
-
-plot(df_participant$sub, df_participant$p_correct_tot, pch = 19, xlab = "Subject number", ylab = "Percentage correct responses")
-plot(df_participant$p_correct_tot, df_participant$p_correct, col = sub, pch = 19, xlab = "Total percentage correct responses", ylab = "Percentage correct responses for each coherence level")
-
-ggplot(data = df_participant, aes(x = as.factor(difficulty), y = p_correct), shape = 5) +
-  geom_jitter(width = 0.1, shape = 16, size = 3, colour = "Blue", alpha = 0.3) +
-  stat_summary(aes(y = p_correct, group=1), fun.y=mean, colour="Blue", size = 4, shape = 95) +
-  scale_x_discrete(labels = c("AccAcc" = "Accurate decision\nAccurate confidence rating", "AccFast" = "Accurate decision\nFast confidence rating", "FastFast" = "Fast decision\nFast confidence rating", "FastAcc" = "Fast decision\nAccurate confidence rating")) +
-  labs(x = "Coherence", y = "Mean accuracy") 
-
-ggplot(data = df_participant_manipulation, aes(x = manipulation, y = cor_mean), shape = 5) +
-  geom_jitter(width = 0.1, shape = 16, size = 3, colour = "Blue", alpha = 0.3) +
-  stat_summary(aes(y = cor_mean, group=1), fun.y=mean, colour="Blue", size = 4, shape = 95) +
-  scale_x_discrete(labels = c("AccAcc" = "Accurate decision\nAccurate confidence rating", "AccFast" = "Accurate decision\nFast confidence rating", "FastFast" = "Fast decision\nFast confidence rating", "FastAcc" = "Fast decision\nAccurate confidence rating")) +
-  labs(x = "Manipulation", y = "Mean accuracy")
-
-# Confidence rating plots
-
-ggplot(data = df_participant, aes(x = as.factor(difficulty), y = cj_mean), shape = 5) +
-  geom_jitter(width = 0.1, shape = 16, size = 3, colour = "Blue", alpha = 0.3) +
-  stat_summary(aes(y = cj_mean, group=1), fun.y=mean, colour="Blue", size = 4, shape = 95) +
-  scale_x_discrete(labels = c("AccAcc" = "Accurate decision\nAccurate confidence rating", "AccFast" = "Accurate decision\nFast confidence rating", "FastFast" = "Fast decision\nFast confidence rating", "FastAcc" = "Fast decision\nAccurate confidence rating")) +
-  labs(x = "Coherence", y = "Mean confidence rating") 
-
-ggplot(data = df_participant_manipulation, aes(x = manipulation, y = cj_mean), shape = 5) +
-  geom_jitter(width = 0.1, shape = 16, size = 3, colour = "Blue", alpha = 0.3) +
-  stat_summary(aes(y = cj_mean, group=1), fun.y=mean, colour="Blue", size = 4, shape = 95) +
-  scale_x_discrete(labels = c("AccAcc" = "Accurate decision\nAccurate confidence rating", "AccFast" = "Accurate decision\nFast confidence rating", "FastFast" = "Fast decision\nFast confidence rating", "FastAcc" = "Fast decision\nAccurate confidence rating")) +
-  labs(x = "Manipulation", y = "Mean confidence rating")
-
-ggplot(data = df_participant, aes(x = as.factor(difficulty), y = metacognition_mean), shape = 5) +
-  geom_jitter(width = 0.1, shape = 16, size = 3, colour = "Blue", alpha = 0.3) +
-  stat_summary(aes(y = metacognition_mean, group=1), fun.y=mean, colour="Blue", size = 4, shape = 95) +
-  scale_x_discrete(labels = c("AccAcc" = "Accurate decision\nAccurate confidence rating", "AccFast" = "Accurate decision\nFast confidence rating", "FastFast" = "Fast decision\nFast confidence rating", "FastAcc" = "Fast decision\nAccurate confidence rating")) +
-  labs(x = "Coherence", y = "Mean confidence rating accuracy")
-
-ggplot(data = df_participant_manipulation, aes(x = manipulation, y = metacognition_mean), shape = 5) +
-  geom_jitter(width = 0.1, shape = 16, size = 3, colour = "Blue", alpha = 0.3) +
-  stat_summary(aes(y = metacognition_mean, group=1), fun.y=mean, colour="Blue", size = 4, shape = 95) +
-  scale_x_discrete(labels = c("AccAcc" = "Accurate decision\nAccurate confidence rating", "AccFast" = "Accurate decision\nFast confidence rating", "FastFast" = "Fast decision\nFast confidence rating", "FastAcc" = "Fast decision\nAccurate confidence rating")) +
-  labs(x = "Manipulation", y = "Mean confidence rating accuracy")
-
-
-# RT histograms over all participants 
-
-# Necessary data manipulations
-data_viable$Response <- as.factor(data_viable$cor)  
-data_viable$Condition <- as.factor(data_viable$manipulation) 
-data_viable$rt_manipulation <- fct_collapse(data_viable$Condition, rt_fast = c("FastFast","FastAcc"), rt_slow = c("AccFast", "AccAcc"))
-data_viable$rtconf_manipulation <- fct_collapse(data_viable$Condition, rtconf_fast = c("FastFast","AccFast"), rtconf_slow = c("FastAcc", "AccAcc"))
-
-# RT of correct versus wrong response
-ggplot(data = data_viable, aes(x = rt, color = Response, fill = Response)) +
-  geom_histogram(alpha=0.5, position= "identity", bins = 28) +
-  scale_color_manual(labels = c("Correct", "Wrong"), values=c("#C0392B", "#27AE60")) +
-  scale_fill_manual(labels = c("Correct", "Wrong"), values=c("#C0392B", "#27AE60")) +
-  xlab("Reaction time") +
-  ylab("Count")
-
-# Confidence RT of correct versus wrong response
-ggplot(data = data_viable, aes(x = rtconf, color = Response, fill = Response)) +
-  geom_histogram(alpha=0.5, position= "identity", bins = 28) +
-  xlim(0, 5) +
-  scale_color_manual(labels = c("Correct", "Wrong"), values=c("#C0392B", "#27AE60")) +
-  scale_fill_manual(labels = c("Correct", "Wrong"), values=c("#C0392B", "#27AE60")) +
-  xlab("Confidence rating reaction time") +
-  ylab("Count")
-
-# RT of fast versus accurate decision manipulation
-ggplot(data = data_viable, aes(x = rt, color = rt_manipulation, fill = rt_manipulation)) +
-  geom_histogram(alpha=0.5, position= "identity", bins = 28) +
-  scale_color_manual(labels = c("Accurate", "Fast"), values=c("#F39C12", "#1F618D")) +
-  scale_fill_manual(labels = c("Accurate", "Fast"), values=c("#F39C12", "#1F618D")) +
-  xlab("Reaction time") +
-  ylab("Count")
-
-# Confidence RT of fast versus accurate confidence rating manipulation
-ggplot(data = data_viable, aes(x = rtconf, color = rtconf_manipulation, fill = rtconf_manipulation)) +
-  geom_histogram(alpha=0.5, position= "identity", bins = 100) +
-  xlim(0, 5) +
-  scale_color_manual(labels = c("Accurate", "Fast"), values=c("#F39C12", "#1F618D")) +
-  scale_fill_manual(labels = c("Accurate", "Fast"), values=c("#F39C12", "#1F618D")) +
-  xlab("Confidence rating reaction time") +
-  ylab("Count")
-
-# mean graphs
-# standard error (sd gecontroleerd voor pp)
-# pp verbinden met lijn
-
-# zelfde bij confidence
-
-# accuraatheid per conditie mean plot
-# confidence mena per conditie
-
-# coherence distance change
+write.csv(data_viable,"Exp1_data_viable.csv",row.names=FALSE)

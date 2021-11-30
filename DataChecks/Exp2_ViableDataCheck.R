@@ -1,6 +1,6 @@
 # November 2021
-# Script checks for (a) viability of the data (as described in preregistration 
-# experiment 2) and (b) irregularities in data of experiment 2
+# Script checks for (a) viability (as described in preregistration experiment 2)
+# and (b) irregularities in the data of experiment 2
 
 
 
@@ -11,17 +11,6 @@ alpha <- 0.05  # Significance level
 # Setting working directory
 
 setwd("C:\\Users\\herre\\Desktop\\Internship\\Results\\Exp2_Results") 
-
-# Loading required packages
-
-library(ggplot2)
-library(forcats)
-
-
-
-# (a) Checking viability of the data
-# See preregistration experiment 2 for more information
-
 
 # Loading data
 
@@ -85,16 +74,18 @@ for (i in unique(data_full$sub)){
   }
 }
 
+# What participants have non-viable data?
+
 unique(data_full$sub[data_full$check1 == FALSE])
 unique(data_full$sub[data_full$check2 == FALSE])
 unique(data_full$sub[data_full$check3 == FALSE])
 unique(data_full$sub[data_full$check4 == FALSE])
 
+# Subset viable data from full data
+
 data_viable <- subset(data_full, check1 == T & check2 == T & check3 == T & 
                                  check4 == T & block > 3 & slow_trial == 0)
 
+# Save viable data
 
-
-
-        
-
+write.csv(data_viable,"Exp2_data_viable.csv",row.names=FALSE)

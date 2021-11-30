@@ -76,10 +76,13 @@ for (i in unique(data_full$sub)){
 
 # What participants have non-viable data?
 
-unique(data_full$sub[data_full$check1 == FALSE])
-unique(data_full$sub[data_full$check2 == FALSE])
-unique(data_full$sub[data_full$check3 == FALSE])
-unique(data_full$sub[data_full$check4 == FALSE])
+for (batch in unique(data_full$batch)){
+  print(paste0("Batch ",batch,":",collapse=""))
+  print(unique(data_full$sub[data_full$check1 == FALSE & data_full$batch == batch]))
+  print(unique(data_full$sub[data_full$check2 == FALSE & data_full$batch == batch]))
+  print(unique(data_full$sub[data_full$check3 == FALSE & data_full$batch == batch]))
+  print(unique(data_full$sub[data_full$check4 == FALSE & data_full$batch == batch]))
+}
 
 # Subset viable data from full data
 

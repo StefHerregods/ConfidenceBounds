@@ -71,30 +71,30 @@ for (i in unique(data_full$sub)){
       data_full$check3[data_full$batch == j & data_full$sub == i] <- TRUE
     }
     
-  }
-}
-
-
-
-
-
-
-        
-        # Step 4: Performance at chance level as assessed by a binomial test
-        
-        correct_responses <- sum(data_temp$cor)
-        total_responses <- nrow(data_temp)
-        binomial <- binom.test(correct_responses,total_responses,1/2,alternative="greater")
-        if (binomial[3] <= alpha){ # is this correct?
-          data_temp$check4 <- TRUE
-        }
-        data_viable <- rbind(data_viable,data_temp) 
-      } 
+    # Check 4: Performance at chance level as assessed by a binomial test
+    
+    correct_responses <- sum(data_temp$cor)
+    total_responses <- nrow(data_temp)
+    if (total_responses > 0){
+      binomial <- binom.test(correct_responses,total_responses,1/2,alternative="greater")
+      if (binomial[3] <= alpha){ 
+        data_full$check4[data_full$batch == j & data_full$sub == i] <- TRUE
+      }
     }
+    
   }
 }
-unique(data_viable$sub[data_viable$check2 == FALSE])
-unique(data_viable$sub[data_viable$check3 == FALSE])
-unique(data_viable$sub[data_viable$check4 == FALSE])
 
-data_viable <- subset(data_viable, c(check2 == TRUE & check3 == TRUE & check4 == TRUE))
+unique(data_full$sub[data_full$check1 == FALSE])
+unique(data_full$sub[data_full$check2 == FALSE])
+unique(data_full$sub[data_full$check3 == FALSE])
+unique(data_full$sub[data_full$check4 == FALSE])
+
+data_viable <- subset(data_full, check1 == T & check2 == T & check3 == T & 
+                                 check4 == T & block > 3 & slow_trial == 0)
+
+
+
+
+        
+

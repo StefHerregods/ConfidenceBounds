@@ -137,7 +137,6 @@ confidence_Accurate = vis.TextStim(win, text='Think CAREFULLY about your confide
 # Warning label
 warning = vis.TextStim(win, text='Too slow... Please respond faster', pos=(0, 0), height=.07, color='red')
 
-
 # Confidence labels, counterbalance the order between participants
 if confidence_labels == 0:
     cj_labels = vis.ImageStim(win,
@@ -163,7 +162,7 @@ cj_keys = ['1', '2', '3', '8', '9', '0', 'escape']
 DotMotion = vis.DotStim(win, units='pix', nDots=120, fieldShape='circle', dotSize=4, color='white', speed=1,
                         signalDots='same', noiseDots='direction', dotLife=5)
 
-# Initialize variable
+# Initialize variables
 ACC = 0
 n_manipulations = 0
 

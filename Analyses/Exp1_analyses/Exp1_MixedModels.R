@@ -3,6 +3,8 @@
 # (c) of experiment 1.
 
 
+# Q: add confidence manipulation as a factor?
+
 # Activating packages
 
 library(lme4)

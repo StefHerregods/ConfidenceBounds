@@ -155,4 +155,47 @@ ggplot(data = manipulation_mean, aes(x = manipulation, y = cj), shape = 5) +
   scale_x_discrete(labels = c("AccAcc" = "Accurate decision\nAccurate confidence rating", "AccFast" = "Accurate decision\nFast confidence rating", "FastFast" = "Fast decision\nFast confidence rating", "FastAcc" = "Fast decision\nAccurate confidence rating")) +
   labs(x = "Manipulation", y = "Mean confidence rating")
 
+# RT histograms over all participants 
+
+# Necessary data manipulations
+data_viable$Response <- as.factor(data_viable$cor)  
+data_viable$Condition <- as.factor(data_viable$manipulation) 
+data_viable$rt_manipulation <- fct_collapse(data_viable$Condition, rt_fast = c("FastFast","FastAcc"), rt_slow = c("AccFast", "AccAcc"))
+data_viable$rtconf_manipulation <- fct_collapse(data_viable$Condition, rtconf_fast = c("FastFast","AccFast"), rtconf_slow = c("FastAcc", "AccAcc"))
+
+# RT of correct versus wrong response
+ggplot(data = data_viable, aes(x = rt, color = Response, fill = Response)) +
+  geom_histogram(alpha=0.5, position= "identity", bins = 28) +
+  scale_color_manual(labels = c("Correct", "Wrong"), values=c("#C0392B", "#27AE60")) +
+  scale_fill_manual(labels = c("Correct", "Wrong"), values=c("#C0392B", "#27AE60")) +
+  xlab("Reaction time") +
+  ylab("Count")
+
+# Confidence RT of correct versus wrong response
+ggplot(data = data_viable, aes(x = rtconf, color = Response, fill = Response)) +
+  geom_histogram(alpha=0.5, position= "identity", bins = 28) +
+  xlim(0, 5) +
+  scale_color_manual(labels = c("Correct", "Wrong"), values=c("#C0392B", "#27AE60")) +
+  scale_fill_manual(labels = c("Correct", "Wrong"), values=c("#C0392B", "#27AE60")) +
+  xlab("Confidence rating reaction time") +
+  ylab("Count")
+
+# RT of fast versus accurate decision manipulation
+ggplot(data = data_viable, aes(x = rt, color = rt_manipulation, fill = rt_manipulation)) +
+  geom_histogram(alpha=0.5, position= "identity", bins = 28) +
+  scale_color_manual(labels = c("Accurate", "Fast"), values=c("#F39C12", "#1F618D")) +
+  scale_fill_manual(labels = c("Accurate", "Fast"), values=c("#F39C12", "#1F618D")) +
+  xlab("Reaction time") +
+  ylab("Count")
+
+# Confidence RT of fast versus accurate confidence rating manipulation
+ggplot(data = data_viable, aes(x = rtconf, color = rtconf_manipulation, fill = rtconf_manipulation)) +
+  geom_histogram(alpha=0.5, position= "identity", bins = 100) +
+  xlim(0, 5) +
+  scale_color_manual(labels = c("Accurate", "Fast"), values=c("#F39C12", "#1F618D")) +
+  scale_fill_manual(labels = c("Accurate", "Fast"), values=c("#F39C12", "#1F618D")) +
+  xlab("Confidence rating reaction time") +
+  ylab("Count")
+
+
 

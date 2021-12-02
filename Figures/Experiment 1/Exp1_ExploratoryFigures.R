@@ -146,6 +146,20 @@ ggplot(data = manipulation_mean, aes(x = manipulation, y = cj), shape = 5) +
   scale_x_discrete(labels = c("AccAcc" = "Accurate decision\nAccurate confidence rating", "AccFast" = "Accurate decision\nFast confidence rating", "FastFast" = "Fast decision\nFast confidence rating", "FastAcc" = "Fast decision\nAccurate confidence rating")) +
   labs(x = "Manipulation", y = "Mean confidence rating")
 
+ggplot(data = coherence_mean, aes(x = as.factor(coherence), y = metacognition), shape = 5) +
+  geom_line(aes(group = sub), alpha = 0.2) +
+  geom_point(shape = 16, size = 3, colour = "Blue", alpha = 0.3) +  stat_summary(aes(y = cj, group = 1), fun = mean, colour="Blue", size = 4, shape = 95) +
+  stat_summary(aes(y = metacognition, group=1), fun = mean, colour = "Blue", size = 4, shape = 95) +
+  scale_x_discrete(labels = c("AccAcc" = "Accurate decision\nAccurate confidence rating", "AccFast" = "Accurate decision\nFast confidence rating", "FastFast" = "Fast decision\nFast confidence rating", "FastAcc" = "Fast decision\nAccurate confidence rating")) +
+  labs(x = "Coherence", y = "Mean confidence rating accuracy")
+
+ggplot(data = manipulation_mean, aes(x = manipulation, y = metacognition), shape = 5) +
+  geom_line(aes(group = sub), alpha = 0.2) +
+  geom_point(shape = 16, size = 3, colour = "Blue", alpha = 0.3) +  stat_summary(aes(y = cj, group = 1), fun = mean, colour="Blue", size = 4, shape = 95) +
+  stat_summary(aes(y = metacognition, group=1), fun = mean, colour = "Blue", size = 4, shape = 95) +
+  scale_x_discrete(labels = c("AccAcc" = "Accurate decision\nAccurate confidence rating", "AccFast" = "Accurate decision\nFast confidence rating", "FastFast" = "Fast decision\nFast confidence rating", "FastAcc" = "Fast decision\nAccurate confidence rating")) +
+  labs(x = "Manipulation", y = "Mean confidence rating accuracy")
+
 # RT histograms over all participants 
 
 # Necessary data manipulations

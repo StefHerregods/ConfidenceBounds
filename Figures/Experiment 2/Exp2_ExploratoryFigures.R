@@ -110,7 +110,7 @@ ggplot(data = data_viable, aes(x = manipulation, y = rtconf)) +
   scale_x_discrete(labels = c("AccAcc" = "Accurate decision\nAccurate confidence rating", "AccFast" = "Accurate decision\nFast confidence rating", "FastFast" = "Fast decision\nFast confidence rating", "FastAcc" = "Fast decision\nAccurate confidence rating")) +
   labs(x = "Manipulation", y = "Confidence rating reaction time")
 
-# confidence RT manipulation (averages)
+# confidence rating RT manipulation (averages)
 
 ggplot(data = manipulation_mean, aes(x = manipulation, y = rtconf), shape = 5) +
   geom_line(aes(group = sub), alpha = 0.2) +
@@ -122,15 +122,37 @@ ggplot(data = manipulation_mean, aes(x = manipulation, y = rtconf), shape = 5) +
 # Accuracy plots
 
 ggplot(data = coherence_mean, aes(x = as.factor(coherence), y = cor), shape = 5) +
-  geom_jitter(width = 0.1, shape = 16, size = 3, colour = "Blue", alpha = 0.3) +
+  geom_line(aes(group = sub), alpha = 0.2) +
+  geom_point(shape = 16, size = 3, colour = "Blue", alpha = 0.3) +
   stat_summary(aes(y = cor, group = 1), fun = mean, colour = "Blue", size = 4, shape = 95) +
-  scale_x_discrete(labels = c("AccAcc" = "Accurate decision\nAccurate confidence rating", "AccFast" = "Accurate decision\nFast confidence rating", "FastFast" = "Fast decision\nFast confidence rating", "FastAcc" = "Fast decision\nAccurate confidence rating")) +
   labs(x = "Coherence", y = "Mean accuracy") 
 
 ggplot(data = manipulation_mean, aes(x = manipulation, y = cor), shape = 5) +
-  geom_jitter(width = 0.1, shape = 16, size = 3, colour = "Blue", alpha = 0.3) +
+  geom_line(aes(group = sub), alpha = 0.2) +
+  geom_point(shape = 16, size = 3, colour = "Blue", alpha = 0.3) +
   stat_summary(aes(y = cor, group = 1), fun = mean, colour="Blue", size = 4, shape = 95) +
   scale_x_discrete(labels = c("AccAcc" = "Accurate decision\nAccurate confidence rating", "AccFast" = "Accurate decision\nFast confidence rating", "FastFast" = "Fast decision\nFast confidence rating", "FastAcc" = "Fast decision\nAccurate confidence rating")) +
   labs(x = "Manipulation", y = "Mean accuracy")
+
+# Confidence rating plots
+
+# Option 1
+ggplot(data = coherence_mean, aes(x = as.factor(coherence), y = cj), shape = 5) +
+  geom_line(aes(group = sub), alpha = 0.2) +
+  geom_point(shape = 16, size = 3, colour = "Blue", alpha = 0.3) +  stat_summary(aes(y = cj, group = 1), fun = mean, colour="Blue", size = 4, shape = 95) +
+  labs(x = "Coherence", y = "Mean confidence rating") 
+
+# Option 2
+ggplot(data = coherence_mean, aes(x = coherence, y = cj), shape = 5) +
+  geom_line(aes(group = sub), alpha = 0.2) +
+  geom_point(shape = 16, size = 3, colour = "Blue", alpha = 0.3) +  stat_summary(aes(y = cj, group = 1), fun = mean, colour="Blue", size = 4, shape = 95) +
+  labs(x = "Coherence", y = "Mean confidence rating") 
+
+ggplot(data = manipulation_mean, aes(x = manipulation, y = cj), shape = 5) +
+  geom_line(aes(group = sub), alpha = 0.2) +
+  geom_point(shape = 16, size = 3, colour = "Blue", alpha = 0.3) +  stat_summary(aes(y = cj, group = 1), fun = mean, colour="Blue", size = 4, shape = 95) +
+  stat_summary(aes(y = cj, group=1), fun = mean, colour = "Blue", size = 4, shape = 95) +
+  scale_x_discrete(labels = c("AccAcc" = "Accurate decision\nAccurate confidence rating", "AccFast" = "Accurate decision\nFast confidence rating", "FastFast" = "Fast decision\nFast confidence rating", "FastAcc" = "Fast decision\nAccurate confidence rating")) +
+  labs(x = "Manipulation", y = "Mean confidence rating")
 
 

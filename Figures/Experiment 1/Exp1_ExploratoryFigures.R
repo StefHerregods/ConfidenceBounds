@@ -13,12 +13,6 @@ data_full <- read.csv(file="Exp1_data_full.csv")
 colnames(data_full)[1] <- gsub('^...','',colnames(data_full)[1])
 data_viable <- read.csv(file="Exp1_data_viable.csv")
 
-# Removing outliers
-
-data_viable <- data_viable[data_viable$block > 3,] # Remove training trials
-data_viable <- data_viable[data_viable$slow_trial == 0,]  # Remove too slow trials
-
-
 # Calculating averages per participant
 
 sub_mean <- data_viable %>%

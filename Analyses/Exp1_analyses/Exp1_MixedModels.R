@@ -3,38 +3,18 @@
 # (c) of experiment 1.
 
 
-# Q: add confidence manipulation as a factor?
-
 # Activating packages
 
 library(lme4)
 library(lmerTest)
 
+# Setting working directory
+
+setwd('C:\\Users\\herre\\Desktop\\Internship\\Results\\Exp1_Results')
 
 # Loading data
 
-setwd('C:\\Users\\herre\\OneDrive\\Bureaublad\\Internship\\Results\\Exp1_results_tot')
-df <- NULL
-for (i in 1:40){
-  file_name <- paste0("DotsTask_sub",i,".csv",collapse="")
-  if (file.exists(file_name)){
-    data_temp <- read.csv(file=file_name)
-    data_temp$subject <- i
-    df <- rbind(data_temp,df)
-  }
-}
-
-# Remove training trials
-
-df <- df[df$block > 3,] 
-
-# Remove too slow trials
-
-df <- df[df$slow_trial == 0,]
-
-# !!! Remove too slow confidence rating trials !!!
-
-df <- df[df$rtconf < 10,]
+df <- read.csv(file = "Exp1_data_viable.csv")
 
 # Separating decision and confidence rating manipulations
 

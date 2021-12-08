@@ -91,6 +91,25 @@ for (batch in unique(data_full$batch)){
 data_viable <- subset(data_full, check1 == T & check2 == T & check3 == T & 
                         check4 == T & block > 3 & slow_trial == 0)
 
+# Manual check
+
+par(mfrow=c(2,2))
+for(i in unique(data_viable$sub)){
+  tempDat <- subset(data_viable, data_viable$sub == i)
+  tempDat$response <- ifelse(tempDat$resp == "['c']", 0, 1)
+  acc_block <- with(tempDat, aggregate(cor, by = list(block = block), mean))
+  bias_block <- with(tempDat, aggregate(response, by = list(block = block), mean))
+  plot(acc_block, ylab = "Acc (.) and bias (x)", frame = F, ylim = c(0,1)); abline(h = .5, lty = 2, col = "grey")
+  points(bias_block, pch = 4)
+  plot(tempDat$rt, frame = F, main = paste('subject',i), ylab = "RT", ylim = c(0,5), col = c('black','grey','grey','black')[as.factor(tempDat$manipulation)])
+  cj_block <- with(tempDat, aggregate(cj, by = list(block = block), mean))
+  plot(cj_block, frame = F, ylab = "confidence judgement", ylim = c(0,1)); abline(h = .5, lty = 2, col = "grey")
+  plot(tempDat$rtconf, frame = F, ylab = "RT_conf", col = c('black','grey','grey','black')[as.factor(tempDat$manipulation)])
+}
+  
+
+
+
 # Save viable data
 
 write.csv(data_viable,"Exp1_data_viable.csv",row.names=FALSE)

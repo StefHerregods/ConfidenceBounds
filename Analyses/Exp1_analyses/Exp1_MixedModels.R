@@ -2,6 +2,14 @@
 # Script contains the mixed models code used to check hypothesis (a), (b) and 
 # (c) of experiment 1.
 
+# Strategy:
+# 1 - base model
+# 2 - 
+# 3 - add random slopes
+
+
+### Data preparation ###
+
 
 # Activating packages
 
@@ -32,20 +40,15 @@ for (i in 1:nrow(df)){
 }
 
 
-# Hypothesis (a)
-# Faster decision reaction times and lower accuracy when participants are 
-# asked to respond quickly (vs accurately), 
-# without an effect on confidence reaction times and confidence ratings.
+### Effect on decision RT ###
 
 
-# Exploration
+RT_base <- lmer(rt ~ 1 + rt_manipulation * rtconf_manipulation * coherence + (1|sub), data = df)
 
-# Random slopes necessary?
-df %>%
-  ggplot(aes(x = rt_manipulation, y = rt)) +
-  geom_point() +
-  geom_point(stat = "summary", fun = "mean", colour = 'red', size = 3) +
-  facet_wrap(vars(sub))
+
+
+
+
 
 # Effect on decision reaction time
 

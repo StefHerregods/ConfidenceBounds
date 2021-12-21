@@ -12,7 +12,7 @@ data_full <- NULL
 
 # Loop through all batch folders
 
-for (j in 1:9){
+for (j in 1:20){
   
   # Loop through all files to be added 
   

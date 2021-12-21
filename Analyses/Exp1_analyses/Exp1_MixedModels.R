@@ -8,6 +8,12 @@
 # 3 - add random slopes
 
 
+# Questions:
+# normalize RT? log of rt?
+# GLM
+# REML = FALSE or TRUE
+# logistic for binary outcome variables
+
 ### Data preparation ###
 
 
@@ -15,6 +21,7 @@
 
 library(lme4)
 library(lmerTest)
+library(car)
 
 # Setting working directory
 
@@ -26,7 +33,7 @@ df <- read.csv(file = "Exp1_data_viable.csv")
 
 # Separating decision and confidence rating manipulations
 
-for (i in 1:nrow(df)){
+for (i in 1:nrow(df)){                                  # 1: NA, 2: give value # or ifelse()
   if (df$manipulation[i] %in% c("AccAcc", "AccFast")){
     df$rt_manipulation[i] <- 1  # 1 for accurate decision-making
   } else {
@@ -43,9 +50,61 @@ for (i in 1:nrow(df)){
 ### Effect on decision RT ###
 
 
-RT_base <- lmer(rt ~ 1 + rt_manipulation * rtconf_manipulation * coherence + (1|sub), data = df)
+
+RT_1 <- lmer(rt ~ 1 + rt_manipulation * rtconf_manipulation * coherence + (1|sub), data = subset(df, cor == 1))
+RT_2 <- lmer(rt.log ~ 1 + rt_manipulation * rtconf_manipulation * coherence + (1 + rt_manipulation + rtconf_manipulation + coherence|sub), data = subset(df, cor == 1))
 
 
+Anova(RT_1) # binary variables (look for literature)
+anova(RT_1) # continuous variables (look for literature)
+anova(RT_base, RT_1)
+
+shapiro.test(RT_2)
+
+
+
+
+
+
+
+
+
+
+
+RT_2 <- lmer(rt ~ 1 + rt_manipulation * rtconf_manipulation * coherence + (1|sub), data = df)
+
+RT_base <- lmer(rt ~ 1 + rt_manipulation * rtconf_manipulation * coherence + (1 + rt_manipulation + rtconf_manipulation + coherence|sub), data = df)
+RT_base <- lmer(rt.log ~ 1 + rt_manipulation * rtconf_manipulation * coherence + (1 + rt_manipulation + rtconf_manipulation + coherence|sub), data = df)
+RT_base <- lmer(rt.scaled ~ 1 + rt_manipulation * rtconf_manipulation * coherence + (1 + rt_manipulation + rtconf_manipulation + coherence|sub), data = df)
+
+RT_base <- glm(rt ~ 1 + rt_manipulation * rtconf_manipulation * coherence + (1 + rt_manipulation * rtconf_manipulation * coherence|sub), family=Gamma	(link = "inverse"), data=df)
+
+
+df$cor.factor <- as.factor(df$cor)
+RT_base <- glm(cor.factor ~ 1 + rt_manipulation * rtconf_manipulation * coherence + (1 + rt_manipulation + rtconf_manipulation + coherence|sub), family = binomial	(link = "logit"), data = df)
+
+
+
+
+#(1) The linearity assumption
+# & (2) The homogeneity assumption; use Levene test to check this out!
+Plot.Model <- plot(RT_2) #creates a fitted vs residual plot
+Plot.Model ## you want an even spread around zero.
+## for the homogeneity assumption you can test it with:
+leveneTest(residuals(RT_2) ~ df$sub)
+
+leveneTest(model1resid ~ df$sub)
+
+#(3) The residuals should be normally distributed
+
+model1resid <- resid(RT_2)
+model1fit <- fitted(RT_2)
+qqnorm(model1resid)
+qqline(model1resid)
+
+# you can log transform it or look for an appropriate model
+df$rt.log <- log(df$rt)
+df$rt.scaled <- scale(df$rt)
 
 
 

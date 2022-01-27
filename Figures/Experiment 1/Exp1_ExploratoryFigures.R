@@ -2,6 +2,11 @@
 # Script contains exploratory graphs
 # Used to check for irregularities in the data
 
+# Load packages
+
+library(ggplot2)
+library(dplyr)
+library(forcats)
 
 # Setting working directory
 
@@ -110,7 +115,13 @@ ggplot(data = coherence_mean, aes(x = as.factor(coherence), y = cor), shape = 5)
   geom_line(aes(group = sub), alpha = 0.2) +
   geom_point(shape = 16, size = 3, colour = "Blue", alpha = 0.3) +
   stat_summary(aes(y = cor, group = 1), fun = mean, colour = "Blue", size = 4, shape = 95) +
-  labs(x = "Coherence", y = "Mean accuracy") 
+  labs(x = "Coherence", y = "Mean accuracy")
+
+ggplot(data = coherence_mean, aes(x = coherence, y = cor), shape = 5) +
+  geom_line(aes(group = sub), alpha = 0.2) +
+  geom_point(shape = 16, size = 3, colour = "Blue", alpha = 0.3) +
+  stat_summary(aes(y = cor, group = 1), fun = mean, colour = "Blue", size = 4, shape = 95) +
+  labs(x = "Coherence", y = "Mean accuracy")
 
 ggplot(data = manipulation_mean, aes(x = manipulation, y = cor), shape = 5) +
   geom_line(aes(group = sub), alpha = 0.2) +
@@ -194,7 +205,8 @@ ggplot(data = data_viable, aes(x = rtconf, color = rtconf_manipulation, fill = r
   scale_color_manual(labels = c("Accurate", "Fast"), values=c("#F39C12", "#1F618D")) +
   scale_fill_manual(labels = c("Accurate", "Fast"), values=c("#F39C12", "#1F618D")) +
   xlab("Confidence rating reaction time") +
-  ylab("Count")
+  ylab("Count") +
+  theme_minimal()
 
 
 

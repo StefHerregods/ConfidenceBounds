@@ -1,27 +1,21 @@
 # Internship project: ConfidenceBounds (2021-2022)
-# Script contains the mixed models code used to check hypothesis (a), (b) and 
+# Script contains the mixed effect models code used to check hypothesis (a), (b) and 
 # (c) of experiment 1.
-
-# Strategy:
-# 1 - base model
-# 2 - 
-# 3 - add random slopes
-
 
 # Questions:
 # normalize RT? log of rt?
-# GLM
 # REML = FALSE or TRUE
 # logistic for binary outcome variables
-
-### Data preparation ###
+# coherence as 1, 2, 3?
 
 
 # Activating packages
 
 library(lme4)
 library(lmerTest)
-library(car)
+library(dplyr)
+library(ggplot2)
+library(grid)
 
 # Setting working directory
 
@@ -31,28 +25,75 @@ setwd('C:\\Users\\herre\\Desktop\\Internship\\Results\\Exp1_Results')
 
 df <- read.csv(file = "Exp1_data_viable.csv")
 
-# Separating decision and confidence rating manipulations
 
-for (i in 1:nrow(df)){                                  # 1: NA, 2: give value # or ifelse()
-  if (df$manipulation[i] %in% c("AccAcc", "AccFast")){
-    df$rt_manipulation[i] <- 1  # 1 for accurate decision-making
-  } else {
-    df$rt_manipulation[i] <- 0  # 2 for fast decision-making
-  }
-  if (df$manipulation[i] %in% c("AccAcc", "FastAcc")){
-    df$rtconf_manipulation[i] <- 1  # 1 for accurate confidence ratings
-  } else {
-    df$rtconf_manipulation[i] <- 0  # 2 for fast confidence ratings
-  }  
-}
+### Effect of manipulations on decision RT ###
 
 
-### Effect on decision RT ###
+# Only use data with correct decisions
+
+df_correct <- subset(df, cor == 1)
+
+# Are random slopes necessary?
+
+plot1 <- ggplot(df_correct, aes(x = as.factor(rt_manipulation), y = rt, group = sub)) +
+  stat_smooth(geom='line', alpha=1, se=FALSE, method = 'lm') +
+  theme_minimal()
+plot2 <- ggplot(df_correct, aes(x = as.factor(rtconf_manipulation), y = rt, group = sub)) +
+  stat_smooth(geom='line', alpha=1, se=FALSE, method = 'lm') +
+  theme_minimal()
+plot3 <- ggplot(df_correct, aes(x = coherence, y = rt, group = sub)) +
+  stat_smooth(geom='line', alpha=1, se=FALSE, method = 'lm') +
+  theme_minimal()
+
+grid.newpage()
+pushViewport(viewport(layout=grid.layout(1,3)))
+vplayout <- function(x,y){
+  viewport(layout.pos.row=x, layout.pos.col=y)}
+print(plot1, vp=vplayout(1,1)); print(plot2, vp=vplayout(1,2)); print(plot3, vp=vplayout(1,3))
+
+
+# Model comparisons (through likelihood ratio tests)
+
+RT_1 <- lmer(rt ~ 1 + rt_manipulation * rtconf_manipulation * coherence + (1|sub), data = df_correct)
+RT_2 <- lmer(rt ~ 1 + rt_manipulation * rtconf_manipulation * coherence + (1 + rt_manipulation|sub), data = df_correct)
+RT_3 <- lmer(rt ~ 1 + rt_manipulation * rtconf_manipulation * coherence + (1 + rtconf_manipulation|sub), data = df_correct)
+RT_4 <- lmer(rt ~ 1 + rt_manipulation * rtconf_manipulation * coherence + (1 + coherence|sub), data = df_correct)
+
+anova(RT_1, RT_2) # significant
+anova(RT_1, RT_3) # significant
+anova(RT_1, RT_4) # significant
+
+RT_5 <- lmer(rt ~ 1 + rt_manipulation * rtconf_manipulation * coherence + (1 + rt_manipulation + rtconf_manipulation|sub), data = df_correct)
+
+anova(RT_2, RT_5) # significant
+anova(RT_3, RT_5) # significant
+
+RT_6 <- lmer(rt ~ 1 + rt_manipulation * rtconf_manipulation * coherence + (1 + rtconf_manipulation + coherence|sub), data = df_correct)
+
+anova(RT_3, RT_6) # significant
+anova(RT_4, RT_6) # significant
+
+RT_7 <- lmer(rt ~ 1 + rt_manipulation * rtconf_manipulation * coherence + (1 + coherence + rt_manipulation|sub), data = df_correct)
+
+anova(RT_4, RT_7) # significant
+anova(RT_2, RT_7) # significant
+
+RT_8 <- lmer(rt ~ 1 + rt_manipulation * rtconf_manipulation * coherence + (1 + coherence + rt_manipulation + rtconf_manipulation|sub), data = df_correct)
+
+anova(RT_5, RT_8) # significant
+anova(RT_5, RT_8) # significant
+anova(RT_5, RT_8) # significant
+
+
+# Any model including all 3 random slopes + random slop for an interaction fails to converge
+# The model below converges, but does not include coherence
+RT_9 <- lmer(rt ~ 1 + rt_manipulation * rtconf_manipulation * coherence + (1 + rt_manipulation * rtconf_manipulation|sub), data = df_correct)
+
+anova(RT_8, RT_9)   # Equally complex model -> no p-value (0 degrees of freedom)
+                    # RT_8 better AIC (lower), BIC (lower), log-likelihood (higher)
 
 
 
-RT_1 <- lmer(rt ~ 1 + rt_manipulation * rtconf_manipulation * coherence + (1|sub), data = subset(df, cor == 1))
-RT_2 <- lmer(rt.log ~ 1 + rt_manipulation * rtconf_manipulation * coherence + (1 + rt_manipulation + rtconf_manipulation + coherence|sub), data = subset(df, cor == 1))
 
 
 Anova(RT_1) # binary variables (look for literature)
@@ -63,7 +104,32 @@ shapiro.test(RT_2)
 
 
 
+### Effect of manipulations on confidence rating RT ###
 
+# Which data set to use?
+
+# Are random slopes necessary? !!!based on correct data only?!
+
+plot1 <- ggplot(df_correct, aes(x = as.factor(rt_manipulation), y = rtconf, group = sub)) +
+  stat_smooth(geom='line', alpha=1, se=FALSE, method = 'lm') +
+  theme_minimal()
+plot2 <- ggplot(df_correct, aes(x = as.factor(rtconf_manipulation), y = rtconf, group = sub)) +
+  stat_smooth(geom='line', alpha=1, se=FALSE, method = 'lm') +
+  theme_minimal()
+plot3 <- ggplot(df_correct, aes(x = coherence, y = rtconf, group = sub)) +
+  stat_smooth(geom='line', alpha=1, se=FALSE, method = 'lm') +
+  theme_minimal()
+
+grid.newpage()
+pushViewport(viewport(layout=grid.layout(1,3)))
+vplayout <- function(x,y){
+  viewport(layout.pos.row=x, layout.pos.col=y)}
+print(plot1, vp=vplayout(1,1))
+print(plot2, vp=vplayout(1,2))
+print(plot3, vp=vplayout(1,3))
+
+
+### Effect of manipulations on ??? ###
 
 
 

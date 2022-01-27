@@ -6,7 +6,6 @@
 # normalize RT? log of rt?
 # REML = FALSE or TRUE
 # logistic for binary outcome variables
-# coherence as 1, 2, 3?
 
 
 # Activating packages
@@ -16,6 +15,7 @@ library(lmerTest)
 library(dplyr)
 library(ggplot2)
 library(grid)
+library(car)
 
 # Setting working directory
 
@@ -85,18 +85,44 @@ anova(RT_5, RT_8) # significant
 anova(RT_5, RT_8) # significant
 
 
-# Any model including all 3 random slopes + random slop for an interaction fails to converge
+# Any model including all 3 random slopes + random slope for an interaction fails to converge
 # The model below converges, but does not include coherence
 RT_9 <- lmer(rt ~ 1 + rt_manipulation * rtconf_manipulation * coherence + (1 + rt_manipulation * rtconf_manipulation|sub), data = df_correct)
 
 anova(RT_8, RT_9)   # Equally complex model -> no p-value (0 degrees of freedom)
                     # RT_8 better AIC (lower), BIC (lower), log-likelihood (higher)
 
+# Model assumptions 
+
+plot(RT_8)
+RT_8_resid <- resid(RT_8)
+RT_8_fit <- fitted(RT_8)
+qqnorm(RT_8_resid)
+qqline(RT_8_resid)
+df_temp <- data.frame(cbind(RT_8_fit, RT_8_resid))
+ggplot(df_temp, aes(x = RT_8_fit, y = RT_8_resid)) + geom_point() + geom_smooth(se = F) + geom_hline(aes(yintercept=0))
+
+# Log transform
+
+df_correct$rt_log <- log(df_correct$rt)
+
+RT_10 <- lmer(rt_log ~ 1 + rt_manipulation * rtconf_manipulation * coherence + (1 + coherence + rt_manipulation + rtconf_manipulation|sub), data = df_correct)
+
+plot(RT_10)
+RT_10_resid <- resid(RT_10)
+RT_10_fit <- fitted(RT_10)
+qqnorm(RT_10_resid)
+qqline(RT_10_resid)
+df_temp <- data.frame(cbind(RT_10_fit, RT_10_resid))
+ggplot(df_temp, aes(x = RT_10_fit, y = RT_10_resid)) + geom_point() + geom_smooth(se = F) + geom_hline(aes(yintercept=0))
 
 
 
 
-Anova(RT_1) # binary variables (look for literature)
+
+
+
+Anova(RT_10) # binary variables (look for literature)
 anova(RT_1) # continuous variables (look for literature)
 anova(RT_base, RT_1)
 

@@ -1,8 +1,14 @@
 # October 2021
 # Script checks for viability of the data as described in the preregistration of
 # experiment 1: https://doi.org/10.17605/OSF.IO/Z2UCM
+# Outliers are removed through a visual check
 
+# Loading packages
 
+library(ggplot2)
+library(ggiraph)
+library(shiny)
+library(dplyr)
 
 # Variables
 
@@ -89,7 +95,8 @@ for (batch in unique(data_full$batch)){
 # Subset viable data from full data
 
 data_viable <- subset(data_full, check1 == T & check2 == T & check3 == T & 
-                        check4 == T & block > 3 & slow_trial == 0)
+                        check4 == T & block > 3 & slow_trial == 0) 
+data_viable <- arrange(data_viable, sub)
 
 # Manual check
 
@@ -107,8 +114,9 @@ for(i in unique(data_viable$sub)){
   plot(tempDat$rtconf, frame = F, ylab = "RT_conf", col = c('black','grey','grey','black')[as.factor(tempDat$manipulation)])
 }
   
+# Remove  rtconf outliers -> cut-off at 5 seconds (based on exploratory figures + max rt is 5s)
 
-
+data_viable <-  subset(data_viable, rtconf <= 5)
 
 # Save viable data
 

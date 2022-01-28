@@ -101,6 +101,14 @@ qqnorm(RT_8_resid)
 qqline(RT_8_resid)
 df_temp <- data.frame(cbind(RT_8_fit, RT_8_resid))
 ggplot(df_temp, aes(x = RT_8_fit, y = RT_8_resid)) + geom_point() + geom_smooth(se = F) + geom_hline(aes(yintercept=0))
+# VIF
+
+library(effects)
+plot(effect('rt_manipulation:coherence',RT_8))
+data.frame(effect('rt_manipulation:coherence',RT_8))
+fixef(RT_8)
+ranef(RT_8)
+
 
 # Log transform
 

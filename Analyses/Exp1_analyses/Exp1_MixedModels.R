@@ -26,7 +26,6 @@ df$rtconf_manipulation <- ifelse(df$manipulation %in% c("AccAcc", "FastAcc"), 1,
 df$rtconf_manipulation <- as.factor(df$rtconf_manipulation)
 df$coherence <- as.factor(df$coherence)
 
-
 ### Effect of manipulations on decision RT ###
 
 
@@ -37,10 +36,10 @@ df_correct <- subset(df, cor == 1)
 # Are random slopes necessary? -> Yes (but less for coherence)
 
 plot1 <- ggplot(df_correct, aes(x = as.factor(rt_manipulation), y = rt, group = sub)) +
-  stat_smooth(geom='line', alpha=1, se=FALSE, method = 'lm') +
+  stat_smooth(geom='line', alpha=1, se=FALSE) +
   theme_minimal()
 plot2 <- ggplot(df_correct, aes(x = as.factor(rtconf_manipulation), y = rt, group = sub)) +
-  stat_smooth(geom='line', alpha=1, se=FALSE, method = 'lm') +
+  stat_smooth(geom='line', alpha=1, se=FALSE) +
   theme_minimal()
 plot3 <- ggplot(df_correct, aes(x = coherence, y = rt, group = sub)) +
   stat_smooth(geom='line', alpha=1, se=FALSE) +
@@ -157,13 +156,13 @@ ranef(RT_9)
 # Are random slopes necessary? 
 
 plot1 <- ggplot(df_correct, aes(x = as.factor(rt_manipulation), y = rtconf, group = sub)) +
-  stat_smooth(geom='line', alpha=1, se=FALSE, method = 'lm') +
+  stat_smooth(geom='line', alpha=1, se=FALSE) +
   theme_minimal()
 plot2 <- ggplot(df_correct, aes(x = as.factor(rtconf_manipulation), y = rtconf, group = sub)) +
-  stat_smooth(geom='line', alpha=1, se=FALSE, method = 'lm') +
+  stat_smooth(geom='line', alpha=1, se=FALSE) +
   theme_minimal()
 plot3 <- ggplot(df_correct, aes(x = coherence, y = rtconf, group = sub)) +
-  stat_smooth(geom='line', alpha=1, se=FALSE, method = 'lm') +
+  stat_smooth(geom='line', alpha=1, se=FALSE) +
   theme_minimal()
 
 grid.newpage()
@@ -178,8 +177,8 @@ print(plot3, vp=vplayout(1,3))
 
 RTconf_1 <- lmer(rtconf ~ 1 + rt_manipulation * rtconf_manipulation * coherence + (1|sub), data = df_correct)
 RTconf_2 <- lmer(rtconf ~ 1 + rt_manipulation * rtconf_manipulation * coherence + (1 + rt_manipulation|sub), data = df_correct)
-RTconf_3 <- lmer(rtconf ~ 1 + rt_manipulation * rtconf_manipulation * coherence + (1 + rtconf_manipulation|sub), data = df_correct)
-RTconf_4 <- lmer(rtconf ~ 1 + rt_manipulation * rtconf_manipulation * coherence + (1 + coherence|sub), data = df_correct)  # Fails to converge
+RTconf_3 <- lmer(rtconf ~ 1 + rt_manipulation * rtconf_manipulation * coherence + (1 + rtconf_manipulation|sub), data = df_correct)  # Fails to converge
+RTconf_4 <- lmer(rtconf ~ 1 + rt_manipulation * rtconf_manipulation * coherence + (1 + coherence|sub), data = df_correct)  # Singular fit
 
 anova(RT_1, RT_2)  # Significant
 anova(RT_1, RT_3)  # Significant
@@ -207,9 +206,58 @@ ggplot(df_temp, aes(x = RTconf_12_fit, y = RTconf_12_resid)) + geom_point() + ge
 
 
 
+
 ### Effect of manipulations on accuracy ###
 
 
+# Are random slopes necessary? 
+
+plot1 <- ggplot(df, aes(x = as.factor(rt_manipulation), y = cor, group = sub)) +
+  stat_smooth(geom='line', alpha=1, se=FALSE) +
+  theme_minimal()
+plot2 <- ggplot(df, aes(x = as.factor(rtconf_manipulation), y = cor, group = sub)) +
+  stat_smooth(geom='line', alpha=1, se=FALSE) +
+  theme_minimal()
+plot3 <- ggplot(df, aes(x = coherence, y = cor, group = sub)) +
+  stat_smooth(geom='line', alpha=1, se=FALSE) +
+  theme_minimal()
+
+grid.newpage()
+pushViewport(viewport(layout=grid.layout(1,3)))
+vplayout <- function(x,y){
+  viewport(layout.pos.row=x, layout.pos.col=y)}
+print(plot1, vp=vplayout(1,1))
+print(plot2, vp=vplayout(1,2))
+print(plot3, vp=vplayout(1,3))
+
+# Transform accuracy into factor
+
+df$cor <- as.factor(df$cor)
+
+# Model comparisons (through likelihood ratio tests)
+
+Cor_1 <- glmer(cor ~ 1 + rt_manipulation * rtconf_manipulation * coherence + (1|sub), data = df, family = binomial)
+Cor_2 <- glmer(cor ~ 1 + rt_manipulation * rtconf_manipulation * coherence + (1 + rt_manipulation|sub), data = df, family = binomial)
+Cor_3 <- glmer(cor ~ 1 + rt_manipulation * rtconf_manipulation * coherence + (1 + rtconf_manipulation|sub), data = df, family = binomial)  
+Cor_4 <- glmer(cor ~ 1 + rt_manipulation * rtconf_manipulation * coherence + (1 + coherence|sub), data = df, family = binomial) 
+
+anova(Cor_1, Cor_2)  # Significant
+anova(Cor_1, Cor_3)  # Not significant
+anova(Cor_1, Cor_4)  # Significant
+
+RTconf_5 <- glmer(cor ~ 1 + rt_manipulation * rtconf_manipulation * coherence + (1 + coherence + rt_manipulation|sub), data = df, family = binomial)  # Fails to converge
+
+anova(Cor_2, Cor_4)  # Significant; better BIC, AIC, log likelihood for RTconf_4
+
+# Model assumptions ????
+
+plot(Cor_4)
+Cor_4_resid <- resid(Cor_4)
+Cor_4_fit <- fitted(Cor_4)
+qqnorm(Cor_4_resid)
+qqline(Cor_4_resid)
+df_temp <- data.frame(cbind(Cor_4_fit, Cor_4_resid))
+ggplot(df_temp, aes(x = Cor_4_fit, y = Cor_4_resid)) + geom_point() + geom_smooth(se = F) + geom_hline(aes(yintercept=0))
 
 
 

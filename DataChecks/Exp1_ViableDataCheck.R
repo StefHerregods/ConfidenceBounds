@@ -1,12 +1,11 @@
 # October 2021
 # Script checks for viability of the data as described in the preregistration of
 # experiment 1: https://doi.org/10.17605/OSF.IO/Z2UCM
-# Outliers are removed through a visual check
+
 
 # Loading packages
 
 library(ggplot2)
-library(ggiraph)
 library(shiny)
 library(dplyr)
 

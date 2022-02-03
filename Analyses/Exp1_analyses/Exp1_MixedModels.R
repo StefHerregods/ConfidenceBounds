@@ -332,12 +332,12 @@ library(tidyr)
 ## Otherwise there is still some uncaptured variance, causing the errors to be dependent (predictable)
 
 # for linear mixed models you can just look at the left upper panel but with logistic regression this will look odd 
-resid_panel(m_conf_slopes) 
+resid_panel(Cor_4) 
 
 # That's why another approach is needed using binned residuals
 # If most of the dots fall within the area, then it's okay
-binnedplot(fitted(m_conf_slopes), 
-           residuals(m_conf_slopes, type = "response"), 
+binnedplot(fitted(Cor_4), 
+           residuals(Cor_4, type = "response"), 
            nclass = NULL, 
            xlab = "Expected Values", 
            ylab = "Average residual", 
@@ -351,11 +351,11 @@ binnedplot(fitted(m_conf_slopes),
 # CHECK LINEAR RELATIONSHIP LOGODDS AND PREDICTORS
 
 ## APPROACH 1
-probabilities <- predict(m_conf_slopes, type = "response")
+probabilities <- predict(Cor_4, type = "response")
 
 # only CONTINUOUS variables
-mydata <- data.frame(df_excluded$evidence_scaled,df_excluded$prev_evidence_scaled,df_excluded$prev_conf_scaled)
-colnames(mydata) <- c("evidence","prev_evidence","prev_conf")
+mydata <- data.frame(df$rt_manipulation, df$rtconf_manipulation, df$coherence)
+colnames(mydata) <- c("rt_manipulation", "rtconf_manipulation", "coherence")
 predictors <- colnames(mydata)
 # Bind the logit and tidying the data for plot
 mydata <- mydata %>%

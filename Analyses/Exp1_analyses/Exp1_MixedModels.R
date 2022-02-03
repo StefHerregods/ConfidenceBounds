@@ -12,6 +12,9 @@ library(grid)
 library(car)
 library(effects)
 
+library(optimx)
+library(dfoptim)
+
 # Setting working directory
 
 setwd('C:\\Users\\herre\\Desktop\\Internship\\Results\\Exp1_Results')
@@ -25,6 +28,7 @@ df$rt_manipulation <- as.factor(df$rt_manipulation)
 df$rtconf_manipulation <- ifelse(df$manipulation %in% c("AccAcc", "FastAcc"), 1, 0)
 df$rtconf_manipulation <- as.factor(df$rtconf_manipulation)
 df$coherence <- as.factor(df$coherence)
+
 
 ### Effect of manipulations on decision RT ###
 
@@ -58,14 +62,27 @@ RT_2 <- lmer(rt ~ 1 + rt_manipulation * rtconf_manipulation * coherence + (1 + r
 RT_3 <- lmer(rt ~ 1 + rt_manipulation * rtconf_manipulation * coherence + (1 + rtconf_manipulation|sub), data = df_correct)
 RT_4 <- lmer(rt ~ 1 + rt_manipulation * rtconf_manipulation * coherence + (1 + coherence|sub), data = df_correct)  # Fails to converge
 
+
+allFit(show.meth.tab=TRUE)
+allFit_RT_4 <- allFit(RT_12)
+summary <- summary(allFit_RT_4)
+summary$which.OK
+
+
+is.OK <- sapply(allFit_RT_4, is, "merMod")
+allFit_RT_4.OK <- allFit_RT_4[is.OK]
+lapply(allFit_RT_4.OK,function(x) x@optinfo$conv$lme4$messages)
+
+
+
+
+
 anova(RT_1, RT_2)  # Significant
 anova(RT_1, RT_3)  # Significant
 
 RT_5 <- lmer(rt ~ 1 + rt_manipulation * rtconf_manipulation * coherence + (1 + rt_manipulation + rtconf_manipulation|sub), data = df_correct)
 
 anova(RT_2, RT_5)  # Significant
-anova(RT_3, RT_5)  # Significant
-
 
 RT_6 <- lmer(rt ~ 1 + rt_manipulation * rtconf_manipulation * coherence + (1 + rt_manipulation * rtconf_manipulation|sub), data = df_correct)
 
@@ -92,29 +109,29 @@ df_correct$rt_log <- scale(df_correct$rt_log, scale = FALSE)
 RT_7 <- lmer(rt_log ~ 1 + rt_manipulation * rtconf_manipulation * coherence + (1|sub), data = df_correct)
 RT_8 <- lmer(rt_log ~ 1 + rt_manipulation * rtconf_manipulation * coherence + (1 + rt_manipulation|sub), data = df_correct)
 RT_9 <- lmer(rt_log ~ 1 + rt_manipulation * rtconf_manipulation * coherence + (1 + rtconf_manipulation|sub), data = df_correct)
-RT_10 <- lmer(rt_log ~ 1 + rt_manipulation * rtconf_manipulation * coherence + (1 + coherence|sub), data = df_correct)  # Singular fit
+RT_10 <- lmer(rt_log ~ 1 + rt_manipulation * rtconf_manipulation * coherence + (1 + coherence|sub), data = df_correct)  
 
 anova(RT_7, RT_8)  # Significant
 anova(RT_7, RT_9)  # Significant
+anova(RT_7, RT_10)  # Significant
 
-RT_11 <- lmer(rt_log ~ 1 + rt_manipulation * rtconf_manipulation * coherence + (1 + rt_manipulation + rtconf_manipulation|sub), data = df_correct)
+RT_11 <- lmer(rt_log ~ 1 + rt_manipulation * rtconf_manipulation * coherence + (1 + rt_manipulation + coherence|sub), data = df_correct)
 
 anova(RT_8, RT_11)  # Significant
-anova(RT_9, RT_11)  # Significant
 
-RT_12 <- lmer(rt_log ~ 1 + rt_manipulation * rtconf_manipulation * coherence + (1 + rt_manipulation * rtconf_manipulation|sub), data = df_correct)
+RT_12 <- lmer(rt_log ~ 1 + rt_manipulation * rtconf_manipulation * coherence + (1 + rt_manipulation + rtconf_manipulation + coherence|sub), data = df_correct)  # Singular fit
 
-anova(RT_11, RT_12)  # Significant
+RT_13 <- lmer(rt_log ~ 1 + rt_manipulation * rtconf_manipulation * coherence + (1 + rt_manipulation * coherence|sub), data = df_correct)  # Singular fit
 
 # Model assumptions
 
-plot(RT_12)
-RT_12_resid <- resid(RT_12)
-RT_12_fit <- fitted(RT_12)
-qqnorm(RT_12_resid)
-qqline(RT_12_resid)
-df_temp <- data.frame(cbind(RT_12_fit, RT_12_resid))
-ggplot(df_temp, aes(x = RT_12_fit, y = RT_12_resid)) + geom_point() + geom_smooth(se = F) + geom_hline(aes(yintercept=0))
+plot(RT_11)
+RT_11_resid <- resid(RT_11)
+RT_11_fit <- fitted(RT_11)
+qqnorm(RT_11_resid)
+qqline(RT_11_resid)
+df_temp <- data.frame(cbind(RT_11_fit, RT_11_resid))
+ggplot(df_temp, aes(x = RT_11_fit, y = RT_11_.resid)) + geom_point() + geom_smooth(se = F) + geom_hline(aes(yintercept=0))
 
 # Multicollinearity - VIF
 
@@ -133,21 +150,22 @@ vif.lme <- function (fit) {
   names(v) <- nam
   v }
 
-vif.lme(RT_12)
+vif.lme(RT_11)
 
 # Model interpretation
 
-anova(RT_12)
-confint(RT_12)
+anova(RT_11)
+confint(RT_11)
 
-plot(effect('rt_manipulation',RT_12))
-plot(effect('coherence',RT_12))
-plot(effect('rt_manipulation:coherence',RT_12))
-plot(effect('rt_manipulation:rtconf_manipulation',RT_12))
+plot(effect('rt_manipulation', RT_11))
+plot(effect('rtconf_manipulation', RT_11))
+plot(effect('coherence', RT_11))
+plot(effect('rt_manipulation:coherence', RT_11))
+plot(effect('rt_manipulation:rtconf_manipulation', RT_11))
 
-data.frame(effect('rt_manipulation:coherence',RT_12))
-fixef(RT_12)
-ranef(RT_9)
+data.frame(effect('rt_manipulation:coherence', RT_11))
+fixef(RT_11)
+ranef(RT_11)
 
 
 ### Effect of manipulations on confidence rating RT ###
@@ -173,17 +191,27 @@ print(plot1, vp=vplayout(1,1))
 print(plot2, vp=vplayout(1,2))
 print(plot3, vp=vplayout(1,3))
 
+# Log transform
+
+df_correct$rtconf_log <- log(df_correct$rtconf)
+
+df_correct$rtconf_log <- scale(df_correct$rtconf_log, scale = FALSE) 
+
 # Model comparisons (through likelihood ratio tests)
 
-RTconf_1 <- lmer(rtconf ~ 1 + rt_manipulation * rtconf_manipulation * coherence + (1|sub), data = df_correct)
-RTconf_2 <- lmer(rtconf ~ 1 + rt_manipulation * rtconf_manipulation * coherence + (1 + rt_manipulation|sub), data = df_correct)
-RTconf_3 <- lmer(rtconf ~ 1 + rt_manipulation * rtconf_manipulation * coherence + (1 + rtconf_manipulation|sub), data = df_correct)  # Fails to converge
-RTconf_4 <- lmer(rtconf ~ 1 + rt_manipulation * rtconf_manipulation * coherence + (1 + coherence|sub), data = df_correct)  # Singular fit
+RTconf_1 <- lmer(rtconf_log ~ 1 + rt_manipulation * rtconf_manipulation * coherence + (1|sub), data = df_correct)
+RTconf_2 <- lmer(rtconf_log ~ 1 + rt_manipulation * rtconf_manipulation * coherence + (1 + rt_manipulation|sub), data = df_correct)
+RTconf_3 <- lmer(rtconf_log ~ 1 + rt_manipulation * rtconf_manipulation * coherence + (1 + rtconf_manipulation|sub), data = df_correct) 
+RTconf_4 <- lmer(rtconf_log ~ 1 + rt_manipulation * rtconf_manipulation * coherence + (1 + coherence|sub), data = df_correct)
 
 anova(RT_1, RT_2)  # Significant
 anova(RT_1, RT_3)  # Significant
+anova(RT_1, RT_4)  # Significant
+
+RTconf_5 <- lmer(rtconf_log ~ 1 + rt_manipulation * rtconf_manipulation * coherence + (1 + rt_manipulation + coherence|sub), data = df_correct)
 
 
+# TO DO !!!!
 
 # Model assumptions
 
@@ -247,9 +275,9 @@ anova(Cor_1, Cor_4)  # Significant
 
 RTconf_5 <- glmer(cor ~ 1 + rt_manipulation * rtconf_manipulation * coherence + (1 + coherence + rt_manipulation|sub), data = df, family = binomial)  # Fails to converge
 
-anova(Cor_2, Cor_4)  # Significant; better BIC, AIC, log likelihood for RTconf_4
+anova(Cor_2, Cor_4)  # Significant; better BIC, AIC, log likelihood for Cor_4
 
-# Model assumptions ????
+# Model assumptions
 
 plot(Cor_4)
 Cor_4_resid <- resid(Cor_4)
@@ -259,6 +287,8 @@ qqline(Cor_4_resid)
 df_temp <- data.frame(cbind(Cor_4_fit, Cor_4_resid))
 ggplot(df_temp, aes(x = Cor_4_fit, y = Cor_4_resid)) + geom_point() + geom_smooth(se = F) + geom_hline(aes(yintercept=0))
 
+vif.lme(Cor_4)
+  
 
 
 
@@ -266,54 +296,110 @@ ggplot(df_temp, aes(x = Cor_4_fit, y = Cor_4_resid)) + geom_point() + geom_smoot
 
 
 
-#(1) The linearity assumption
-# & (2) The homogeneity assumption; use Levene test to check this out!
-Plot.Model <- plot(RT_2) #creates a fitted vs residual plot
-Plot.Model ## you want an even spread around zero.
-## for the homogeneity assumption you can test it with:
-leveneTest(residuals(RT_2) ~ df$sub)
-
-leveneTest(model1resid ~ df$sub)
-
-#(3) The residuals should be normally distributed
-
-model1resid <- resid(RT_2)
-model1fit <- fitted(RT_2)
-qqnorm(model1resid)
-qqline(model1resid)
-
-# you can log transform it or look for an appropriate model
-df$rt.log <- log(df$rt)
-df$rt.scaled <- scale(df$rt)
 
 
 
 
 
 
-#anova(modelA_3, modelA_4)
-
-#modelA_5 <- lmer(rt ~ 1 + rt_manipulation * rtconf_manipulation + rt_manipulation * coherence + (1 + rt_manipulation + rtconf_manipulation + coherence|sub), REML = FALSE, data = df)  # Adding manipulations
-#summary(modelA_5)
-#confint(modelA_5)
-
-#anova(modelA_4, modelA_5
-
-# Assumptions
-
-modelA_4_resid <- resid(modelA_4)
-modelA_4_fit <- fitted(modelA_4)
-qqnorm(modelA_4_resid)
-qqline(modelA_4_resid)
-df_temp <- data.frame(cbind(modelA_4_fit, modelA_4_resid))
-ggplot(df_temp, aes(x = modelA_4_fit, y = modelA_4_resid)) + geom_point() + geom_smooth(se = F) + geom_hline(aes(yintercept=0))
 
 
-# (b) Faster confidence reaction times and less accurate confidence ratings 
-# (i.e., confidence ratings that are less precise in the prediction of accuracy)
-# when participants are asked to give quick confidence ratings 
-# (vs think carefully about their ratings), 
-# with no effect on decision accuracy and decision reaction times.
+library(aod)
+library(ggpubr)
+library(arm)
+library(car)
+library(ggplot2)
+library(ggResidpanel)
+library(lme4)
+library(tidyr)
+
+### ASSUMPTIONS MULTILEVEL LOGISTIC REGRESSION
+
+#independence of errors -> plot residuals over time
+#linearity between log odds and continuous predictors
+#absence of multicollinearity -> VIF
+#lack of strongly influential outliers
+
+# SO NO homoscedasticity nor normally distributed residuals
+
+# In this example 'm_conf_slopes' is our mixed model
+
+
+
+
+# INDEPENDENCE OF ERRORS
+## This means that when you plot your residuals there shouldn't be a trend (just a straigth line)
+## Otherwise there is still some uncaptured variance, causing the errors to be dependent (predictable)
+
+# for linear mixed models you can just look at the left upper panel but with logistic regression this will look odd 
+resid_panel(m_conf_slopes) 
+
+# That's why another approach is needed using binned residuals
+# If most of the dots fall within the area, then it's okay
+binnedplot(fitted(m_conf_slopes), 
+           residuals(m_conf_slopes, type = "response"), 
+           nclass = NULL, 
+           xlab = "Expected Values", 
+           ylab = "Average residual", 
+           main = "Binned residual plot", 
+           cex.pts = 0.8, 
+           col.pts = 1, 
+           col.int = "gray")
+
+
+
+# CHECK LINEAR RELATIONSHIP LOGODDS AND PREDICTORS
+
+## APPROACH 1
+probabilities <- predict(m_conf_slopes, type = "response")
+
+# only CONTINUOUS variables
+mydata <- data.frame(df_excluded$evidence_scaled,df_excluded$prev_evidence_scaled,df_excluded$prev_conf_scaled)
+colnames(mydata) <- c("evidence","prev_evidence","prev_conf")
+predictors <- colnames(mydata)
+# Bind the logit and tidying the data for plot
+mydata <- mydata %>%
+  mutate(logit = log(probabilities/(1-probabilities))) %>%
+  gather(key = "predictors", value = "predictor.value", -logit)
+
+# You should see a more or less linear relation
+ggplot(mydata, aes(logit,predictor.value))+
+  geom_point(size = 0.5, alpha = 0.5) +
+  geom_smooth(method = "loess",se=FALSE) + 
+  theme_bw() + 
+  facet_wrap(~predictors, scales = "free_y")
+
+## APPROACH 2
+
+# Check linearity between logodds and continuous predictors with Box Tidwell transformation
+# Just add interaction between predictor and ln(predictor) in your model
+# If you have negative values, then make then all positive (just add constant to all the values to make then positive)
+# If not significant, linearity is okay!
+
+df_boxtidwell <- df_excluded
+
+# ln only possible for values > 0 so transform variables
+df_boxtidwell$prev_conf_scaled_bt <- 1 + df_boxtidwell$prev_conf_scaled + abs(min(df_boxtidwell$prev_conf_scaled))
+df_boxtidwell$evidence_scaled_bt <- 1 + df_boxtidwell$evidence_scaled + abs(min(df_boxtidwell$evidence_scaled)) 
+df_boxtidwell$prev_evidence_scaled_bt <- 1 + df_boxtidwell$prev_evidence_scaled + abs(min(df_boxtidwell$prev_evidence_scaled))
+
+m_boxtidwell <- glmer(data=df_boxtidwell, resp ~ 
+                        
+                        evidence_scaled_bt +
+                        prev_evidence_scaled_bt +
+                        prev_resp * prev_conf_scaled_bt  +
+                        
+                        evidence_scaled_bt:log(evidence_scaled_bt) +
+                        prev_evidence_scaled_bt:log(prev_evidence_scaled_bt) +
+                        prev_conf_scaled_bt:log(prev_conf_scaled_bt) +
+                        
+                        (1|sub),
+                      family = binomial,control=glmerControl(optimizer='bobyqa',optCtrl = list(maxfun=10000000)))
+
+Anova(m_boxtidwell)
+
+# ABSENCE OF MULTICOLLINEARITY
+# Just check VIF
 
 
 

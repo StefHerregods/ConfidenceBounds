@@ -27,9 +27,8 @@ z = 0.5  # Starting point (accuracy-coded dataset -> 0.5)
 ntrials = 1000  # Number of decision-making simulations per observation
 sigma = 1  # Within-trial noise
 dt = 0.001  # Precision
-# v, a, ter, a2, postdriftmod
 
-# for observations: use 'metacognition', not cj
+# for observations: use 'metacognition', not cj?
 
 # ?
 
@@ -37,8 +36,8 @@ chi_square_optim <- function(params, observations, returnFit){
   
   # Generate predictions
   
-  names(params) <- c('v', 'a', 'ter', 'z', 'ntrials', 'sigma', 'dt', 'a2', 'postdriftmod')
-  predictions <- data.frame(DDM_confidence_bounds(v = params['v'], a = params['a'], ter = params['ter'], z = params['z'], ntrials = dim(observations)[1] * ntrials, s = params['sigma'], dt = params['dt'], a2 = params['a2'], postdriftmod = params['post_drift_mod']))
+  names(params) <- c('v', 'a', 'ter', 'a2', 'postdriftmod')
+  predictions <- data.frame(DDM_confidence_bounds(v = params['v'], a = params['a'], ter = params['ter'], z = z, ntrials = dim(observations)[1] * ntrials, s = sigma, dt = dt, a2 = params['a2'], postdriftmod = params['post_drift_mod']))
   names(predictions) <- c('rt', 'resp', 'cor', 'raw_evidence2', 'rtfull', 'confidence', 'rtconf', 'cj')
   #predictions$evidence2 <- predictions$raw_evidence2 #???
   
@@ -176,24 +175,24 @@ N<-length(subs)
 
 # Create empty matrices
 
-v_matrix <- matrix(NA,N,2)  #!!! change to higher than 2 for more conditions
-a_matrix <- matrix(NA,N,2)
-ter_matrix <- matrix(NA,N,2)
-a2_matrix <- matrix(NA,N,2)
-postdriftmod_matrix <- matrix(NA,N,2)
+v_matrix <- matrix(NA,N,4)  #!!! change to higher than 4 for more conditions
+a_matrix <- matrix(NA,N,4)
+ter_matrix <- matrix(NA,N,4)
+a2_matrix <- matrix(NA,N,4)
+postdriftmod_matrix <- matrix(NA,N,4)
 
 # Optimize (extended) DDM parameters 
 
 for(i in 1:N){  # For each participant separately
    
   print(paste('Running participant', subs[i], 'from', N))
-  condLab <- unique(df$rt_manipulation)  #!!! Change to all forms of manipulations
+  condLab <- unique(df$manipulation)  #!!! Change to all forms of manipulations
   tempAll <- subset(df, sub == subs[i])
   
-  for(c in 1:2){  # For each condition separately !!! Change to higher for more conditions
+  for(c in 1:4){  # For each condition separately !!! Change to higher for more conditions
     
-    tempDat <- subset(tempAll, rt_manipulation == condLab[c])
-    tempDat <- tempDat[,c('rt', 'cor', 'resp', 'cj', 'rt_confidence')]
+    tempDat <- subset(tempAll, manipulation == condLab[c])
+    tempDat <- tempDat[,c('rt', 'cor', 'resp', 'cj', 'manipulation')]
     
     #Load existing individual results if already exist
     # TODO
@@ -201,7 +200,7 @@ for(i in 1:N){  # For each participant separately
     # Optimization function
     
     optimal_params <- DEoptim(chi_square_optim, # function to optimize
-                              lower = c(0, .5, 0, .5, 0), # v,a,ter,z,ntrials,sigma,dt,t2time,post_drift_mod,add_mean,add_sd
+                              lower = c(0, .5, 0, .5, 0), # v, a, ter, a2, postdriftmod
                               upper = c(3,  4, 1,  4, 2.5), #
                               observations = tempDat,returnFit=1,control=c(itermax=500)) # observed data is a parameter for the ks function we pass
     

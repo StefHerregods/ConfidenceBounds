@@ -6,7 +6,10 @@
 
 
 rm(list=ls())
-setwd('C:\\Users\\herre\\OneDrive\\Documenten\\GitHub\\ConfidenceBounds\\Analyses\\Exp1_analyses')
+
+# Setting working directory
+
+setwd('C:\\Users\\herre\\Desktop\\Internship\\Results\\Exp1_Results')
 
 # Load packages
 
@@ -16,7 +19,7 @@ library(RcppZiggurat)  # Random number generator (normal distribution)
 
 # Give R access to the DDM simulation function in C++
 
-sourceCpp("DDM_confidence_bounds.cpp") 
+sourceCpp("C:\\Users\\herre\\OneDrive\\Documenten\\GitHub\\ConfidenceBounds\\Analyses\\Exp1_analyses\\DDM_confidence_bounds.cpp") 
 
 # Variable settings
 
@@ -32,46 +35,49 @@ dt = 0.001  # Precision
 
 chi_square_optim <- function(params, observations, returnFit){  
   
-  # (1) Generate predictions
+  # Generate predictions
   
   names(params) <- c('v', 'a', 'ter', 'z', 'ntrials', 'sigma', 'dt', 'a2', 'postdriftmod')
   predictions <- data.frame(DDM_confidence_bounds(v = params['v'], a = params['a'], ter = params['ter'], z = params['z'], ntrials = dim(observations)[1] * ntrials, s = params['sigma'], dt = params['dt'], a2 = params['a2'], postdriftmod = params['post_drift_mod']))
   names(predictions) <- c('rt', 'resp', 'cor', 'raw_evidence2', 'rtfull', 'confidence', 'rtconf', 'cj')
   #predictions$evidence2 <- predictions$raw_evidence2 #???
   
-  # (2) Linear scaling of confidence 
+  # Linear scaling of confidence (from continuous to binary)
   
   predictions$cj <- (predictions$cj + params['add_mean']) / params['add_sd']
   predictions$cj <- ifelse(predictions$cj > 0, 1, 0)  # Transform to binary variable (0-1)
   
-  # (3) Separate predictions according to the response
+  # Separate predictions according to the response
   
   c_predicted <- predictions[predictions$cor == 1,]
   e_predicted <- predictions[predictions$cor == 0,]
   
-  # (4) Sort prediction rt's 
+  # Sort prediction RTs 
   
   c_predicted_rt <- sort(c_predicted$rt)
   e_predicted_rt <- sort(e_predicted$rt)
   
-  # (5.1) If we're only simulating data: return the predictions
+  # If we're only simulating data: return the predictions
   
   if(returnFit==0){ 
     return(predictions[,c('rt','cor','cj')])
     
-  # (5.2) If we are fitting the model, compare these predictions to the observations 
+  # If we are fitting the model: compare these predictions to the observations 
   
   }else{ 
   
-    # First, separate the data in correct and error trials
+    # Separate observations into correct and error trials
+    
     c_observed <- observations[observations$cor == 1,]
     e_observed <- observations[observations$cor == 0,]
     
-    # Now, get the quantile RTs on the "observed data" for correct and error distributions separately (for quantiles .1, .3, .5, .7, .9)
+    # Get the quantile RTs on the "observed data" for correct and error distributions separately (for quantiles .1, .3, .5, .7, .9)
+    
     c_quantiles <- quantile(c_observed$rt, probs = c(.1,.3,.5,.7,.9), names = FALSE)
     e_quantiles <- quantile(e_observed$rt, probs = c(.1,.3,.5,.7,.9), names = FALSE)
     
-    # to combine correct and incorrect we scale the expected interquantile probability by the proportion of correct and incorect respectively
+    # To combine correct and incorrect trials, we scale the expected interquantile probability by the proportion of correct and incorrect respectively
+    
     prop_obs_c <- dim(c_observed)[1] / dim(observations)[1]
     prop_obs_e <- dim(e_observed)[1] / dim(observations)[1]
     
@@ -79,7 +85,9 @@ chi_square_optim <- function(params, observations, returnFit){
     e_obs_proportion = prop_obs_e * c(.1, .2, .2, .2, .2, .1)
     obs_props <- c(c_obs_proportion,e_obs_proportion)
     
-    # now, get the proportion of responses that fall between the observed quantiles when applied to the predicted data (scale by N?)
+    # Calculate proportion of responses that fall between the observed quantiles when applied to the predicted data 
+    #!!!(scale by N?)
+    
     c_pred_proportion <- c(
       sum(c_predicted_rt <= c_quantiles[1]),
       sum(c_predicted_rt <= c_quantiles[2]) - sum(c_predicted_rt <= c_quantiles[1]),
@@ -97,12 +105,15 @@ chi_square_optim <- function(params, observations, returnFit){
       sum(e_predicted_rt <= e_quantiles[5]) - sum(e_predicted_rt <= e_quantiles[4]),
       sum(e_predicted_rt > e_quantiles[5])
     ) / dim(predictions)[1]
+    
     pred_props <- c(c_pred_proportion,e_pred_proportion)
     
-    # avoid zeros in the the data (because of division by predictions for chi square statistic) -> set to small number
+    # Avoid zeros in the the data (because of division by predictions for chi square statistic) -> set to small number
+    
     pred_props[pred_props==0] <- .0000001
     
-    # Now, do the same for confidence
+    # Now, do the same for confidence judgement rt #!!!!!!!!!!!!
+    
     obs_props_cj <- c(sum(c_observed$cj==1),
                       sum(c_observed$cj==2),
                       sum(c_observed$cj==3),
@@ -117,11 +128,14 @@ chi_square_optim <- function(params, observations, returnFit){
                       sum(e_observed$cj==6)
     )/length(observations$cj)
     
-    # to make the next step easier, lets sort the predictions for correct and errors
+    # To make the next step easier, lets sort the predictions for correct and errors
+    
     c_predicted_cj <- sort(c_predicted$cj)
     e_predicted_cj <- sort(e_predicted$cj)
     
-    # now, get the proportion of responses that fall between the observed quantiles when applied to the predicted data (scale by N?)
+    # Calculate proportion of responses that fall between the observed quantiles when applied to the predicted data 
+    #(scale by N?)
+    
     pred_props_cj <- c(
       sum(c_predicted_cj == 1),
       sum(c_predicted_cj == 2),
@@ -137,12 +151,14 @@ chi_square_optim <- function(params, observations, returnFit){
       sum(e_predicted_cj == 6)
     ) / dim(predictions)[1]    
     
-    # avoid zeros in the the data (because of division by predictions for chi square statistic) -> set to small number
+    # Avoid zeros in the the data (because of division by predictions for chi square statistic) -> set to small number
+   
     pred_props_cj[pred_props_cj==0] <- .0000001
     
-    # Combine the quantiles for rts and cj
-    obs_props <- c(obs_props,obs_props_cj)
-    pred_props <- c(pred_props,pred_props_cj)
+    # Combine the quantiles for RTs and cj
+    #obs_props <- c(obs_props,obs_props_cj)
+    #pred_props <- c(pred_props,pred_props_cj)
+    
     # calculate chi square
     chiSquare = sum( ( (obs_props - pred_props) ^ 2) / pred_props )
     
@@ -151,6 +167,63 @@ chi_square_optim <- function(params, observations, returnFit){
     
   }
 }
+
+# Load data
+
+df <- read.csv(file = "Exp1_data_viable.csv")
+subs <- unique(df$sub)
+N<-length(subs)
+
+# Create empty matrices
+
+v_matrix <- matrix(NA,N,2)  #!!! change to higher than 2 for more conditions
+a_matrix <- matrix(NA,N,2)
+ter_matrix <- matrix(NA,N,2)
+a2_matrix <- matrix(NA,N,2)
+postdriftmod_matrix <- matrix(NA,N,2)
+
+# Optimize (extended) DDM parameters 
+
+for(i in 1:N){  # For each participant separately
+   
+  print(paste('Running participant', subs[i], 'from', N))
+  condLab <- unique(df$rt_manipulation)  #!!! Change to all forms of manipulations
+  tempAll <- subset(df, sub == subs[i])
+  
+  for(c in 1:2){  # For each condition separately !!! Change to higher for more conditions
+    
+    tempDat <- subset(tempAll, rt_manipulation == condLab[c])
+    tempDat <- tempDat[,c('rt', 'cor', 'resp', 'cj', 'rt_confidence')]
+    
+    #Load existing individual results if already exist
+    # TODO
+    
+    # Optimization function
+    
+    optimal_params <- DEoptim(chi_square_optim, # function to optimize
+                              lower = c(0, .5, 0, .5, 0), # v,a,ter,z,ntrials,sigma,dt,t2time,post_drift_mod,add_mean,add_sd
+                              upper = c(3,  4, 1,  4, 2.5), #
+                              observations = tempDat,returnFit=1,control=c(itermax=500)) # observed data is a parameter for the ks function we pass
+    
+    results <- summary(optimal_params)
+    
+    # Save individual results
+    
+    save(results, file=paste0('SATO experiment 1/results_sub_',i,'_',condLab[c],'.Rdata'))
+    
+    # Add results 
+    
+    v_matrix <- results$optim$bestmem[1]  #!!! change to higher than 2 for more conditions
+    a_matrix <- results$optim$bestmem[2]
+    ter_matrix <- results$optim$bestmem[3]
+    a2_matrix <- results$optim$bestmem[4]
+    postdriftmod_matrix <- results$optim$bestmem[5]
+    
+  }
+}
+
+
+
 
 
 

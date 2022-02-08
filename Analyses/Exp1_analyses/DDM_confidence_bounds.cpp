@@ -5,7 +5,7 @@
 using namespace Rcpp;
 static Ziggurat::Ziggurat::Ziggurat zigg;
 // [[Rcpp::export]]
-NumericMatrix DDM_confidence_boundaries(double v, double a, double ter, double z, int ntrials, double s, double dt, double a2, double postdriftmod) {
+NumericMatrix DDM_confidence_bounds(double v, double a, double ter, double z, int ntrials, double s, double dt, double a2, double postdriftmod) {
   
   // initialize output
   NumericMatrix DATA(ntrials,8);

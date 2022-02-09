@@ -23,6 +23,8 @@ sourceCpp("C:\\Users\\herre\\OneDrive\\Documenten\\GitHub\\ConfidenceBounds\\Ana
 
 # Variable settings
 
+overwrite = F  # Overwrite already existing files?
+
 z = 0.5  # Starting point (accuracy-coded dataset -> 0.5)
 ntrials = 1000  # Number of decision-making simulations per observation
 sigma = 1  # Within-trial noise
@@ -33,7 +35,7 @@ itermax = 50  # Number of DeOptim iterations
 # for observations: use 'metacognition', not cj?
 
 # ?
-
+x <- 1
 chi_square_optim <- function(params, observations, returnFit){  
   
   # Generate predictions
@@ -42,7 +44,7 @@ chi_square_optim <- function(params, observations, returnFit){
   predictions <<- data.frame(DDM_confidence_bounds(v = params['v'], a = params['a'], ter = params['ter'], z = z, ntrials = ntrials, s = sigma, dt = dt, a2 = params['a2'], postdriftmod = params['postdriftmod']))
   names(predictions) <- c('rt', 'resp', 'cor', 'raw_evidence2', 'rtfull', 'confidence', 'rtconf', 'cj')
   #predictions$evidence2 <- predictions$raw_evidence2 #???
-  
+
   # Linear scaling of confidence (from continuous to binary)
   
   predictions$cj <- (predictions$cj + params['add_mean']) / params['add_sd']
@@ -66,7 +68,7 @@ chi_square_optim <- function(params, observations, returnFit){
   # If we're only simulating data: return the predictions
   
   if(returnFit==0){ 
-    return(predictions[,c('rt','cor','cj')])
+    return(predictions[,c('rt','cor','cj', 'rtconf')])
     
   # If we are fitting the model: compare these predictions to the observations 
   
@@ -159,43 +161,34 @@ chi_square_optim <- function(params, observations, returnFit){
     pred_props_rtconf[pred_props_rtconf == 0] <- .0000001
     
     
+    ### 3 - Confidence rating comparison ###
     
-    # Now, do the same for confidence  #!!!!!
     
-    # obs_props_cj <- c(sum(c_observed$cj == 0),
-    #                   sum(c_observed$cj == 1)
-    # )/length(observations$cj)
+    # Confidence judgement proportions 
+    
+    obs_props_cj <- c(sum(c_observed$cj == 0),
+                      sum(c_observed$cj == 1)
+    )/length(observations$cj)
     
     # To make the next step easier, lets sort the predictions for correct and errors
     
-    # c_predicted_cj <- sort(c_predicted$cj)
-    # e_predicted_cj <- sort(e_predicted$cj)
+    c_predicted_cj <- sort(c_predicted$cj)
+    e_predicted_cj <- sort(e_predicted$cj)
     
     # Calculate proportion of responses that fall between the observed quantiles when applied to the predicted data 
     #(scale by N?)
     
-    # pred_props_cj <- c(
-    #   sum(c_predicted_cj == 1),
-    #   sum(c_predicted_cj == 2),
-    #   sum(c_predicted_cj == 3),
-    #   sum(c_predicted_cj == 4),
-    #   sum(c_predicted_cj == 5),
-    #   sum(c_predicted_cj == 6),
-    #   sum(e_predicted_cj == 1),
-    #   sum(e_predicted_cj == 2),
-    #   sum(e_predicted_cj == 3),
-    #   sum(e_predicted_cj == 4),
-    #   sum(e_predicted_cj == 5),
-    #   sum(e_predicted_cj == 6)
-    # ) / dim(predictions)[1]    
+    pred_props_cj <- c(sum(c_predicted_cj == 0),
+                       sum(c_predicted_cj == 1)
+    ) / dim(predictions)[1]
     
     # Avoid zeros in the the data (because of division by predictions for chi square statistic) -> set to small number
    
-    # pred_props_cj[pred_props_cj==0] <- .0000001
+    pred_props_cj[pred_props_cj == 0] <- .0000001
     
     # Combine the quantiles for RTs and cj
-    obs_props <- c(obs_props, obs_props) #, obs_props_cj)
-    pred_props <- c(pred_props_rt, pred_props_rtconf) #, pred_props_cj)
+    obs_props <- c(obs_props, obs_props, obs_props_cj) 
+    pred_props <- c(pred_props_rt, pred_props_rtconf, pred_props_cj) 
     
     # calculate chi square
     chiSquare = sum( ( (obs_props - pred_props) ^ 2) / pred_props )
@@ -231,39 +224,59 @@ for(i in 1:N){  # For each participant separately
   for(c in 1:4){  # For each condition separately !!! Change to higher for more conditions
     
     tempDat <- subset(tempAll, manipulation == condLab[c])
-    tempDat <- tempDat[,c('rt', 'cor', 'resp', 'cj', 'manipulation')]
+    tempDat <- tempDat[,c('rt', 'cor', 'resp', 'cj', 'manipulation', 'rtconf')]
     
     # Load existing individual results if these already exist
-    # TODO
     
-    # Optimization function
-    
-    optimal_params <- DEoptim(chi_square_optim, # function to optimize
-                              lower = c(0, .5, 0, .5,   0),  # lowest possible values for v, a, ter, a2, postdriftmod
-                              upper = c(3,  4, 1,  4, 2.5), 
-                              observations = tempDat, returnFit = 1, control=c(itermax = itermax)) # observed data is a parameter for the ks function we pass
-    
-    results <- summary(optimal_params)
-    
-    # Save individual results
-    
-    save(results, file=paste0('Parameter_estimation\\results_sub_',i,'_',condLab[c],'.Rdata'))
-    
+    file_name <- paste0('Parameter_estimation\\results_sub_', i, '_', condLab[c], '.Rdata')
+    if (overwrite == F & file.exists(file_name)){
+
+      load(file_name)
+      
+    # Else, estimate parameters
+      
+    } else {
+      
+      # Optimization function
+      
+      optimal_params <- DEoptim(chi_square_optim,  # Function to optimize
+                                lower = c(0, .5, 0, .5,   0),  # Lowest possible values for v, a, ter, a2, postdriftmod
+                                upper = c(3,  4, 1,  4, 2.5), 
+                                observations = tempDat, returnFit = 1, control = c(itermax = itermax))  # Observed data is a parameter for the ks function we pass
+      
+      results <- summary(optimal_params)
+      
+      # Save individual results
+      
+      save(results, file = file_name)
+      
+    }
+      
     # Add results 
     
-    v_matrix[i,c] <- results$optim$bestmem[1]  #!!! change to higher than 2 for more conditions
+    v_matrix[i,c] <- results$optim$bestmem[1]  
     a_matrix[i,c] <- results$optim$bestmem[2]
     ter_matrix[i,c] <- results$optim$bestmem[3]
     a2_matrix[i,c] <- results$optim$bestmem[4]
     postdriftmod_matrix[i,c] <- results$optim$bestmem[5]
-    
+      
   }
 }
 
-# Plot ???
+# Exploratory plots
 
-jpeg(file="exp_1_sato_results.jpg", res=600, width=400*4*(350/72), height=400*(350/72))
-par(mfrow=c(1,4))
+
+ggplot(data = v_matrix, aes(x = !!!, y = !!!), shape = 5) +
+  geom_line(aes(group = !!!sub), alpha = 0.2) +
+  geom_point(shape = 16, size = 3, colour = "Blue", alpha = 0.3) +
+  stat_summary(aes(y = !!!, group = 1), fun = mean, colour="Blue", size = 4, shape = 95) +
+  scale_x_discrete(labels = c("AccAcc" = "Accurate decision\nAccurate confidence rating", "AccFast" = "Accurate decision\nFast confidence rating", "FastFast" = "Fast decision\nFast confidence rating", "FastAcc" = "Fast decision\nAccurate confidence rating")) +
+  labs(x = "Manipulation", y = "Mean decision reaction time") 
+
+ggplot(data = v_matrix, aes(x = , y = )) +
+  geom_
+
+
 plot(colMeans(v_matrix),frame=F,cex.lab=1.5,ylim=c(0,5),xlim=c(.8,4.2),ylab="Drift rate",xlab="Manipulation",xaxt='n')
 axis(1,1:4,c("1", "1", "3", "4"))
 for(i in 1:N) lines(1:4,v_matrix[i,1:4],type='b',lty=2,col='grey',pch=19)

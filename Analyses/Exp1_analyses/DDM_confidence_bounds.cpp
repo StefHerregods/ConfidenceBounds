@@ -64,9 +64,9 @@ NumericMatrix DDM_confidence_bounds(double v, double a, double ter, double z, in
         t = t + dt;
         evidence = evidence + v_post * dt + s * sqrt(dt) * zigg.norm();
         if (evidence >= a2/2){
-          DATA(i,7) = 1;
-        } else if (evidence <= - a2/2){
           DATA(i,7) = 0;
+        } else if (evidence <= - a2/2){
+          DATA(i,7) = 1;
         }
       }
     }

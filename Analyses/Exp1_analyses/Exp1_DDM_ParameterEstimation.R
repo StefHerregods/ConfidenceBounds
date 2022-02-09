@@ -1,8 +1,15 @@
 # Internship project 2021-2022
 # Script estimates DDM parameters of DDM with confidence bounds
-# Input: decision reaction times, decisions, confidence rating reaction times, binary confidence rating
+# Input: decision reaction times, decisions, confidence rating reaction times, binary confidence rating (high vs. low confidence)
 # Based on https://github.com/kdesende/dynamic_influences_on_static_measures/blob/main/3A_experiment1_sato
   # Desender, K., Vermeylen, L., Verguts, T. (2021)
+
+
+# TO DO
+# - één v per coherence level
+# - simulaties based on estimated parameters
+# - comparison of different cost functions
+# - split confidence rt and confidence 
 
 
 rm(list=ls())
@@ -23,7 +30,7 @@ sourceCpp("C:\\Users\\herre\\OneDrive\\Documenten\\GitHub\\ConfidenceBounds\\Ana
 
 # Variable settings
 
-overwrite = F  # Overwrite already existing files?
+overwrite = T  # Overwrite already existing files?
 
 z = 0.5  # Starting point (accuracy-coded dataset -> 0.5)
 ntrials = 1000  # Number of decision-making simulations per observation
@@ -32,43 +39,38 @@ dt = 0.001  # Precision
 
 itermax = 50  # Number of DeOptim iterations
 
-# for observations: use 'metacognition', not cj?
 
-# ?
-x <- 1
+### Calculate Chi-square (expected versus observed values)
+
 chi_square_optim <- function(params, observations, returnFit){  
   
   # Generate predictions
   
-  names(params) <- c('v', 'a', 'ter', 'a2', 'postdriftmod')
+  names(params) <- c('v', 'a', 'ter', 'a2', 'postdriftmod') 
   predictions <<- data.frame(DDM_confidence_bounds(v = params['v'], a = params['a'], ter = params['ter'], z = z, ntrials = ntrials, s = sigma, dt = dt, a2 = params['a2'], postdriftmod = params['postdriftmod']))
   names(predictions) <- c('rt', 'resp', 'cor', 'raw_evidence2', 'rtfull', 'confidence', 'rtconf', 'cj')
-  #predictions$evidence2 <- predictions$raw_evidence2 #???
-
-  # Linear scaling of confidence (from continuous to binary)
-  
-  predictions$cj <- (predictions$cj + params['add_mean']) / params['add_sd']
-  predictions$cj <- ifelse(predictions$cj > 0, 1, 0)  # Transform to binary variable (0-1)
   
   # Separate predictions according to the response
   
   c_predicted <- predictions[predictions$cor == 1,]
   e_predicted <- predictions[predictions$cor == 0,]
   
-  # Sort prediction RTs 
+  # RT data frame
   
-  c_predicted_rt <- sort(c_predicted$rt)
-  e_predicted_rt <- sort(e_predicted$rt)
+  c_predicted_rt <- c_predicted$rt
+  e_predicted_rt <- e_predicted$rt
   
-  # Sort prediction confidence RTs
+  # RTconf data frame
   
-  c_predicted_rtconf <- sort(c_predicted$rtconf)
-  e_predicted_rtconf <- sort(e_predicted$rtconf)  
+  c_predicted_rtconf <- c_predicted$rtconf
+  e_predicted_rtconf <- e_predicted$rtconf
   
   # If we're only simulating data: return the predictions
   
   if(returnFit==0){ 
     return(predictions[,c('rt','cor','cj', 'rtconf')])
+    # simulaties per proefpersoon
+    # loop 
     
   # If we are fitting the model: compare these predictions to the observations 
   
@@ -98,8 +100,7 @@ chi_square_optim <- function(params, observations, returnFit){
     obs_props <- c(c_obs_proportion,e_obs_proportion)
     
     # Calculate proportion of responses that fall between the observed quantiles when applied to the predicted data 
-    #!!!(scale by N?)
-    
+
     c_pred_proportion <- c(
       sum(c_predicted_rt <= c_quantiles[1]),
       sum(c_predicted_rt <= c_quantiles[2]) - sum(c_predicted_rt <= c_quantiles[1]),
@@ -134,8 +135,7 @@ chi_square_optim <- function(params, observations, returnFit){
     e_quantiles <- quantile(e_observed$rtconf, probs = c(.1,.3,.5,.7,.9), names = FALSE)
     
     # Calculate proportion of responses that fall between the observed quantiles when applied to the predicted data 
-    #!!!(scale by N?)
-    
+
     c_pred_proportion <- c(
       sum(c_predicted_rtconf <= c_quantiles[1]),
       sum(c_predicted_rtconf <= c_quantiles[2]) - sum(c_predicted_rtconf <= c_quantiles[1]),
@@ -172,12 +172,11 @@ chi_square_optim <- function(params, observations, returnFit){
     
     # To make the next step easier, lets sort the predictions for correct and errors
     
-    c_predicted_cj <- sort(c_predicted$cj)
-    e_predicted_cj <- sort(e_predicted$cj)
+    c_predicted_cj <- c_predicted$cj
+    e_predicted_cj <- e_predicted$cj
     
     # Calculate proportion of responses that fall between the observed quantiles when applied to the predicted data 
-    #(scale by N?)
-    
+
     pred_props_cj <- c(sum(c_predicted_cj == 0),
                        sum(c_predicted_cj == 1)
     ) / dim(predictions)[1]
@@ -186,14 +185,17 @@ chi_square_optim <- function(params, observations, returnFit){
    
     pred_props_cj[pred_props_cj == 0] <- .0000001
     
-    # Combine the quantiles for RTs and cj
+    # Combine the quantiles for RTs, RTconf and cj
+    
     obs_props <- c(obs_props, obs_props, obs_props_cj) 
     pred_props <- c(pred_props_rt, pred_props_rtconf, pred_props_cj) 
     
-    # calculate chi square
+    # Calculate chi square
+    
     chiSquare = sum( ( (obs_props - pred_props) ^ 2) / pred_props )
     
-    #Return chiSquare
+    # Return chiSquare
+    
     return(chiSquare)
     
   }
@@ -240,9 +242,9 @@ for(i in 1:N){  # For each participant separately
       # Optimization function
       
       optimal_params <- DEoptim(chi_square_optim,  # Function to optimize
-                                lower = c(0, .5, 0, .5,   0),  # Lowest possible values for v, a, ter, a2, postdriftmod
-                                upper = c(3,  4, 1,  4, 2.5), 
-                                observations = tempDat, returnFit = 1, control = c(itermax = itermax))  # Observed data is a parameter for the ks function we pass
+                                lower = c(0, .5, 0, 0,   0),  # Lowest possible values for v, a, ter, a2, postdriftmod
+                                upper = c(3,  4, 1, 4, 2.5), 
+                                observations = tempDat, returnFit = 1, control = c(itermax = itermax))
       
       results <- summary(optimal_params)
       
@@ -262,6 +264,7 @@ for(i in 1:N){  # For each participant separately
       
   }
 }
+
 
 # Exploratory plots
 
@@ -296,10 +299,5 @@ dev.off()
 
 
 
-write.table(v_matrix, file='drift.txt')
-write.table(a_matrix, file='bound.txt')
-write.table(ter_matrix, file='ter.txt')
 
-v_matrix <- read.table('drift.txt')
-a_matrix <- read.table('bound.txt')
 

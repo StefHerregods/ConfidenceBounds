@@ -10,6 +10,7 @@
 # - simulaties based on estimated parameters
 # - comparison of different cost functions
 # - split confidence rt and confidence 
+# change precision/iterations
 
 
 rm(list=ls())
@@ -35,12 +36,13 @@ overwrite = T  # Overwrite already existing files?
 z = 0.5  # Starting point (accuracy-coded dataset -> 0.5)
 ntrials = 1000  # Number of decision-making simulations per observation
 sigma = 1  # Within-trial noise
-dt = 0.001  # Precision
+dt = 0.01  # Precision
 
-itermax = 50  # Number of DeOptim iterations
+itermax = 100  # Number of DeOptim iterations
 
 
 ### Calculate Chi-square (expected versus observed values)
+
 
 chi_square_optim <- function(params, observations, returnFit){  
   
@@ -69,8 +71,6 @@ chi_square_optim <- function(params, observations, returnFit){
   
   if(returnFit==0){ 
     return(predictions[,c('rt','cor','cj', 'rtconf')])
-    # simulaties per proefpersoon
-    # loop 
     
   # If we are fitting the model: compare these predictions to the observations 
   

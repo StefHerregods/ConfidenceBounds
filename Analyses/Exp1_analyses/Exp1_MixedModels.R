@@ -11,9 +11,9 @@ library(ggplot2)
 library(grid)
 library(car)
 library(effects)
-library(lmerTest)
 library(optimx)
 library(dfoptim)
+
 
 # VIF function
 
@@ -45,6 +45,7 @@ df$rt_manipulation <- as.factor(df$rt_manipulation)
 df$rtconf_manipulation <- ifelse(df$manipulation %in% c("AccAcc", "FastAcc"), 1, 0)
 df$rtconf_manipulation <- as.factor(df$rtconf_manipulation)
 df$coherence <- as.factor(df$coherence)
+df$cor <- as.factor(df$cor)
 
 
 ### Effect of manipulations on decision RT ###
@@ -104,7 +105,7 @@ RT_8 <- lmer(rt ~ 1 + rt_manipulation * rtconf_manipulation * coherence + (1 + r
 RT_9 <- lmer(rt ~ 1 + rt_manipulation * rtconf_manipulation * coherence + (1 + rt_manipulation * rtconf_manipulation + coherence|sub), 
              data = df_correct, control = lmerControl(optimizer = "bobyqa"))  # boundary (singular) fit
 
-# Model assumptions -> violated -> log transform rt
+# Model assumptions -> violated -> log transform RT
 
 plot(RT_6)
 RT_6_resid <- resid(RT_6)
@@ -135,61 +136,20 @@ allFit_RT_10 <- allFit(RT_10)
 is.OK <- sapply(allFit_RT_10, is, "merMod")
 allFit_RT_10.OK <- allFit_RT_10[is.OK]
 lapply(allFit_RT_10.OK, function(x) x@optinfo$conv$lme4$messages)
-summary(allFit_RT_10)  # Results converge; Use nmkbw optimizer
-
-RT_10 <- lmer(rt_log ~ 1 + rt_manipulation * rtconf_manipulation * coherence + (1 + coherence|sub), data = df_correct, 
-              control = lmerControl(optimizer = "nmkbw")) 
+summary(allFit_RT_10)  # Singular fit for nearly all optimizers
 
 anova(RT_7, RT_8)  # Significant; BIC 24711
 anova(RT_7, RT_9)  # Significant; BIC 25857
-anova(RT_7, RT_10)  # Significant; BIC 25844
 
-RT_11 <- lmer(rt_log ~ 1 + rt_manipulation * rtconf_manipulation * coherence + (1 + rt_manipulation + coherence|sub), 
-              data = df_correct, control = lmerControl(optimizer = "nmkbw")) 
+RT_11 <- lmer(rt_log ~ 1 + rt_manipulation * rtconf_manipulation * coherence + (1 + rt_manipulation + rtconf_manipulation|sub), 
+              data = df_correct, control = lmerControl(optimizer = "bobyqa"))
 
-anova(RT_10, RT_11)  # Significant
+anova(RT_8, RT_11)  # Significant
 
-RT_12 <- lmer(rt_log ~ 1 + rt_manipulation * rtconf_manipulation * coherence + (1 + rt_manipulation + coherence + rtconf_manipulation|sub), 
-              data = df_correct, control = lmerControl(optimizer = "nmkbw"))  # Fails to converge
+RT_12 <- lmer(rt_log ~ 1 + rt_manipulation * rtconf_manipulation * coherence + (1 + rt_manipulation * rtconf_manipulation|sub), 
+              data = df_correct, control = lmerControl(optimizer = "bobyqa")) 
 
-allFit_RT_12 <- allFit(RT_12)
-is.OK <- sapply(allFit_RT_12, is, "merMod")
-allFit_RT_12.OK <- allFit_RT_12[is.OK]
-lapply(allFit_RT_12.OK, function(x) x@optinfo$conv$lme4$messages)
-summary(allFit_RT_12)  # Results converge (except for Nelder_Mead); Use nloptwrap.NLOPT_LN_BOBYQA	 optimizer
-
-RT_12 <- lmer(rt_log ~ 1 + rt_manipulation * rtconf_manipulation * coherence + (1 + rt_manipulation + coherence + rtconf_manipulation|sub), 
-              data = df_correct, control = lmerControl(optimizer = "nloptwrap", optCtrl = list(algorithm = "NLOPT_LN_BOBYQA", maxit = 1e6)))
-
-anova (RT_11, RT_12)  # Significant
-
-RT_13 <- lmer(rt_log ~ 1 + rt_manipulation * rtconf_manipulation * coherence + (1 + rt_manipulation * coherence + rtconf_manipulation|sub), 
-              data = df_correct, control = lmerControl(optimizer = "nloptwrap", optCtrl = list(algorithm = "NLOPT_LN_BOBYQA", maxit = 1e6)))
-
-allFit_RT_13 <- allFit(RT_13)
-is.OK <- sapply(allFit_RT_13, is, "merMod")
-allFit_RT_13.OK <- allFit_RT_13[is.OK]
-lapply(allFit_RT_13.OK, function(x) x@optinfo$conv$lme4$messages)
-summary(allFit_RT_13)  # Boundary (singular) fit
-
-RT_14 <- lmer(rt_log ~ 1 + rt_manipulation * rtconf_manipulation * coherence + (1 + rt_manipulation + coherence * rtconf_manipulation|sub), 
-              data = df_correct, control = lmerControl(optimizer = "nloptwrap", optCtrl = list(algorithm = "NLOPT_LN_BOBYQA", maxit = 1e6)))
-
-allFit_RT_14 <- allFit(RT_14)
-is.OK <- sapply(allFit_RT_14, is, "merMod")
-allFit_RT_14.OK <- allFit_RT_14[is.OK]
-lapply(allFit_RT_14.OK, function(x) x@optinfo$conv$lme4$messages)
-summary(allFit_RT_14)  # Boundary (singular) fit
-
-
-RT_15 <- lmer(rt_log ~ 1 + rt_manipulation * rtconf_manipulation * coherence + (1 + rt_manipulation * rtconf_manipulation + coherence|sub), 
-              data = df_correct, control = lmerControl(optimizer = "nloptwrap", optCtrl = list(algorithm = "NLOPT_LN_BOBYQA", maxit = 1e6)))
-
-allFit_RT_15 <- allFit(RT_15)
-is.OK <- sapply(allFit_RT_15, is, "merMod")
-allFit_RT_15.OK <- allFit_RT_15[is.OK]
-lapply(allFit_RT_15.OK, function(x) x@optinfo$conv$lme4$messages)
-summary(allFit_RT_15)  # Only NLOPT_LN_NELDERMEAD has singular fit; Convergence issues in other optimizers
+anova(RT_11, RT_12)  # Significant
 
 # Model assumptions
 
@@ -207,7 +167,7 @@ vif.lme(RT_12)
 
 # Model interpretation
 
-anova(RT_12)
+Anova(RT_12)
 confint(RT_12)
 
 plot(effect('rt_manipulation', RT_12))
@@ -252,40 +212,61 @@ df_correct$rtconf_log <- scale(df_correct$rtconf_log, scale = FALSE)
 
 # Model comparisons (through likelihood ratio tests)
 
-RTconf_1 <- lmer(rtconf_log ~ 1 + rt_manipulation * rtconf_manipulation * coherence + (1|sub), data = df_correct)
-RTconf_2 <- lmer(rtconf_log ~ 1 + rt_manipulation * rtconf_manipulation * coherence + (1 + rt_manipulation|sub), data = df_correct)
-RTconf_3 <- lmer(rtconf_log ~ 1 + rt_manipulation * rtconf_manipulation * coherence + (1 + rtconf_manipulation|sub), data = df_correct) 
-RTconf_4 <- lmer(rtconf_log ~ 1 + rt_manipulation * rtconf_manipulation * coherence + (1 + coherence|sub), data = df_correct)
+RTconf_1 <- lmer(rtconf_log ~ 1 + rt_manipulation * rtconf_manipulation * coherence + (1|sub), 
+                 data = df_correct, control = lmerControl(optimizer = "bobyqa"))
+RTconf_2 <- lmer(rtconf_log ~ 1 + rt_manipulation * rtconf_manipulation * coherence + (1 + rt_manipulation|sub), 
+                 data = df_correct, control = lmerControl(optimizer = "bobyqa"))
+RTconf_3 <- lmer(rtconf_log ~ 1 + rt_manipulation * rtconf_manipulation * coherence + (1 + rtconf_manipulation|sub), 
+                 data = df_correct, control = lmerControl(optimizer = "bobyqa")) 
+RTconf_4 <- lmer(rtconf_log ~ 1 + rt_manipulation * rtconf_manipulation * coherence + (1 + coherence|sub), 
+                 data = df_correct, control = lmerControl(optimizer = "bobyqa"))  # Boundary (singular) fit
 
-anova(RT_1, RT_2)  # Significant
-anova(RT_1, RT_3)  # Significant
-anova(RT_1, RT_4)  # Significant
+allFit_RTconf_4 <- allFit(RTconf_4)
+is.OK <- sapply(allFit_RTconf_4, is, "merMod")
+allFit_RTconf_4.OK <- allFit_RTconf_4[is.OK]
+lapply(allFit_RTconf_4.OK, function(x) x@optinfo$conv$lme4$messages)
+summary(allFit_RTconf_4)  # Boundary (singular) fit for nearly all optimizers
 
-RTconf_5 <- lmer(rtconf_log ~ 1 + rt_manipulation * rtconf_manipulation * coherence + (1 + rt_manipulation + coherence|sub), data = df_correct)
+anova(RTconf_1, RTconf_2)  # Significant; BIC 47547
+anova(RTconf_1, RTconf_3)  # Significant; BIC 44147
 
+RTconf_5 <- lmer(rtconf_log ~ 1 + rt_manipulation * rtconf_manipulation * coherence + (1 + rt_manipulation + rtconf_manipulation|sub), 
+                 data = df_correct, control = lmerControl(optimizer = "bobyqa"))
 
-# TO DO !!!!
+anova(RTconf_3, RTconf_5)  # Significant
+
+RTconf_6 <- lmer(rtconf_log ~ 1 + rt_manipulation * rtconf_manipulation * coherence + (1 + rt_manipulation * rtconf_manipulation|sub), 
+                 data = df_correct, control = lmerControl(optimizer = "bobyqa"))
+
+anova(RTconf_5, RTconf_6) # Significant
 
 # Model assumptions
 
-plot(RTconf_12)
-RTconf_12_resid <- resid(RTconf_12)
-RTconf_12_fit <- fitted(RTconf_12)
-qqnorm(RTconf_12_resid)
-qqline(RTconf_12_resid)
-df_temp <- data.frame(cbind(RTconf_12_fit, RTconf_12_resid))
-ggplot(df_temp, aes(x = RTconf_12_fit, y = RTconf_12_resid)) + geom_point() + geom_smooth(se = F) + geom_hline(aes(yintercept=0))
+plot(RTconf_6)
+RTconf_6_resid <- resid(RTconf_6)
+RTconf_6_fit <- fitted(RTconf_6)
+qqnorm(RTconf_6_resid)
+qqline(RTconf_6_resid)
+df_temp <- data.frame(cbind(RTconf_6_fit, RTconf_6_resid))
+ggplot(df_temp, aes(x = RTconf_6_fit, y = RTconf_6_resid)) + geom_point() + geom_smooth(se = F) + geom_hline(aes(yintercept=0))
 
+# Multicollinearity - VIF
 
+vif.lme(RTconf_6)
 
+# Model interpretation
 
+anova(RTconf_6)
+confint(RTconf_6)
 
+plot(effect('rt_manipulation', RTconf_6))  # Not significant
+plot(effect('rtconf_manipulation', RTconf_6)) 
+plot(effect('coherence', RTconf_6))
+plot(effect('rt_manipulation:rtconf_manipulation', RTconf_6))
 
-
-
-
-
-
+#data.frame(effect('rt_manipulation:coherence', RTconf_6))
+fixef(RTconf_6)
+ranef(RTconf_6)
 
 
 ### Effect of manipulations on accuracy ###
@@ -311,28 +292,34 @@ print(plot1, vp=vplayout(1,1))
 print(plot2, vp=vplayout(1,2))
 print(plot3, vp=vplayout(1,3))
 
-# Transform accuracy into factor
-
-df$cor <- as.factor(df$cor)
-
 # Model comparisons (through likelihood ratio tests)
 
-Cor_1 <- glmer(cor ~ 1 + rt_manipulation * rtconf_manipulation * coherence + (1|sub), data = df, family = binomial)
-Cor_2 <- glmer(cor ~ 1 + rt_manipulation * rtconf_manipulation * coherence + (1 + rt_manipulation|sub), data = df, family = binomial)
-Cor_3 <- glmer(cor ~ 1 + rt_manipulation * rtconf_manipulation * coherence + (1 + rtconf_manipulation|sub), data = df, family = binomial)  
-Cor_4 <- glmer(cor ~ 1 + rt_manipulation * rtconf_manipulation * coherence + (1 + coherence|sub), data = df, family = binomial) 
+Cor_1 <- glmer(cor ~ 1 + rt_manipulation * rtconf_manipulation * coherence + (1|sub), 
+               data = df, family = binomial, control = glmerControl(optimizer = "bobyqa"))
+Cor_2 <- glmer(cor ~ 1 + rt_manipulation * rtconf_manipulation * coherence + (1 + rt_manipulation|sub), 
+               data = df, family = binomial, control = glmerControl(optimizer = "bobyqa"))
+Cor_3 <- glmer(cor ~ 1 + rt_manipulation * rtconf_manipulation * coherence + (1 + rtconf_manipulation|sub), 
+               data = df, family = binomial, control = glmerControl(optimizer = "bobyqa"))  
+Cor_4 <- glmer(cor ~ 1 + rt_manipulation * rtconf_manipulation * coherence + (1 + coherence|sub), 
+               data = df, family = binomial, control = glmerControl(optimizer = "bobyqa"))  # Boundary (singular) fit
+
+allFit_Cor_4 <- allFit(Cor_4)
+is.OK <- sapply(allFit_Cor_4, is, "merMod")
+allFit_Cor_4.OK <- allFit_Cor_4[is.OK]
+lapply(allFit_Cor_4.OK, function(x) x@optinfo$conv$lme4$messages)
+summary(allFit_Cor_4)  # Boundary (singular) fit for nearly all optimizers
 
 anova(Cor_1, Cor_2)  # Significant
 anova(Cor_1, Cor_3)  # Not significant
-anova(Cor_1, Cor_4)  # Significant
 
-RTconf_5 <- glmer(cor ~ 1 + rt_manipulation * rtconf_manipulation * coherence + (1 + coherence + rt_manipulation|sub), data = df, family = binomial)  # Fails to converge
+Cor_5 <- glmer(cor ~ 1 + rt_manipulation * rtconf_manipulation * coherence + (1 + rt_manipulation + rtconf_manipulation|sub), 
+                  data = df, family = binomial, control = glmerControl(optimizer = "bobyqa"))  # Fails to converge
 
-anova(Cor_2, Cor_4)  # Significant; better BIC, AIC, log likelihood for Cor_4
+anova(Cor_2, Cor_5)  # Not significant
 
 # Model assumptions
 
-plot(Cor_4)
+plot(Cor_2)
 Cor_4_resid <- resid(Cor_4)
 Cor_4_fit <- fitted(Cor_4)
 qqnorm(Cor_4_resid)
@@ -340,12 +327,12 @@ qqline(Cor_4_resid)
 df_temp <- data.frame(cbind(Cor_4_fit, Cor_4_resid))
 ggplot(df_temp, aes(x = Cor_4_fit, y = Cor_4_resid)) + geom_point() + geom_smooth(se = F) + geom_hline(aes(yintercept=0))
 
-vif.lme(Cor_4)
+vif.lme(Cor_2)
   
 
 
-
-
+Anova(Cor_2)
+confint(Cor_2)
 
 
 

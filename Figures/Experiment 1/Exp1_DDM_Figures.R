@@ -14,7 +14,7 @@ df <- data.frame(matrix(ncol = 9, nrow = 40*4))
 colnames(df) <- c('sub', 'manipulation', 'v1', 'v2', 'v3', 'a', 'ter', 'a2', 'postdriftmod')
 condLab <- c('FastFast', 'AccFast', 'AccAcc', 'FastAcc') 
 j <- 1
-for (i in 1:40){
+for (i in 1:20){ #!!!change
   for(c in 1:4){
     file_name <- paste0('Parameter_estimation\\results_sub_', i, '_', condLab[c], '.Rdata')
     load(file_name)

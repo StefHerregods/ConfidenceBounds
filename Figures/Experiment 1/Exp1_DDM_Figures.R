@@ -10,73 +10,90 @@ setwd('C:\\Users\\herre\\Desktop\\Internship\\Results\\Exp1_Results')
 
 # Load data (long format)
 
-df <- data.frame(matrix(ncol = 7, nrow = 40*4))
-colnames(df) <- c('sub', 'manipulation', 'v', 'a', 'ter', 'a2', 'postdriftmod')
-condLab <- c('AccAcc', 'AccFast', 'FastFast', 'FastAcc')  #!!! Change to all forms of manipulations
+df <- data.frame(matrix(ncol = 9, nrow = 40*4))
+colnames(df) <- c('sub', 'manipulation', 'v1', 'v2', 'v3', 'a', 'ter', 'a2', 'postdriftmod')
+condLab <- c('FastFast', 'AccFast', 'AccAcc', 'FastAcc') 
 j <- 1
 for (i in 1:40){
   for(c in 1:4){
     file_name <- paste0('Parameter_estimation\\results_sub_', i, '_', condLab[c], '.Rdata')
     load(file_name)
-    df[j,] <- c(i, condLab[c], results$optim$bestmem[1], results$optim$bestmem[2], results$optim$bestmem[3], results$optim$bestmem[4], results$optim$bestmem[5])
+    df[j,] <- c(i, condLab[c], results$optim$bestmem[1], results$optim$bestmem[2], results$optim$bestmem[3], results$optim$bestmem[4], results$optim$bestmem[5], results$optim$bestmem[6], results$optim$bestmem[7])
     j <- j + 1
   }
 }
-df$a2 <- as.numeric(data.frame(df$a2)) #!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
-# v
+df[3:9] <- lapply(df[3:9], as.numeric)
 
-ggplot(df, aes(x = manipulation, y = v)) +
+
+# v1
+
+ggplot(df, aes(x = manipulation, y = v1)) +
   geom_point() +
   geom_line(aes(group = sub), alpha = 0.2) +
-  stat_summary(aes(y = v, group = 1), fun = mean, colour="Blue", size = 4, shape = 95) +
+  stat_summary(aes(y = v1, group = 1), fun = mean, colour="Blue", size = 4, shape = 95) +
   scale_x_discrete(labels = c("Fast decision\nFast confidence rating", "Accurate decision\nFast confidence rating", "Accurate decision\nAccurate confidence rating", "Fast decision\nAccurate confidence rating")) 
   
+# v2
+
+ggplot(df, aes(x = manipulation, y = v2)) +
+  geom_point() +
+  geom_line(aes(group = sub), alpha = 0.2) +
+  stat_summary(aes(y = v2, group = 1), fun = mean, colour="Blue", size = 4, shape = 95) +
+  scale_x_discrete(labels = c("Fast decision\nFast confidence rating", "Accurate decision\nFast confidence rating", "Accurate decision\nAccurate confidence rating", "Fast decision\nAccurate confidence rating")) 
+
+# v3
+
+ggplot(df, aes(x = manipulation, y = v3)) +
+  geom_point() +
+  geom_line(aes(group = sub), alpha = 0.2) +
+  stat_summary(aes(y = v3, group = 1), fun = mean, colour="Blue", size = 4, shape = 95) +
+  scale_x_discrete(labels = c("Fast decision\nFast confidence rating", "Accurate decision\nFast confidence rating", "Accurate decision\nAccurate confidence rating", "Fast decision\nAccurate confidence rating")) 
+
+# v comparison
+
+ggplot(df, aes(x = manipulation)) +
+  geom_point(aes(y = v1), colour = 'darkred') +
+  geom_point(aes(y = v2), colour = 'blue') +
+  geom_point(aes(y = v3), colour = 'green') +
+  geom_line(aes(y = v1, group = sub), alpha = 0.2, colour = 'darkred', lty = 5) +
+  geom_line(aes(y = v2, group = sub), alpha = 0.2, colour = 'blue', lty = 5) +
+  geom_line(aes(y = v3, group = sub), alpha = 0.2, colour = 'green', lty = 5) +
+  stat_summary(aes(y = v1, group = 1), fun = mean, colour= 'darkred', size = 4, shape = 95) +
+  stat_summary(aes(y = v2, group = 1), fun = mean, colour= 'blue', size = 4, shape = 95) +
+  stat_summary(aes(y = v3, group = 1), fun = mean, colour= 'green', size = 4, shape = 95) +
+  scale_x_discrete(labels = c("Fast decision\nFast confidence rating", "Accurate decision\nFast confidence rating", "Accurate decision\nAccurate confidence rating", "Fast decision\nAccurate confidence rating")) 
+
+
 # a
 
-a_df_wide <- data.frame(a_matrix)
-a_df_wide$index <- 1:nrow(a_df_wide)
-a_df <- a_df_wide %>% pivot_longer(cols = !index, names_to = 'condition', values_to = 'a')
-
-ggplot(a_df, aes(x = condition, y = a)) +
+ggplot(df, aes(x = manipulation, y = a)) +
   geom_point() +
-  geom_line(aes(group = index), alpha = 0.2) +
+  geom_line(aes(group = sub), alpha = 0.2) +
   stat_summary(aes(y = a, group = 1), fun = mean, colour="Blue", size = 4, shape = 95) +
   scale_x_discrete(labels = c("Fast decision\nFast confidence rating", "Accurate decision\nFast confidence rating", "Accurate decision\nAccurate confidence rating", "Fast decision\nAccurate confidence rating")) 
 
 # a2
 
-a2_df_wide <- data.frame(a2_matrix)
-a2_df_wide$index <- 1:nrow(a2_df_wide)
-a2_df <- a2_df_wide %>% pivot_longer(cols = !index, names_to = 'condition', values_to = 'a2')
-
-ggplot(a2_df, aes(x = condition, y = a2)) +
+ggplot(df, aes(x = manipulation, y = a2)) +
   geom_point() +
-  geom_line(aes(group = index), alpha = 0.2) +
+  geom_line(aes(group = sub), alpha = 0.2) +
   stat_summary(aes(y = a2, group = 1), fun = mean, colour="Blue", size = 4, shape = 95) +
   scale_x_discrete(labels = c("Fast decision\nFast confidence rating", "Accurate decision\nFast confidence rating", "Accurate decision\nAccurate confidence rating", "Fast decision\nAccurate confidence rating")) 
 
 # ter
 
-ter_df_wide <- data.frame(ter_matrix)
-ter_df_wide$index <- 1:nrow(ter_df_wide)
-ter_df <- ter_df_wide %>% pivot_longer(cols = !index, names_to = 'condition', values_to = 'ter')
-
-ggplot(ter_df, aes(x = condition, y = ter)) +
+ggplot(df, aes(x = manipulation, y = ter)) +
   geom_point() +
-  geom_line(aes(group = index), alpha = 0.2) +
+  geom_line(aes(group = sub), alpha = 0.2) +
   stat_summary(aes(y = ter, group = 1), fun = mean, colour="Blue", size = 4, shape = 95) +
   scale_x_discrete(labels = c("Fast decision\nFast confidence rating", "Accurate decision\nFast confidence rating", "Accurate decision\nAccurate confidence rating", "Fast decision\nAccurate confidence rating")) 
 
 # postdriftmod
 
-postdriftmod_df_wide <- data.frame(postdriftmod_matrix)
-postdriftmod_df_wide$index <- 1:nrow(postdriftmod_df_wide)
-postdriftmod_df <- postdriftmod_df_wide %>% pivot_longer(cols = !index, names_to = 'condition', values_to = 'postdriftmod')
-
-ggplot(postdriftmod_df, aes(x = condition, y = postdriftmod)) +
+ggplot(df, aes(x = manipulation, y = postdriftmod)) +
   geom_point() +
-  geom_line(aes(group = index), alpha = 0.2) +
+  geom_line(aes(group = sub), alpha = 0.2) +
   stat_summary(aes(y = postdriftmod, group = 1), fun = mean, colour="Blue", size = 4, shape = 95) +
   scale_x_discrete(labels = c("Fast decision\nFast confidence rating", "Accurate decision\nFast confidence rating", "Accurate decision\nAccurate confidence rating", "Fast decision\nAccurate confidence rating")) 
 

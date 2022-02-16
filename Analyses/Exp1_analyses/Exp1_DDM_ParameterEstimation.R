@@ -9,7 +9,6 @@
 # - één v per coherence level
 # - simulaties based on estimated parameters
 # - comparison of different cost functions
-# - split confidence rt and confidence 
 # change precision/iterations
 
 
@@ -50,7 +49,7 @@ chi_square_optim <- function(params, observations, returnFit){
   
   names(params) <- c('v', 'a', 'ter', 'a2', 'postdriftmod') 
   predictions <<- data.frame(DDM_confidence_bounds(v = params['v'], a = params['a'], ter = params['ter'], z = z, ntrials = ntrials, s = sigma, dt = dt, a2 = params['a2'], postdriftmod = params['postdriftmod']))
-  names(predictions) <- c('rt', 'resp', 'cor', 'raw_evidence2', 'rtfull', 'confidence', 'rtconf', 'cj')
+  names(predictions) <- c('rt', 'resp', 'cor', 'conf_evidence', 'rtfull', 'rtconf', 'cj')
   
   # Separate predictions according to the response
   
@@ -70,7 +69,7 @@ chi_square_optim <- function(params, observations, returnFit){
   # If we're only simulating data: return the predictions
   
   if(returnFit==0){ 
-    return(predictions[,c('rt','cor','cj', 'rtconf')])
+    return(predictions[,c('rt', 'cor', 'cj', 'rtconf')])
     
   # If we are fitting the model: compare these predictions to the observations 
   
@@ -207,14 +206,6 @@ df <- read.csv(file = "Exp1_data_viable.csv")
 subs <- unique(df$sub)
 N<-length(subs)
 
-# Create empty matrices
-
-v_matrix <- matrix(NA, N, 4)  #!!! change to higher than 4 for more conditions
-a_matrix <- matrix(NA, N, 4)
-ter_matrix <- matrix(NA, N, 4)
-a2_matrix <- matrix(NA, N, 4)
-postdriftmod_matrix <- matrix(NA, N, 4)
-
 # Optimize (extended) DDM parameters 
 
 for(i in 1:N){  # For each participant separately
@@ -253,15 +244,6 @@ for(i in 1:N){  # For each participant separately
       save(results, file = file_name)
       
     }
-      
-    # Add results 
-    
-    v_matrix[i,c] <- results$optim$bestmem[1]  
-    a_matrix[i,c] <- results$optim$bestmem[2]
-    ter_matrix[i,c] <- results$optim$bestmem[3]
-    a2_matrix[i,c] <- results$optim$bestmem[4]
-    postdriftmod_matrix[i,c] <- results$optim$bestmem[5]
-      
   }
 }
 

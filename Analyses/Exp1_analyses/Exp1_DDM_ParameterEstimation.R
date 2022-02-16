@@ -9,9 +9,11 @@
 # - simulaties based on estimated parameters
 # - comparison of different cost functions
 # change precision/iterations
+# - also separate postdriftmod???
 
 # Issues:
-# 
+# - manipulation order?
+# - v2, v3
 
 
 rm(list=ls())

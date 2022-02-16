@@ -6,10 +6,12 @@
 
 
 # TO DO
-# - één v per coherence level
 # - simulaties based on estimated parameters
 # - comparison of different cost functions
 # change precision/iterations
+
+# Issues:
+# 
 
 
 rm(list=ls())
@@ -38,7 +40,12 @@ ntrials = 1000  # Number of decision-making simulations per observation
 sigma = 1  # Within-trial noise
 dt = 0.01  # Precision
 
-itermax = 100  # Number of DeOptim iterations
+itermax = 1000  # Number of DeOptim iterations
+
+# Variable vectors
+
+v_vector <- c('v1', 'v2', 'v3')
+coherence_vector <- c(0.1, 0.2, 0.4)
 
 
 ### Calculate Chi-square (expected versus observed values)
@@ -54,14 +61,14 @@ chi_square_optim <- function(params, all_observations, returnFit){
   
   names(params) <- c('v1', 'v2', 'v3', 'a', 'ter', 'a2', 'postdriftmod')
   
-  # Separate chi-square for each level of coherence
+  # Calculate separate chi-square for each level of coherence
   
-  for (i in c(0.1, 0.2, 0.4)){
-    observations <- all_observations %>% filter(coherence == i)
+  for (i in 1:3){
+    observations <- all_observations %>% filter(coherence == coherence_vector[i])
     
     # Generate predictions 
     
-    predictions <<- data.frame(DDM_confidence_bounds(v = params['v'], a = params['a'], ter = params['ter'], z = z, ntrials = ntrials, s = sigma, dt = dt, a2 = params['a2'], postdriftmod = params['postdriftmod']))
+    predictions <<- data.frame(DDM_confidence_bounds(v = params[v_vector[i]], a = params['a'], ter = params['ter'], z = z, ntrials = ntrials, s = sigma, dt = dt, a2 = params['a2'], postdriftmod = params['postdriftmod']))
     names(predictions) <- c('rt', 'resp', 'cor', 'conf_evidence', 'rtfull', 'rtconf', 'cj')
     
     # Separate predictions according to the response
@@ -230,10 +237,10 @@ N<-length(subs)
 for(i in 1:N){  # For each participant separately
    
   print(paste('Running participant', subs[i], 'from', N))
-  condLab <- unique(df$manipulation)  #!!! Change to all forms of manipulations
+  condLab <- unique(df$manipulation)  
   tempAll <- subset(df, sub == subs[i])
   
-  for(c in 1:4){  # For each condition separately !!! Change to higher for more conditions
+  for(c in 1:4){  # For each condition separately 
     
     tempDat <- subset(tempAll, manipulation == condLab[c])
     tempDat <- tempDat[,c('rt', 'cor', 'resp', 'cj', 'manipulation', 'rtconf', 'coherence')]
@@ -253,8 +260,8 @@ for(i in 1:N){  # For each participant separately
       
       optimal_params <- DEoptim(chi_square_optim,  # Function to optimize
                                 # Lowest possible values for v (for each level of coherence: 0.1, 0.2 and 0.4), a, ter, a2, postdriftmod
-                                lower = c(0, 0, 0, .5, 0, 0,   0),  
-                                upper = c(3, 3, 3,  4, 1, 4, 2.5), 
+                                lower = c(0, 0, 0, .5,   0, 0,   0),  
+                                upper = c(3, 3, 3,  4, 1.5, 4, 2.5), 
                                 all_observations = tempDat, returnFit = 1, control = c(itermax = itermax))
       
       results <- summary(optimal_params)

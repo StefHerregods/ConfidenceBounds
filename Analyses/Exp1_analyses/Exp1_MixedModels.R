@@ -13,7 +13,9 @@ library(car)
 library(effects)
 library(optimx)
 library(dfoptim)
-
+library(ggResidpanel)
+library(arm)
+library(splines)
 
 # VIF function
 
@@ -160,6 +162,7 @@ qqnorm(RT_12_resid)
 qqline(RT_12_resid)
 df_temp <- data.frame(cbind(RT_12_fit, RT_12_resid))
 ggplot(df_temp, aes(x = RT_12_fit, y = RT_12_resid)) + geom_point() + geom_smooth(se = F) + geom_hline(aes(yintercept=0))
+resid_panel(RT_12)
 
 # Multicollinearity - VIF
 
@@ -249,6 +252,7 @@ qqnorm(RTconf_6_resid)
 qqline(RTconf_6_resid)
 df_temp <- data.frame(cbind(RTconf_6_fit, RTconf_6_resid))
 ggplot(df_temp, aes(x = RTconf_6_fit, y = RTconf_6_resid)) + geom_point() + geom_smooth(se = F) + geom_hline(aes(yintercept=0))
+resid_panel(RTconf_6)
 
 # Multicollinearity - VIF
 
@@ -256,7 +260,7 @@ vif.lme(RTconf_6)
 
 # Model interpretation
 
-anova(RTconf_6)
+Anova(RTconf_6)
 confint(RTconf_6)
 
 plot(effect('rt_manipulation', RTconf_6))  # Not significant
@@ -319,65 +323,10 @@ anova(Cor_2, Cor_5)  # Not significant
 
 # Model assumptions
 
-plot(Cor_2)
-Cor_4_resid <- resid(Cor_4)
-Cor_4_fit <- fitted(Cor_4)
-qqnorm(Cor_4_resid)
-qqline(Cor_4_resid)
-df_temp <- data.frame(cbind(Cor_4_fit, Cor_4_resid))
-ggplot(df_temp, aes(x = Cor_4_fit, y = Cor_4_resid)) + geom_point() + geom_smooth(se = F) + geom_hline(aes(yintercept=0))
-
-vif.lme(Cor_2)
-  
-
-
-Anova(Cor_2)
-confint(Cor_2)
-
-
-
-
-
-
-
-
-
-
-
-library(aod)
-library(ggpubr)
-library(arm)
-library(car)
-library(ggplot2)
-library(ggResidpanel)
-library(lme4)
-library(tidyr)
-
-### ASSUMPTIONS MULTILEVEL LOGISTIC REGRESSION
-
-#independence of errors -> plot residuals over time
-#linearity between log odds and continuous predictors
-#absence of multicollinearity -> VIF
-#lack of strongly influential outliers
-
-# SO NO homoscedasticity nor normally distributed residuals
-
-# In this example 'm_conf_slopes' is our mixed model
-
-
-
-
-# INDEPENDENCE OF ERRORS
-## This means that when you plot your residuals there shouldn't be a trend (just a straigth line)
-## Otherwise there is still some uncaptured variance, causing the errors to be dependent (predictable)
-
-# for linear mixed models you can just look at the left upper panel but with logistic regression this will look odd 
-resid_panel(Cor_4) 
-
-# That's why another approach is needed using binned residuals
-# If most of the dots fall within the area, then it's okay
-binnedplot(fitted(Cor_4), 
-           residuals(Cor_4, type = "response"), 
+# (1) Independence of errors
+# Gray lines indicate plus and minus 2 standard-error bounds (around 95% of residuals)
+binnedplot(fitted(Cor_2), 
+           residuals(Cor_2, type = "response"), 
            nclass = NULL, 
            xlab = "Expected Values", 
            ylab = "Average residual", 
@@ -386,60 +335,29 @@ binnedplot(fitted(Cor_4),
            col.pts = 1, 
            col.int = "gray")
 
+plot(Cor_2)
+plot(predict(Cor_2), residuals(Cor_2), col = c("blue","red")[as.numeric(df$cor)])
+abline(h=0,lty=2,col="grey")
+lines(lowess(predict(Cor_2), residuals(Cor_2)), col="black", lwd=2)
 
+rl=lm(residuals(Cor_2)~bs(predict(Cor_2),8))
+y=predict(rl,se=TRUE)
+segments(predict(Cor_2),y$fit+2*y$se.fit,predict(Cor_2),y$fit-2*y$se.fit,col="green")
 
-# CHECK LINEAR RELATIONSHIP LOGODDS AND PREDICTORS
+# (2) Linearity (no continuous variables)
 
-## APPROACH 1
-probabilities <- predict(Cor_4, type = "response")
+# (3) Absence of multicollinearity
 
-# only CONTINUOUS variables
-mydata <- data.frame(df$rt_manipulation, df$rtconf_manipulation, df$coherence)
-colnames(mydata) <- c("rt_manipulation", "rtconf_manipulation", "coherence")
-predictors <- colnames(mydata)
-# Bind the logit and tidying the data for plot
-mydata <- mydata %>%
-  mutate(logit = log(probabilities/(1-probabilities))) %>%
-  gather(key = "predictors", value = "predictor.value", -logit)
+vif.lme(Cor_2)
 
-# You should see a more or less linear relation
-ggplot(mydata, aes(logit,predictor.value))+
-  geom_point(size = 0.5, alpha = 0.5) +
-  geom_smooth(method = "loess",se=FALSE) + 
-  theme_bw() + 
-  facet_wrap(~predictors, scales = "free_y")
+# Model interpretation
 
-## APPROACH 2
+Anova(Cor_2)
 
-# Check linearity between logodds and continuous predictors with Box Tidwell transformation
-# Just add interaction between predictor and ln(predictor) in your model
-# If you have negative values, then make then all positive (just add constant to all the values to make then positive)
-# If not significant, linearity is okay!
+plot(effect('rt_manipulation', Cor_2))  # Not significant
+plot(effect('rtconf_manipulation', Cor_2))   # Not significant
+plot(effect('coherence', Cor_2))
 
-df_boxtidwell <- df_excluded
-
-# ln only possible for values > 0 so transform variables
-df_boxtidwell$prev_conf_scaled_bt <- 1 + df_boxtidwell$prev_conf_scaled + abs(min(df_boxtidwell$prev_conf_scaled))
-df_boxtidwell$evidence_scaled_bt <- 1 + df_boxtidwell$evidence_scaled + abs(min(df_boxtidwell$evidence_scaled)) 
-df_boxtidwell$prev_evidence_scaled_bt <- 1 + df_boxtidwell$prev_evidence_scaled + abs(min(df_boxtidwell$prev_evidence_scaled))
-
-m_boxtidwell <- glmer(data=df_boxtidwell, resp ~ 
-                        
-                        evidence_scaled_bt +
-                        prev_evidence_scaled_bt +
-                        prev_resp * prev_conf_scaled_bt  +
-                        
-                        evidence_scaled_bt:log(evidence_scaled_bt) +
-                        prev_evidence_scaled_bt:log(prev_evidence_scaled_bt) +
-                        prev_conf_scaled_bt:log(prev_conf_scaled_bt) +
-                        
-                        (1|sub),
-                      family = binomial,control=glmerControl(optimizer='bobyqa',optCtrl = list(maxfun=10000000)))
-
-Anova(m_boxtidwell)
-
-# ABSENCE OF MULTICOLLINEARITY
-# Just check VIF
-
-
-
+#data.frame(effect('rt_manipulation:coherence', RTconf_6))
+fixef(RTconf_6)
+ranef(RTconf_6)

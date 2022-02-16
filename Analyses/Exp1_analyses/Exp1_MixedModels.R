@@ -48,7 +48,6 @@ df$rtconf_manipulation <- as.factor(df$rtconf_manipulation)
 df$coherence <- as.factor(df$coherence)
 df$cor <- as.factor(df$cor)
 
-
 ### Effect of manipulations on decision RT ###
 
 

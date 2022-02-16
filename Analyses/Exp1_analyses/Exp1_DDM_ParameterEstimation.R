@@ -23,6 +23,7 @@ setwd('C:\\Users\\herre\\Desktop\\Internship\\Results\\Exp1_Results')
 library(Rcpp)  # To source, compile and run C++ functions
 library(DEoptim)  # Optimization algorithm
 library(RcppZiggurat)  # Random number generator (normal distribution) 
+library(dplyr)
 
 # Give R access to the DDM simulation function in C++
 
@@ -43,159 +44,177 @@ itermax = 100  # Number of DeOptim iterations
 ### Calculate Chi-square (expected versus observed values)
 
 
-chi_square_optim <- function(params, observations, returnFit){  
+chi_square_optim <- function(params, all_observations, returnFit){  
   
-  # Generate predictions
+  # Reset chi-square
   
-  names(params) <- c('v', 'a', 'ter', 'a2', 'postdriftmod') 
-  predictions <<- data.frame(DDM_confidence_bounds(v = params['v'], a = params['a'], ter = params['ter'], z = z, ntrials = ntrials, s = sigma, dt = dt, a2 = params['a2'], postdriftmod = params['postdriftmod']))
-  names(predictions) <- c('rt', 'resp', 'cor', 'conf_evidence', 'rtfull', 'rtconf', 'cj')
+  chiSquare <- 0
   
-  # Separate predictions according to the response
+  # Name parameters
   
-  c_predicted <- predictions[predictions$cor == 1,]
-  e_predicted <- predictions[predictions$cor == 0,]
+  names(params) <- c('v1', 'v2', 'v3', 'a', 'ter', 'a2', 'postdriftmod')
   
-  # RT data frame
+  # Separate chi-square for each level of coherence
   
-  c_predicted_rt <- c_predicted$rt
-  e_predicted_rt <- e_predicted$rt
+  for (i in c(0.1, 0.2, 0.4)){
+    observations <- all_observations %>% filter(coherence == i)
+    
+    # Generate predictions 
+    
+    predictions <<- data.frame(DDM_confidence_bounds(v = params['v'], a = params['a'], ter = params['ter'], z = z, ntrials = ntrials, s = sigma, dt = dt, a2 = params['a2'], postdriftmod = params['postdriftmod']))
+    names(predictions) <- c('rt', 'resp', 'cor', 'conf_evidence', 'rtfull', 'rtconf', 'cj')
+    
+    # Separate predictions according to the response
+    
+    c_predicted <- predictions[predictions$cor == 1,]
+    e_predicted <- predictions[predictions$cor == 0,]
+    
+    # RT data frame
+    
+    c_predicted_rt <- c_predicted$rt
+    e_predicted_rt <- e_predicted$rt
+    
+    # RTconf data frame
+    
+    c_predicted_rtconf <- c_predicted$rtconf
+    e_predicted_rtconf <- e_predicted$rtconf
+    
+    # If we are only simulating data: return the predictions
+    
+    if(returnFit==0){ 
+      return(predictions[,c('rt', 'cor', 'cj', 'rtconf')])
+      
+    # If we are fitting the model: compare these predictions to the observations 
+      
+    }else{ 
+      
+      
+      ### 1 - Decision RT comparison ###
+      
+      
+      # Separate observations into correct and error trials
+      
+      c_observed <- observations[observations$cor == 1,]
+      e_observed <- observations[observations$cor == 0,]
+      
+      # Get the quantile RTs on the "observed data" for correct and error distributions separately (for quantiles .1, .3, .5, .7, .9)
+      
+      c_quantiles <- quantile(c_observed$rt, probs = c(.1,.3,.5,.7,.9), names = FALSE)
+      e_quantiles <- quantile(e_observed$rt, probs = c(.1,.3,.5,.7,.9), names = FALSE)
+      
+      # To combine correct and incorrect trials, we scale the expected interquantile probability by the proportion of correct and incorrect respectively
+      
+      prop_obs_c <- dim(c_observed)[1] / dim(observations)[1]
+      prop_obs_e <- dim(e_observed)[1] / dim(observations)[1]
+      
+      c_obs_proportion = prop_obs_c * c(.1, .2, .2, .2, .2, .1)
+      e_obs_proportion = prop_obs_e * c(.1, .2, .2, .2, .2, .1)
+      obs_props <- c(c_obs_proportion,e_obs_proportion)
+      
+      # Calculate proportion of responses that fall between the observed quantiles when applied to the predicted data 
+      
+      c_pred_proportion <- c(
+        sum(c_predicted_rt <= c_quantiles[1]),
+        sum(c_predicted_rt <= c_quantiles[2]) - sum(c_predicted_rt <= c_quantiles[1]),
+        sum(c_predicted_rt <= c_quantiles[3]) - sum(c_predicted_rt <= c_quantiles[2]),
+        sum(c_predicted_rt <= c_quantiles[4]) - sum(c_predicted_rt <= c_quantiles[3]),
+        sum(c_predicted_rt <= c_quantiles[5]) - sum(c_predicted_rt <= c_quantiles[4]),
+        sum(c_predicted_rt > c_quantiles[5])
+      ) / dim(predictions)[1]
+      
+      e_pred_proportion <- c(
+        sum(e_predicted_rt <= e_quantiles[1]),
+        sum(e_predicted_rt <= e_quantiles[2]) - sum(e_predicted_rt <= e_quantiles[1]),
+        sum(e_predicted_rt <= e_quantiles[3]) - sum(e_predicted_rt <= e_quantiles[2]),
+        sum(e_predicted_rt <= e_quantiles[4]) - sum(e_predicted_rt <= e_quantiles[3]),
+        sum(e_predicted_rt <= e_quantiles[5]) - sum(e_predicted_rt <= e_quantiles[4]),
+        sum(e_predicted_rt > e_quantiles[5])
+      ) / dim(predictions)[1]
+      
+      pred_props_rt <- c(c_pred_proportion, e_pred_proportion)
+      
+      # Avoid zeros in the the data (because of division by predictions for chi square statistic) -> set to small number
+      
+      pred_props_rt[pred_props_rt == 0] <- .0000001
+      
+      
+      ### 2 - Confidence rating RT comparison ###
+      
+      
+      # Get the quantile confidence RTs on the "observed data" for correct and error distributions separately (for quantiles .1, .3, .5, .7, .9)
+      
+      c_quantiles <- quantile(c_observed$rtconf, probs = c(.1,.3,.5,.7,.9), names = FALSE)
+      e_quantiles <- quantile(e_observed$rtconf, probs = c(.1,.3,.5,.7,.9), names = FALSE)
+      
+      # Calculate proportion of responses that fall between the observed quantiles when applied to the predicted data 
+      
+      c_pred_proportion <- c(
+        sum(c_predicted_rtconf <= c_quantiles[1]),
+        sum(c_predicted_rtconf <= c_quantiles[2]) - sum(c_predicted_rtconf <= c_quantiles[1]),
+        sum(c_predicted_rtconf <= c_quantiles[3]) - sum(c_predicted_rtconf <= c_quantiles[2]),
+        sum(c_predicted_rtconf <= c_quantiles[4]) - sum(c_predicted_rtconf <= c_quantiles[3]),
+        sum(c_predicted_rtconf <= c_quantiles[5]) - sum(c_predicted_rtconf <= c_quantiles[4]),
+        sum(c_predicted_rtconf > c_quantiles[5])
+      ) / dim(predictions)[1]
+      
+      e_pred_proportion <- c(
+        sum(e_predicted_rtconf <= e_quantiles[1]),
+        sum(e_predicted_rtconf <= e_quantiles[2]) - sum(e_predicted_rtconf <= e_quantiles[1]),
+        sum(e_predicted_rtconf <= e_quantiles[3]) - sum(e_predicted_rtconf <= e_quantiles[2]),
+        sum(e_predicted_rtconf <= e_quantiles[4]) - sum(e_predicted_rtconf <= e_quantiles[3]),
+        sum(e_predicted_rtconf <= e_quantiles[5]) - sum(e_predicted_rtconf <= e_quantiles[4]),
+        sum(e_predicted_rtconf > e_quantiles[5])
+      ) / dim(predictions)[1]
+      
+      pred_props_rtconf <- c(c_pred_proportion, e_pred_proportion)
+      
+      # Avoid zeros in the the data (because of division by predictions for chi square statistic) -> set to small number
+      
+      pred_props_rtconf[pred_props_rtconf == 0] <- .0000001
+      
+      
+      ### 3 - Confidence rating comparison ###
+      
+      
+      # Confidence judgement proportions 
+      
+      obs_props_cj <- c(sum(c_observed$cj == 0),
+                        sum(c_observed$cj == 1)
+      )/length(observations$cj)
+      
+      # To make the next step easier, lets sort the predictions for correct and errors
+      
+      c_predicted_cj <- c_predicted$cj
+      e_predicted_cj <- e_predicted$cj
+      
+      # Calculate proportion of responses that fall between the observed quantiles when applied to the predicted data 
+      
+      pred_props_cj <- c(sum(c_predicted_cj == 0),
+                         sum(c_predicted_cj == 1)
+      ) / dim(predictions)[1]
+      
+      # Avoid zeros in the the data (because of division by predictions for chi square statistic) -> set to small number
+      
+      pred_props_cj[pred_props_cj == 0] <- .0000001
+      
+      # Combine the quantiles for RTs, RTconf and cj
+      
+      obs_props <- c(obs_props, obs_props, obs_props_cj) 
+      pred_props <- c(pred_props_rt, pred_props_rtconf, pred_props_cj) 
+      
+      # Calculate chi-square
+      
+      chiSquare_temp = sum( ( (obs_props - pred_props) ^ 2) / pred_props )
+      
+      # Add chi-squares 
+      
+      chiSquare <- chiSquare + chiSquare_temp
+    
+  }
   
-  # RTconf data frame
-  
-  c_predicted_rtconf <- c_predicted$rtconf
-  e_predicted_rtconf <- e_predicted$rtconf
-  
-  # If we're only simulating data: return the predictions
-  
-  if(returnFit==0){ 
-    return(predictions[,c('rt', 'cor', 'cj', 'rtconf')])
+  # Return chiSquare
     
-  # If we are fitting the model: compare these predictions to the observations 
-  
-  }else{ 
-  
-    
-    ### 1 - Decision RT comparison ###
-    
-    
-    # Separate observations into correct and error trials
-    
-    c_observed <- observations[observations$cor == 1,]
-    e_observed <- observations[observations$cor == 0,]
-    
-    # Get the quantile RTs on the "observed data" for correct and error distributions separately (for quantiles .1, .3, .5, .7, .9)
-    
-    c_quantiles <- quantile(c_observed$rt, probs = c(.1,.3,.5,.7,.9), names = FALSE)
-    e_quantiles <- quantile(e_observed$rt, probs = c(.1,.3,.5,.7,.9), names = FALSE)
-    
-    # To combine correct and incorrect trials, we scale the expected interquantile probability by the proportion of correct and incorrect respectively
-    
-    prop_obs_c <- dim(c_observed)[1] / dim(observations)[1]
-    prop_obs_e <- dim(e_observed)[1] / dim(observations)[1]
-    
-    c_obs_proportion = prop_obs_c * c(.1, .2, .2, .2, .2, .1)
-    e_obs_proportion = prop_obs_e * c(.1, .2, .2, .2, .2, .1)
-    obs_props <- c(c_obs_proportion,e_obs_proportion)
-    
-    # Calculate proportion of responses that fall between the observed quantiles when applied to the predicted data 
-
-    c_pred_proportion <- c(
-      sum(c_predicted_rt <= c_quantiles[1]),
-      sum(c_predicted_rt <= c_quantiles[2]) - sum(c_predicted_rt <= c_quantiles[1]),
-      sum(c_predicted_rt <= c_quantiles[3]) - sum(c_predicted_rt <= c_quantiles[2]),
-      sum(c_predicted_rt <= c_quantiles[4]) - sum(c_predicted_rt <= c_quantiles[3]),
-      sum(c_predicted_rt <= c_quantiles[5]) - sum(c_predicted_rt <= c_quantiles[4]),
-      sum(c_predicted_rt > c_quantiles[5])
-    ) / dim(predictions)[1]
-    
-    e_pred_proportion <- c(
-      sum(e_predicted_rt <= e_quantiles[1]),
-      sum(e_predicted_rt <= e_quantiles[2]) - sum(e_predicted_rt <= e_quantiles[1]),
-      sum(e_predicted_rt <= e_quantiles[3]) - sum(e_predicted_rt <= e_quantiles[2]),
-      sum(e_predicted_rt <= e_quantiles[4]) - sum(e_predicted_rt <= e_quantiles[3]),
-      sum(e_predicted_rt <= e_quantiles[5]) - sum(e_predicted_rt <= e_quantiles[4]),
-      sum(e_predicted_rt > e_quantiles[5])
-    ) / dim(predictions)[1]
-    
-    pred_props_rt <- c(c_pred_proportion, e_pred_proportion)
-    
-    # Avoid zeros in the the data (because of division by predictions for chi square statistic) -> set to small number
-    
-    pred_props_rt[pred_props_rt == 0] <- .0000001
-    
-    
-    ### 2 - Confidence rating RT comparison ###
-    
-    
-    # Get the quantile confidence RTs on the "observed data" for correct and error distributions separately (for quantiles .1, .3, .5, .7, .9)
-    
-    c_quantiles <- quantile(c_observed$rtconf, probs = c(.1,.3,.5,.7,.9), names = FALSE)
-    e_quantiles <- quantile(e_observed$rtconf, probs = c(.1,.3,.5,.7,.9), names = FALSE)
-    
-    # Calculate proportion of responses that fall between the observed quantiles when applied to the predicted data 
-
-    c_pred_proportion <- c(
-      sum(c_predicted_rtconf <= c_quantiles[1]),
-      sum(c_predicted_rtconf <= c_quantiles[2]) - sum(c_predicted_rtconf <= c_quantiles[1]),
-      sum(c_predicted_rtconf <= c_quantiles[3]) - sum(c_predicted_rtconf <= c_quantiles[2]),
-      sum(c_predicted_rtconf <= c_quantiles[4]) - sum(c_predicted_rtconf <= c_quantiles[3]),
-      sum(c_predicted_rtconf <= c_quantiles[5]) - sum(c_predicted_rtconf <= c_quantiles[4]),
-      sum(c_predicted_rtconf > c_quantiles[5])
-    ) / dim(predictions)[1]
-    
-    e_pred_proportion <- c(
-      sum(e_predicted_rtconf <= e_quantiles[1]),
-      sum(e_predicted_rtconf <= e_quantiles[2]) - sum(e_predicted_rtconf <= e_quantiles[1]),
-      sum(e_predicted_rtconf <= e_quantiles[3]) - sum(e_predicted_rtconf <= e_quantiles[2]),
-      sum(e_predicted_rtconf <= e_quantiles[4]) - sum(e_predicted_rtconf <= e_quantiles[3]),
-      sum(e_predicted_rtconf <= e_quantiles[5]) - sum(e_predicted_rtconf <= e_quantiles[4]),
-      sum(e_predicted_rtconf > e_quantiles[5])
-    ) / dim(predictions)[1]
-    
-    pred_props_rtconf <- c(c_pred_proportion, e_pred_proportion)
-    
-    # Avoid zeros in the the data (because of division by predictions for chi square statistic) -> set to small number
-    
-    pred_props_rtconf[pred_props_rtconf == 0] <- .0000001
-    
-    
-    ### 3 - Confidence rating comparison ###
-    
-    
-    # Confidence judgement proportions 
-    
-    obs_props_cj <- c(sum(c_observed$cj == 0),
-                      sum(c_observed$cj == 1)
-    )/length(observations$cj)
-    
-    # To make the next step easier, lets sort the predictions for correct and errors
-    
-    c_predicted_cj <- c_predicted$cj
-    e_predicted_cj <- e_predicted$cj
-    
-    # Calculate proportion of responses that fall between the observed quantiles when applied to the predicted data 
-
-    pred_props_cj <- c(sum(c_predicted_cj == 0),
-                       sum(c_predicted_cj == 1)
-    ) / dim(predictions)[1]
-    
-    # Avoid zeros in the the data (because of division by predictions for chi square statistic) -> set to small number
-   
-    pred_props_cj[pred_props_cj == 0] <- .0000001
-    
-    # Combine the quantiles for RTs, RTconf and cj
-    
-    obs_props <- c(obs_props, obs_props, obs_props_cj) 
-    pred_props <- c(pred_props_rt, pred_props_rtconf, pred_props_cj) 
-    
-    # Calculate chi square
-    
-    chiSquare = sum( ( (obs_props - pred_props) ^ 2) / pred_props )
-    
-    # Return chiSquare
-    
-    return(chiSquare)
+  return(chiSquare)
     
   }
 }
@@ -217,7 +236,7 @@ for(i in 1:N){  # For each participant separately
   for(c in 1:4){  # For each condition separately !!! Change to higher for more conditions
     
     tempDat <- subset(tempAll, manipulation == condLab[c])
-    tempDat <- tempDat[,c('rt', 'cor', 'resp', 'cj', 'manipulation', 'rtconf')]
+    tempDat <- tempDat[,c('rt', 'cor', 'resp', 'cj', 'manipulation', 'rtconf', 'coherence')]
     
     # Load existing individual results if these already exist
     
@@ -233,9 +252,10 @@ for(i in 1:N){  # For each participant separately
       # Optimization function
       
       optimal_params <- DEoptim(chi_square_optim,  # Function to optimize
-                                lower = c(0, .5, 0, 0,   0),  # Lowest possible values for v, a, ter, a2, postdriftmod
-                                upper = c(3,  4, 1, 4, 2.5), 
-                                observations = tempDat, returnFit = 1, control = c(itermax = itermax))
+                                # Lowest possible values for v (for each level of coherence: 0.1, 0.2 and 0.4), a, ter, a2, postdriftmod
+                                lower = c(0, 0, 0, .5, 0, 0,   0),  
+                                upper = c(3, 3, 3,  4, 1, 4, 2.5), 
+                                all_observations = tempDat, returnFit = 1, control = c(itermax = itermax))
       
       results <- summary(optimal_params)
       

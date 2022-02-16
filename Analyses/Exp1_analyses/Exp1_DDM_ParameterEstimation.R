@@ -259,7 +259,7 @@ for(i in 1:N){  # For each participant separately
       # Optimization function
       
       optimal_params <- DEoptim(chi_square_optim,  # Function to optimize
-                                # Lowest possible values for v (for each level of coherence: 0.1, 0.2 and 0.4), a, ter, a2, postdriftmod
+                                # Possible values for v (for each level of coherence: 0.1, 0.2 and 0.4), a, ter, a2, postdriftmod
                                 lower = c(0, 0, 0, .5,   0, 0,   0),  
                                 upper = c(3, 3, 3,  4, 1.5, 4, 2.5), 
                                 all_observations = tempDat, returnFit = 1, control = c(itermax = itermax))

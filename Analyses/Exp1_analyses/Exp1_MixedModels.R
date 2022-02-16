@@ -1,6 +1,5 @@
 # Internship project: ConfidenceBounds (2021-2022)
-# Script contains the mixed effect models code used to check hypothesis (a), (b) and 
-# (c) of experiment 1.
+# Script contains the mixed effect models code used to analyze RT's, confidence RT's and accuracy
 
 
 # Activating packages
@@ -21,10 +20,10 @@ library(splines)
 
 # https://stackoverflow.com/questions/26633483/collinearity-after-accounting-for-random-mixed-effects
 vif.lme <- function (fit) {  
-  ## adapted from rms::vif
+  # adapted from rms::vif
   v <- vcov(fit)
   nam <- names(fixef(fit))
-  ## exclude intercepts
+  # exclude intercepts
   ns <- sum(1 * (nam == "Intercept" | nam == "(Intercept)"))
   if (ns > 0) {
     v <- v[-(1:ns), -(1:ns), drop = FALSE]

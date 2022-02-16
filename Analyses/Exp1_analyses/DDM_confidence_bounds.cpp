@@ -8,7 +8,7 @@ static Ziggurat::Ziggurat::Ziggurat zigg;
 NumericMatrix DDM_confidence_bounds(double v, double a, double ter, double z, int ntrials, double s, double dt, double a2, double postdriftmod) {
   
   // initialize output
-  NumericMatrix DATA(ntrials,8);
+  NumericMatrix DATA(ntrials,7);
   
   // loop over trials
   for (int i = 0; i < ntrials; i++) {
@@ -27,8 +27,7 @@ NumericMatrix DDM_confidence_bounds(double v, double a, double ter, double z, in
       
       if (evidence >= a){
         resp = 1;
-        evidence=a;
-        //added = sign 
+        evidence = a;
         if (v >= 0){ 
           acc = 1;
         }
@@ -54,9 +53,9 @@ NumericMatrix DDM_confidence_bounds(double v, double a, double ter, double z, in
         t = t + dt;
         evidence = evidence + v_post * dt + s * sqrt(dt) * zigg.norm();
         if (evidence >= a + a2/2){
-          DATA(i,7) = 1;
+          DATA(i,6) = 1;
         } else if (evidence <= a - a2/2){
-          DATA(i,7) = 0;
+          DATA(i,6) = 0;
           }
       }
     } else if (resp == -1){
@@ -64,21 +63,15 @@ NumericMatrix DDM_confidence_bounds(double v, double a, double ter, double z, in
         t = t + dt;
         evidence = evidence + v_post * dt + s * sqrt(dt) * zigg.norm();
         if (evidence >= a2/2){
-          DATA(i,7) = 0;
+          DATA(i,6) = 0;
         } else if (evidence <= - a2/2){
-          DATA(i,7) = 1;
+          DATA(i,6) = 1;
         }
       }
     }
     DATA(i,3) = evidence;
     DATA(i,4) = (t + ter);
-    if (resp == 1){
-      DATA(i,5) = evidence-a;
-    }
-    if (resp == -1){
-      DATA(i,5) = -evidence; 
-    }
-    DATA(i,6) = t;
+    DATA(i,5) = DATA(i,4) - DATA(i,0);
   }
-  return DATA; //RT, resp, accuracy, evidence2, RTfull, confidence, RTconfidence, ConfBound
+  return DATA; //RT (including non-decision time), resp (1 or -1), accuracy (1 or 0), evidence2 (control variable), RTfull, RTconfidence, ConfidenceRating (high-1 or low-0)
 }

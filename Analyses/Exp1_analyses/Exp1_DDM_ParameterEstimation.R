@@ -15,6 +15,9 @@
 # - manipulation order?
 # - v2, v3
 
+# Test file:
+# - change directory!!!
+
 
 rm(list=ls())
 
@@ -35,18 +38,19 @@ sourceCpp("C:\\Users\\herre\\OneDrive\\Documenten\\GitHub\\ConfidenceBounds\\Ana
 
 # Variable settings
 
-overwrite = T  # Overwrite already existing files?
+overwrite = F  # Overwrite already existing files?
 
 z = 0.5  # Starting point (accuracy-coded dataset -> 0.5)
 ntrials = 1000  # Number of decision-making simulations per observation
 sigma = 1  # Within-trial noise
-dt = 0.01  # Precision
+dt = 0.1  # Precision
 
-itermax = 1000  # Number of DeOptim iterations
+itermax = 300  # Number of DeOptim iterations
 
 # Variable vectors
 
 v_vector <- c('v1', 'v2', 'v3')
+postdriftmod_vector <- c('postdriftmod1', 'postdriftmod2', 'postdriftmod3')
 coherence_vector <- c(0.1, 0.2, 0.4)
 
 
@@ -61,7 +65,7 @@ chi_square_optim <- function(params, all_observations, returnFit){
   
   # Name parameters
   
-  names(params) <- c('v1', 'v2', 'v3', 'a', 'ter', 'a2', 'postdriftmod')
+  names(params) <- c('v1', 'v2', 'v3', 'a', 'ter', 'a2', 'postdriftmod1', 'postdriftmod2', 'postdriftmod3')
   
   # Calculate separate chi-square for each level of coherence
   
@@ -70,7 +74,7 @@ chi_square_optim <- function(params, all_observations, returnFit){
     
     # Generate predictions 
     
-    predictions <<- data.frame(DDM_confidence_bounds(v = params[v_vector[i]], a = params['a'], ter = params['ter'], z = z, ntrials = ntrials, s = sigma, dt = dt, a2 = params['a2'], postdriftmod = params['postdriftmod']))
+    predictions <<- data.frame(DDM_confidence_bounds(v = params[v_vector[i]], a = params['a'], ter = params['ter'], z = z, ntrials = ntrials, s = sigma, dt = dt, a2 = params['a2'], postdriftmod = params[postdriftmod_vector[i]]))
     names(predictions) <- c('rt', 'resp', 'cor', 'conf_evidence', 'rtfull', 'rtconf', 'cj')
     
     # Separate predictions according to the response
@@ -249,7 +253,7 @@ for(i in 1:N){  # For each participant separately
     
     # Load existing individual results if these already exist
     
-    file_name <- paste0('Parameter_estimation\\results_sub_', i, '_', condLab[c], '.Rdata')
+    file_name <- paste0('Parameter_estimation_test\\results_sub_', i, '_', condLab[c], '.Rdata')
     if (overwrite == F & file.exists(file_name)){
 
       load(file_name)
@@ -261,9 +265,9 @@ for(i in 1:N){  # For each participant separately
       # Optimization function
       
       optimal_params <- DEoptim(chi_square_optim,  # Function to optimize
-                                # Possible values for v (for each level of coherence: 0.1, 0.2 and 0.4), a, ter, a2, postdriftmod
-                                lower = c(0, 0, 0, .5,   0, 0,   0),  
-                                upper = c(3, 3, 3,  4, 1.5, 4, 2.5), 
+                                # Possible values for v (for each level of coherence: 0.1, 0.2 and 0.4), a, ter, a2, postdriftmod (for each level of coherence: 0.1, 0.2, 0.4)
+                                lower = c(0, 0, 0, .5,   0, 0,   0,   0,   0),  
+                                upper = c(3, 3, 3,  4, 1.5, 4, 2.5, 2.5, 2.5),
                                 all_observations = tempDat, returnFit = 1, control = c(itermax = itermax))
       
       results <- summary(optimal_params)

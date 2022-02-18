@@ -38,14 +38,14 @@ sourceCpp("C:\\Users\\herre\\OneDrive\\Documenten\\GitHub\\ConfidenceBounds\\Ana
 
 # Variable settings
 
-overwrite <- T  # Overwrite already existing files?
+overwrite <- F  # Overwrite already existing files?
 
 z <- 0.5  # Starting point (accuracy-coded dataset -> 0.5)
 ntrials <- 1000  # Number of decision-making simulations per observation
 sigma <- 1  # Within-trial noise
-dt <- 0.001  # Precision
+dt <- 0.01  # Precision
 
-itermax <- 300  # Number of DeOptim iterations
+itermax <- 500  # Number of DeOptim iterations
 
 # Variable vectors
 
@@ -263,7 +263,7 @@ for(i in 1:N){  # For each participant separately
       optimal_params <- DEoptim(chi_square_optim,  # Function to optimize
                                 # Possible values for v (for each level of coherence: 0.1, 0.2 and 0.4), a, ter, a2, postdriftmod 
                                 lower = c(0, 0, 0, .5,   0, 0,   0),  
-                                upper = c(3, 3, 3,  4, 1.5, 4, 2.5),
+                                upper = c(3, 3, 3,  4, 1.5, 5.5, 5),
                                 all_observations = tempDat, returnFit = 1, control = c(itermax = itermax))
       
       results <- summary(optimal_params)

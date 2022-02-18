@@ -6,7 +6,9 @@ library(ggplot2)
 library(dplyr)
 library(Rcpp)  # To source, compile and run C++ functions
 library(DEoptim)  # Optimization algorithm
-library(RcppZiggurat)  # Random number generator (normal distribution) 
+library(RcppZiggurat)  # Random number generator (normal distribution)
+library(ggpubr)
+library(gridExtra)
 
 # Give R access to the DDM simulation function in C++
 
@@ -22,7 +24,7 @@ df <- data.frame(matrix(ncol = 9, nrow = 40*4))
 colnames(df) <- c('sub', 'manipulation', 'v1', 'v2', 'v3', 'a', 'ter', 'a2', 'postdriftmod')
 condLab <- c('FastFast', 'AccFast', 'AccAcc', 'FastAcc') 
 j <- 1
-for (i in 1:29){ #!!!change
+for (i in 1:40){ 
   for(c in 1:4){
     file_name <- paste0('Parameter_estimation\\results_sub_', i, '_', condLab[c], '.Rdata')
     load(file_name)
@@ -115,13 +117,16 @@ ggplot(df, aes(x = manipulation, y = postdriftmod)) +
 # DDM parameters
 
 z <- 0.5  # Starting point (accuracy-coded dataset -> 0.5)
-ntrials <- 100000  # Number of decision-making simulations per observation
+ntrials <- 10000  # Number of decision-making simulations per observation
 sigma <- 1  # Within-trial noise
-dt <- 0.001  # Precision
+dt <- 0.01  # Precision
 
 # Loop parameters
 
-n <- 20  # Number of participants to include     #!!!! change this when having more simulations
+n <- 40  # Number of participants to include 
+plot_number <- 1  
+plot_list_RT = list()
+plot_list_RTconf = list()
 
 # Vectors
 
@@ -133,7 +138,9 @@ manipulation_vector <- c('FastFast', 'AccFast', 'AccAcc', 'FastAcc')
 df_obs <- read.csv(file = "Exp1_data_viable.csv")
 c_observed <- df_obs %>% filter(sub <= n & cor == 1) 
 e_observed <- df_obs %>% filter(sub <= n & cor == 0)
-  
+high_conf_observed <- df_obs %>% filter(sub <= n & cj == 1)
+low_conf_observed <- df_obs %>% filter(sub <= n & cj == 0)
+
 # Loop through manipulations
 
 for (j in 1:4){
@@ -144,9 +151,14 @@ for (j in 1:4){
     
     c_predicted <- NULL
     e_predicted <- NULL
+    high_conf_predicted <- NULL
+    low_conf_predicted <- NULL
     
     c_observed_temp <- c_observed %>% filter(manipulation == manipulation_vector[j] & coherence == coherence_vector[k])
     e_observed_temp <- e_observed %>% filter(manipulation == manipulation_vector[j] & coherence == coherence_vector[k])
+    
+    high_conf_observed_temp <- high_conf_observed %>% filter(manipulation == manipulation_vector[j] & coherence == coherence_vector[k])
+    low_conf_observed_temp <- low_conf_observed %>% filter(manipulation == manipulation_vector[j] & coherence == coherence_vector[k])
     
     # Loop through participants
     
@@ -167,26 +179,48 @@ for (j in 1:4){
       c_predicted_temp <- predictions[predictions$cor == 1,]
       e_predicted_temp <- predictions[predictions$cor == 0,]
       
+      # Separate predictions according the the cj
+      
+      high_conf_predicted_temp <- predictions[predictions$cj == 1,]
+      low_conf_predicted_temp <- predictions[predictions$cj == 0,]
+      
       # Merge predictions
       
       c_predicted <- rbind(c_predicted, c_predicted_temp)
       e_predicted <- rbind(e_predicted, e_predicted_temp)
-      
+      high_conf_predicted <- rbind(high_conf_predicted, high_conf_predicted_temp)
+      low_conf_predicted <- rbind(low_conf_predicted, low_conf_predicted_temp)
     }
     
-    # print plot
+    # Save plots in list
       
-    print(ggplot() +
-            geom_histogram(data = c_observed_temp, aes(x = rt, y = ..density..), fill = 'green', alpha = 0.7) +
-            geom_density(data = c_predicted, aes(x = rt), colour = 'green') +
-            geom_histogram(data = e_observed_temp, aes(x = rt, y = ..density..), fill = 'red', alpha = 0.7) +
-            geom_density(data = e_predicted, aes(x = rt), colour = 'red') +
-            xlim(0, 6) +
-            ylim(0, 1.5) +
-            ggtitle(paste('coherence: ', coherence_vector[k], 'manipulation: ', manipulation_vector[j])))
+    plot_list_RT[[plot_number]] <- ggplot() +
+      geom_histogram(data = c_observed_temp, aes(x = rt, y = ..density..), fill = 'green', alpha = 0.5, bins = 15) +
+      geom_density(data = c_predicted, aes(x = rt), colour = 'green') +
+      geom_histogram(data = e_observed_temp, aes(x = rt, y = ..density..), fill = 'red', alpha = 0.5, bins = 15) +
+      geom_density(data = e_predicted, aes(x = rt), colour = 'red') +
+      xlim(0, 5) +
+      ylim(0, 2) +
+      ggtitle(paste('coherence: ', coherence_vector[k], 'manipulation: ', manipulation_vector[j]))
+    
+    plot_list_RTconf[[plot_number]] <- ggplot() +
+      geom_histogram(data = high_conf_observed_temp, aes(x = rtconf, y = ..density..), fill = 'green', alpha = 0.5, bins = 15) +
+      geom_density(data = high_conf_predicted, aes(x = rtconf), colour = 'green') +
+      geom_histogram(data = low_conf_observed_temp, aes(x = rtconf, y = ..density..), fill = 'red', alpha = 0.5, bins = 15) +
+      geom_density(data = low_conf_predicted, aes(x = rtconf), colour = 'red') +
+      xlim(0, 5) +
+      ylim(0, 2) +
+      ggtitle(paste('coherence: ', coherence_vector[k], 'manipulation: ', manipulation_vector[j]))
+    
+    plot_number <- plot_number + 1
     
   }
   
 }
+
+marrangeGrob(plot_list_RT,
+          ncol = 4, nrow = 3)
+marrangeGrob(plot_list_RTconf,
+             ncol = 4, nrow = 3)
 
 

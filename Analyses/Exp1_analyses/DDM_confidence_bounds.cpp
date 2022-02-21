@@ -5,7 +5,7 @@
 using namespace Rcpp;
 static Ziggurat::Ziggurat::Ziggurat zigg;
 // [[Rcpp::export]]
-NumericMatrix DDM_confidence_bounds(double v, double a, double ter, double z, int ntrials, double s, double dt, double a2, double postdriftmod) {
+NumericMatrix DDM_confidence_bounds(double v, double a, double ter, double z, int ntrials, double s, double dt, double a2, double postdriftmod, double a2_slope) {
   
   // initialize output
   NumericMatrix DATA(ntrials,7);
@@ -18,6 +18,7 @@ NumericMatrix DDM_confidence_bounds(double v, double a, double ter, double z, in
     int acc = 0;
     double evidence = a*z;
     double t = 0;
+    double t2 = 0;
     
     // Decisional processing
     while (t > -1){
@@ -49,22 +50,24 @@ NumericMatrix DDM_confidence_bounds(double v, double a, double ter, double z, in
     //Post-decisional processing
     double v_post = v * postdriftmod;
     if (resp == 1){
-      while ((evidence < a + a2/2) && (evidence > a - a2/2)){
+      while ((evidence < a + a2/2 - t2*a2_slope) && (evidence > a - a2/2 + t2*a2_slope)){
         t = t + dt;
+        t2 = t2 + dt;
         evidence = evidence + v_post * dt + s * sqrt(dt) * zigg.norm();
-        if (evidence >= a + a2/2){
+        if (evidence >= a + a2/2 - t2*a2_slope){
           DATA(i,6) = 1;
-        } else if (evidence <= a - a2/2){
+        } else if (evidence <= a - a2/2 + t2*a2_slope){
           DATA(i,6) = 0;
           }
       }
     } else if (resp == -1){
-      while ((evidence < a2/2) && (evidence > -a2/2)){
+      while ((evidence < a2/2 - t2*a2_slope) && (evidence > -a2/2 + t2*a2_slope)){
         t = t + dt;
+        t2 = t2 + dt;
         evidence = evidence + v_post * dt + s * sqrt(dt) * zigg.norm();
-        if (evidence >= a2/2){
+        if (evidence >= a2/2 - t2*a2_slope){
           DATA(i,6) = 0;
-        } else if (evidence <= - a2/2){
+        } else if (evidence <= - a2/2 + t2*a2_slope){
           DATA(i,6) = 1;
         }
       }

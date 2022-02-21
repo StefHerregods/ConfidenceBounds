@@ -47,6 +47,7 @@ df$rtconf_manipulation <- ifelse(df$manipulation %in% c("AccAcc", "FastAcc"), 1,
 df$rtconf_manipulation <- as.factor(df$rtconf_manipulation)
 df$coherence <- as.factor(df$coherence)
 df$cor <- as.factor(df$cor)
+df$cj <- as.factor(df$cj)
 
 ### Effect of manipulations on decision RT ###
 
@@ -359,3 +360,52 @@ plot(effect('coherence', Cor_2))
 #data.frame(effect('rt_manipulation:coherence', RTconf_6))
 fixef(RTconf_6)
 ranef(RTconf_6)
+
+
+### Effect of manipulations on confidence judgements ###
+
+
+# Are random slopes necessary? 
+
+plot1 <- ggplot(df, aes(x = as.factor(rt_manipulation), y = cj, group = sub)) +
+  stat_smooth(geom='line', alpha=1, se=FALSE) +
+  theme_minimal()
+plot2 <- ggplot(df, aes(x = as.factor(rtconf_manipulation), y = cj, group = sub)) +
+  stat_smooth(geom='line', alpha=1, se=FALSE) +
+  theme_minimal()
+plot3 <- ggplot(df, aes(x = coherence, y = cj, group = sub)) +
+  stat_smooth(geom='line', alpha=1, se=FALSE) +
+  theme_minimal()
+
+grid.newpage()
+pushViewport(viewport(layout=grid.layout(1,3)))
+vplayout <- function(x,y){
+  viewport(layout.pos.row=x, layout.pos.col=y)}
+print(plot1, vp=vplayout(1,1))
+print(plot2, vp=vplayout(1,2))
+print(plot3, vp=vplayout(1,3))
+
+# Model comparisons (through likelihood ratio tests)
+
+cj_1 <- glmer(cj ~ 1 + rt_manipulation * rtconf_manipulation * coherence + (1|sub), 
+               data = df, family = binomial, control = glmerControl(optimizer = "bobyqa"))
+cj_2 <- glmer(cj ~ 1 + rt_manipulation * rtconf_manipulation * coherence + (1 + rt_manipulation|sub), 
+               data = df, family = binomial, control = glmerControl(optimizer = "bobyqa"))
+cj_3 <- glmer(cj ~ 1 + rt_manipulation * rtconf_manipulation * coherence + (1 + rtconf_manipulation|sub), 
+               data = df, family = binomial, control = glmerControl(optimizer = "bobyqa"))  
+cj_4 <- glmer(cj ~ 1 + rt_manipulation * rtconf_manipulation * coherence + (1 + coherence|sub), 
+               data = df, family = binomial, control = glmerControl(optimizer = "bobyqa"))  
+
+allFit_Cor_4 <- allFit(Cor_4)
+is.OK <- sapply(allFit_Cor_4, is, "merMod")
+allFit_Cor_4.OK <- allFit_Cor_4[is.OK]
+lapply(allFit_Cor_4.OK, function(x) x@optinfo$conv$lme4$messages)
+summary(allFit_Cor_4)  # Boundary (singular) fit for nearly all optimizers
+
+anova(Cor_1, Cor_2)  # Significant
+anova(Cor_1, Cor_3)  # Not significant
+
+Cor_5 <- glmer(cor ~ 1 + rt_manipulation * rtconf_manipulation * coherence + (1 + rt_manipulation + rtconf_manipulation|sub), 
+               data = df, family = binomial, control = glmerControl(optimizer = "bobyqa"))  # Fails to converge
+
+anova(Cor_2, Cor_5)  # Not significant

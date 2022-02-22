@@ -367,13 +367,13 @@ ranef(RTconf_6)
 
 # Are random slopes necessary? 
 
-plot1 <- ggplot(df, aes(x = as.factor(rt_manipulation), y = cj, group = sub)) +
+plot1 <- ggplot(df_correct, aes(x = as.factor(rt_manipulation), y = cj, group = sub)) +
   stat_smooth(geom='line', alpha=1, se=FALSE) +
   theme_minimal()
-plot2 <- ggplot(df, aes(x = as.factor(rtconf_manipulation), y = cj, group = sub)) +
+plot2 <- ggplot(df_correct, aes(x = as.factor(rtconf_manipulation), y = cj, group = sub)) +
   stat_smooth(geom='line', alpha=1, se=FALSE) +
   theme_minimal()
-plot3 <- ggplot(df, aes(x = coherence, y = cj, group = sub)) +
+plot3 <- ggplot(df_correct, aes(x = coherence, y = cj, group = sub)) +
   stat_smooth(geom='line', alpha=1, se=FALSE) +
   theme_minimal()
 
@@ -388,24 +388,79 @@ print(plot3, vp=vplayout(1,3))
 # Model comparisons (through likelihood ratio tests)
 
 cj_1 <- glmer(cj ~ 1 + rt_manipulation * rtconf_manipulation * coherence + (1|sub), 
-               data = df, family = binomial, control = glmerControl(optimizer = "bobyqa"))
+               data = df_correct, family = binomial, control = glmerControl(optimizer = "bobyqa"))
 cj_2 <- glmer(cj ~ 1 + rt_manipulation * rtconf_manipulation * coherence + (1 + rt_manipulation|sub), 
-               data = df, family = binomial, control = glmerControl(optimizer = "bobyqa"))
+               data = df_correct, family = binomial, control = glmerControl(optimizer = "bobyqa"))
 cj_3 <- glmer(cj ~ 1 + rt_manipulation * rtconf_manipulation * coherence + (1 + rtconf_manipulation|sub), 
-               data = df, family = binomial, control = glmerControl(optimizer = "bobyqa"))  
+               data = df_correct, family = binomial, control = glmerControl(optimizer = "bobyqa"))  
 cj_4 <- glmer(cj ~ 1 + rt_manipulation * rtconf_manipulation * coherence + (1 + coherence|sub), 
-               data = df, family = binomial, control = glmerControl(optimizer = "bobyqa"))  
+               data = df_correct, family = binomial, control = glmerControl(optimizer = "bobyqa"))  
 
-allFit_Cor_4 <- allFit(Cor_4)
-is.OK <- sapply(allFit_Cor_4, is, "merMod")
-allFit_Cor_4.OK <- allFit_Cor_4[is.OK]
-lapply(allFit_Cor_4.OK, function(x) x@optinfo$conv$lme4$messages)
-summary(allFit_Cor_4)  # Boundary (singular) fit for nearly all optimizers
+anova(cj_1, cj_2)  # Significant; BIC 24298
+anova(cj_1, cj_3)  # Significant; BIC 24335
+anova(cj_1, cj_4)  # Significant; BIC 24171
 
-anova(Cor_1, Cor_2)  # Significant
-anova(Cor_1, Cor_3)  # Not significant
+cj_5 <- glmer(cj ~ 1 + rt_manipulation * rtconf_manipulation * coherence + (1 + coherence + rt_manipulation|sub), 
+               data = df_correct, family = binomial, control = glmerControl(optimizer = "bobyqa"))
 
-Cor_5 <- glmer(cor ~ 1 + rt_manipulation * rtconf_manipulation * coherence + (1 + rt_manipulation + rtconf_manipulation|sub), 
-               data = df, family = binomial, control = glmerControl(optimizer = "bobyqa"))  # Fails to converge
+anova(cj_4, cj_5)  # Significant
 
-anova(Cor_2, Cor_5)  # Not significant
+cj_6 <- glmer(cj ~ 1 + rt_manipulation * rtconf_manipulation * coherence + (1 + coherence + rt_manipulation + rtconf_manipulation|sub), 
+              data = df_correct, family = binomial, control = glmerControl(optimizer = "bobyqa"))
+
+anova(cj_5, cj_6)  # Significant
+
+cj_7 <- glmer(cj ~ 1 + rt_manipulation * rtconf_manipulation * coherence + (1 + coherence * rt_manipulation + rtconf_manipulation|sub), 
+              data = df_correct, family = binomial, control = glmerControl(optimizer = "bobyqa"))  # Boundary (singular) fit
+cj_8 <- glmer(cj ~ 1 + rt_manipulation * rtconf_manipulation * coherence + (1 + coherence + rt_manipulation * rtconf_manipulation|sub), 
+              data = df_correct, family = binomial, control = glmerControl(optimizer = "bobyqa"))  
+cj_9 <- glmer(cj ~ 1 + rt_manipulation * rtconf_manipulation * coherence + (1 + coherence * rtconf_manipulation + rt_manipulation|sub), 
+              data = df_correct, family = binomial, control = glmerControl(optimizer = "bobyqa"))  # Boundary (singular) fit
+
+# Model assumptions
+
+# (1) Independence of errors
+# Gray lines indicate plus and minus 2 standard-error bounds (around 95% of residuals)
+binnedplot(fitted(cj_8), 
+           residuals(cj_8, type = "response"), 
+           nclass = NULL, 
+           xlab = "Expected Values", 
+           ylab = "Average residual", 
+           main = "Binned residual plot", 
+           cex.pts = 0.8, 
+           col.pts = 1, 
+           col.int = "gray")
+
+plot(cj_8)
+plot(predict(cj_8), residuals(cj_8), col = c("blue","red")[as.numeric(df$cor)])
+abline(h=0,lty=2,col="grey")
+lines(lowess(predict(cj_8), residuals(cj_8)), col="black", lwd=2)
+
+rl=lm(residuals(cj_8)~bs(predict(cj_8),8))
+y=predict(rl,se=TRUE)
+segments(predict(cj_8),y$fit+2*y$se.fit,predict(cj_8),y$fit-2*y$se.fit,col="green")
+
+# (2) Linearity (no continuous variables)
+
+# (3) Absence of multicollinearity
+
+vif.lme(cj_8)
+
+# Model interpretation
+
+Anova(cj_8)
+
+plot(effect('rt_manipulation', cj_8))  # Not significant
+plot(effect('rtconf_manipulation', cj_8))   # Not significant
+plot(effect('coherence', cj_8))
+plot(effect('rt_manipulation:coherence', cj_8))
+
+#data.frame(effect('rt_manipulation:coherence', RTconf_6))
+fixef(RTconf_6)
+ranef(RTconf_6)
+
+
+
+
+
+

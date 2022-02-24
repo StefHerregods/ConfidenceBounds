@@ -20,20 +20,20 @@ setwd('C:\\Users\\herre\\Desktop\\Internship\\Results\\Exp1_Results')
 
 # Load data (long format)
 
-df <- data.frame(matrix(ncol = 9, nrow = 40*4))
-colnames(df) <- c('sub', 'manipulation', 'v1', 'v2', 'v3', 'a', 'ter', 'a2', 'postdriftmod')
+df <- data.frame(matrix(ncol = 11, nrow = 40*4))
+colnames(df) <- c('sub', 'manipulation', 'v1', 'v2', 'v3', 'a', 'ter', 'a2', 'postdriftmod', 'a2_slope', 'ter2')
 condLab <- c('FastFast', 'AccFast', 'AccAcc', 'FastAcc') 
 j <- 1
 for (i in 1:40){ 
   for(c in 1:4){
-    file_name <- paste0('Parameter_estimation\\results_sub_', i, '_', condLab[c], '.Rdata')
+    file_name <- paste0('Parameter_estimation_both\\Parameter_estimation_both%5Cresults_sub_', i, '_', condLab[c], '.Rdata')
     load(file_name)
-    df[j,] <- c(i, condLab[c], results$optim$bestmem[1], results$optim$bestmem[2], results$optim$bestmem[3], results$optim$bestmem[4], results$optim$bestmem[5], results$optim$bestmem[6], results$optim$bestmem[7])
+    df[j,] <- c(i, condLab[c], results$optim$bestmem[1], results$optim$bestmem[2], results$optim$bestmem[3], results$optim$bestmem[4], results$optim$bestmem[5], results$optim$bestmem[6], results$optim$bestmem[7], results$optim$bestmem[8], results$optim$bestmem[9])
     j <- j + 1
   }
 }
 
-df[3:9] <- lapply(df[3:9], as.numeric)
+df[3:11] <- lapply(df[3:11], as.numeric)
 
 
 # v1
@@ -107,6 +107,21 @@ ggplot(df, aes(x = manipulation, y = postdriftmod)) +
   stat_summary(aes(y = postdriftmod, group = 1), fun = mean, colour="Blue", size = 4, shape = 95) +
   scale_x_discrete(labels = c("Fast decision\nFast confidence rating", "Accurate decision\nFast confidence rating", "Accurate decision\nAccurate confidence rating", "Fast decision\nAccurate confidence rating")) 
 
+# a2_slope
+
+ggplot(df, aes(x = manipulation, y = a2_slope)) +
+  geom_point() +
+  geom_line(aes(group = sub), alpha = 0.2) +
+  stat_summary(aes(y = a2_slope, group = 1), fun = mean, colour="Blue", size = 4, shape = 95) +
+  scale_x_discrete(labels = c("Fast decision\nFast confidence rating", "Accurate decision\nFast confidence rating", "Accurate decision\nAccurate confidence rating", "Fast decision\nAccurate confidence rating")) 
+
+# ter2
+
+ggplot(df, aes(x = manipulation, y = ter2)) +
+  geom_point() +
+  geom_line(aes(group = sub), alpha = 0.2) +
+  stat_summary(aes(y = ter2, group = 1), fun = mean, colour="Blue", size = 4, shape = 95) +
+  scale_x_discrete(labels = c("Fast decision\nFast confidence rating", "Accurate decision\nFast confidence rating", "Accurate decision\nAccurate confidence rating", "Fast decision\nAccurate confidence rating")) 
 
 
 
@@ -123,7 +138,7 @@ dt <- 0.01  # Precision
 
 # Loop parameters
 
-n <- 40  # Number of participants to include 
+n <- 40  # Number of participants to include (40)
 plot_number <- 1  
 plot_list_RT = list()
 plot_list_RTconf = list()
@@ -170,8 +185,8 @@ for (j in 1:4){
       v <- df_temp[[k + 2]]
       
       # Simulate data     #!!!! add other vars later
-      
-      predictions <- data.frame(DDM_confidence_bounds(v = v, a = df_temp$a, ter = df_temp$ter, z = z, ntrials = ntrials, s = sigma, dt = dt, a2 = df_temp$a2, postdriftmod = df_temp$postdriftmod))
+      ### ter2
+      predictions <- data.frame(DDM_confidence_bounds(v = v, a = df_temp$a, ter = df_temp$ter, z = z, ntrials = ntrials, s = sigma, dt = dt, a2 = df_temp$a2, postdriftmod = df_temp$postdriftmod, a2_slope = df_temp$a2_slope, ter2 = df_temp$ter2))
       names(predictions) <- c('rt', 'resp', 'cor', 'evidence2', 'rtfull', 'rtconf', 'cj')
       
       # Separate predictions according to the response
@@ -190,23 +205,25 @@ for (j in 1:4){
       e_predicted <- rbind(e_predicted, e_predicted_temp)
       high_conf_predicted <- rbind(high_conf_predicted, high_conf_predicted_temp)
       low_conf_predicted <- rbind(low_conf_predicted, low_conf_predicted_temp)
+      
+      print(i)
     }
     
     # Save plots in list
       
     plot_list_RT[[plot_number]] <- ggplot() +
-      geom_histogram(data = c_observed_temp, aes(x = rt, y = ..density..), fill = 'green', alpha = 0.5, bins = 15) +
+      geom_histogram(data = c_observed_temp, aes(x = rt, y = ..density..), fill = 'green', alpha = 0.5, bins = 20) +
       geom_density(data = c_predicted, aes(x = rt), colour = 'green') +
-      geom_histogram(data = e_observed_temp, aes(x = rt, y = ..density..), fill = 'red', alpha = 0.5, bins = 15) +
+      geom_histogram(data = e_observed_temp, aes(x = rt, y = ..density..), fill = 'red', alpha = 0.5, bins = 20) +
       geom_density(data = e_predicted, aes(x = rt), colour = 'red') +
       xlim(0, 5) +
       ylim(0, 2) +
       ggtitle(paste('coherence: ', coherence_vector[k], 'manipulation: ', manipulation_vector[j]))
     
     plot_list_RTconf[[plot_number]] <- ggplot() +
-      geom_histogram(data = high_conf_observed_temp, aes(x = rtconf, y = ..density..), fill = 'green', alpha = 0.5, bins = 15) +
+      geom_histogram(data = high_conf_observed_temp, aes(x = rtconf, y = ..density..), fill = 'green', alpha = 0.5, bins = 20) +
       geom_density(data = high_conf_predicted, aes(x = rtconf), colour = 'green') +
-      geom_histogram(data = low_conf_observed_temp, aes(x = rtconf, y = ..density..), fill = 'red', alpha = 0.5, bins = 15) +
+      geom_histogram(data = low_conf_observed_temp, aes(x = rtconf, y = ..density..), fill = 'red', alpha = 0.5, bins = 20) +
       geom_density(data = low_conf_predicted, aes(x = rtconf), colour = 'red') +
       xlim(0, 5) +
       ylim(0, 2) +

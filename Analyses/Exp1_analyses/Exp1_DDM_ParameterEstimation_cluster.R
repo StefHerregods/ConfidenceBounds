@@ -5,17 +5,10 @@
   # Desender, K., Vermeylen, L., Verguts, T. (2021)
 
 
-rm(list=ls())
-
-# Setting working directory
-
-setwd('C:\\Users\\herre\\Desktop\\Internship\\Results\\Exp1_Results')
-
 # Load packages
 
 library(Rcpp)  # To source, compile and run C++ functions
 library(DEoptim)  # Optimization algorithm
-#library(RcppZiggurat)  # Random number generator (normal distribution) 
 library(dplyr)
 library(optparse)  # Necessary for parallel computing
 
@@ -30,7 +23,7 @@ overwrite <- T  # Overwrite already existing files?
 z <- 0.5  # Starting point (accuracy-coded dataset -> 0.5)
 ntrials <- 1000  # Number of decision-making simulations per observation
 sigma <- 1  # Within-trial noise
-dt <- 0.001  # Precision
+dt <- 0.01  # Precision
 
 itermax <- 2000  # Number of DeOptim iterations
 
@@ -243,7 +236,7 @@ for(c in 1:4){  # For each condition separately
   
   # Load existing individual results if these already exist
   
-  file_name <- paste0('Parameter_estimation_both\\results_sub_', i, '_', condLab[c], '.Rdata')
+  file_name <- paste0('simple_results_sub_', i, '_', condLab[c], '.Rdata')
   if (overwrite == F & file.exists(file_name)){
 
     load(file_name)
@@ -256,8 +249,8 @@ for(c in 1:4){  # For each condition separately
     
     optimal_params <- DEoptim(chi_square_optim,  # Function to optimize
                               # Possible values for v (for each level of coherence: 0.1, 0.2 and 0.4), a, ter, a2, postdriftmod, a2_slope, ter2
-                              lower = c(0, 0, 0, .5,   0, 0,   0,  0, -2),  
-                              upper = c(3, 3, 3,  4, 1.5, 5.5, 15, 10, 2),
+                              lower = c(0, 0, 0, 0,   0, 0,   0,  0, 0),  
+                              upper = c(3, 3, 3, 4, 1.5, 5.5, 15, 0, 0),
                               all_observations = tempDat, returnFit = 1, control = c(itermax = itermax))
     
     results <- summary(optimal_params)

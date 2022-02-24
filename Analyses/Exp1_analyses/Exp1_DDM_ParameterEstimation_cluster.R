@@ -5,20 +5,6 @@
   # Desender, K., Vermeylen, L., Verguts, T. (2021)
 
 
-# TO DO
-# - simulaties based on estimated parameters
-# - comparison of different cost functions
-# - change precision/iterations
-# - also separate postdriftmod???
-
-# Issues:
-# - manipulation order?
-# - v2, v3
-
-# Test file:
-# - change directory!!!
-
-
 rm(list=ls())
 
 # Setting working directory
@@ -32,16 +18,10 @@ library(DEoptim)  # Optimization algorithm
 #library(RcppZiggurat)  # Random number generator (normal distribution) 
 library(dplyr)
 library(optparse)  # Necessary for parallel computing
-option_list = list(
-  make_option(c("-s","--subject"), type = "character",default=NULL,metavar="character")
-)
-opt_parser = OptionParser(option_list = option_list)
-opt = parse_args(opt_parser)
-i = as.numeric(opt$subject)
 
 # Give R access to the DDM simulation function in C++
 
-sourceCpp("C:\\Users\\herre\\OneDrive\\Documenten\\GitHub\\ConfidenceBounds\\Analyses\\Exp1_analyses\\DDM_confidence_bounds.cpp") 
+sourceCpp("DDM_confidence_bounds.cpp") 
 
 # Variable settings
 
@@ -241,45 +221,52 @@ df <- read.csv(file = "Exp1_data_viable.csv")
 subs <- unique(df$sub)
 N<-length(subs)
 
-# Optimize (extended) DDM parameters 
+# Optimize (extended) DDM parameters (parallel)
 
-for(i in 1:N){  # For each participant separately
+option_list = list(
+  make_option(c("-s","--subject"), type = "character",default=NULL,metavar="character")
+)
+opt_parser = OptionParser(option_list = option_list)
+opt = parse_args(opt_parser)
+i = as.numeric(opt$subject)
+
+# For each participant separately
    
-  print(paste('Running participant', subs[i], 'from', N))
-  condLab <- unique(df$manipulation)  
-  tempAll <- subset(df, sub == subs[i])
-  
-  for(c in 1:4){  # For each condition separately 
-    
-    tempDat <- subset(tempAll, manipulation == condLab[c])
-    tempDat <- tempDat[,c('rt', 'cor', 'resp', 'cj', 'manipulation', 'rtconf', 'coherence')]
-    
-    # Load existing individual results if these already exist
-    
-    file_name <- paste0('Parameter_estimation_both\\results_sub_', i, '_', condLab[c], '.Rdata')
-    if (overwrite == F & file.exists(file_name)){
+print(paste('Running participant', subs[i], 'from', N))
+condLab <- unique(df$manipulation)  
+tempAll <- subset(df, sub == subs[i])
 
-      load(file_name)
-      
-    # Else, estimate parameters
-      
-    } else {
-      
-      # Optimization function
-      
-      optimal_params <- DEoptim(chi_square_optim,  # Function to optimize
-                                # Possible values for v (for each level of coherence: 0.1, 0.2 and 0.4), a, ter, a2, postdriftmod, a2_slope, ter2
-                                lower = c(0, 0, 0, .5,   0, 0,   0,  0, -2),  
-                                upper = c(3, 3, 3,  4, 1.5, 5.5, 15, 10, 2),
-                                all_observations = tempDat, returnFit = 1, control = c(itermax = itermax))
-      
-      results <- summary(optimal_params)
-      
-      # Save individual results
-      
-      save(results, file = file_name)
-      
-    }
+for(c in 1:4){  # For each condition separately 
+  
+  tempDat <- subset(tempAll, manipulation == condLab[c])
+  tempDat <- tempDat[,c('rt', 'cor', 'resp', 'cj', 'manipulation', 'rtconf', 'coherence')]
+  
+  # Load existing individual results if these already exist
+  
+  file_name <- paste0('Parameter_estimation_both\\results_sub_', i, '_', condLab[c], '.Rdata')
+  if (overwrite == F & file.exists(file_name)){
+
+    load(file_name)
+    
+  # Else, estimate parameters
+    
+  } else {
+    
+    # Optimization function
+    
+    optimal_params <- DEoptim(chi_square_optim,  # Function to optimize
+                              # Possible values for v (for each level of coherence: 0.1, 0.2 and 0.4), a, ter, a2, postdriftmod, a2_slope, ter2
+                              lower = c(0, 0, 0, .5,   0, 0,   0,  0, -2),  
+                              upper = c(3, 3, 3,  4, 1.5, 5.5, 15, 10, 2),
+                              all_observations = tempDat, returnFit = 1, control = c(itermax = itermax))
+    
+    results <- summary(optimal_params)
+    
+    # Save individual results
+    
+    save(results, file = file_name)
+    
   }
 }
+
 

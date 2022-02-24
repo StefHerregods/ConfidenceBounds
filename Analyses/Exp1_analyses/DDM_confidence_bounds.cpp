@@ -5,10 +5,10 @@
 using namespace Rcpp;
 static Ziggurat::Ziggurat::Ziggurat zigg;
 // [[Rcpp::export]]
-NumericMatrix DDM_confidence_bounds(double v, double a, double ter, double z, int ntrials, double s, double dt, double a2, double postdriftmod, double a2_slope) {
+NumericMatrix DDM_confidence_bounds(double v, double a, double ter, double z, int ntrials, double s, double dt, double a2, double postdriftmod, double a2_slope, double ter2) {
   
   // initialize output
-  NumericMatrix DATA(ntrials,7);
+  NumericMatrix DATA(ntrials,8);
   
   // loop over trials
   for (int i = 0; i < ntrials; i++) {
@@ -51,7 +51,6 @@ NumericMatrix DDM_confidence_bounds(double v, double a, double ter, double z, in
     double v_post = v * postdriftmod;
     if (resp == 1){
       while ((evidence < a + a2/2 - t2*a2_slope) && (evidence > a - a2/2 + t2*a2_slope)){
-        t = t + dt;
         t2 = t2 + dt;
         evidence = evidence + v_post * dt + s * sqrt(dt) * zigg.norm();
         if (evidence >= a + a2/2 - t2*a2_slope){
@@ -62,7 +61,6 @@ NumericMatrix DDM_confidence_bounds(double v, double a, double ter, double z, in
       }
     } else if (resp == -1){
       while ((evidence < a2/2 - t2*a2_slope) && (evidence > -a2/2 + t2*a2_slope)){
-        t = t + dt;
         t2 = t2 + dt;
         evidence = evidence + v_post * dt + s * sqrt(dt) * zigg.norm();
         if (evidence >= a2/2 - t2*a2_slope){
@@ -73,8 +71,8 @@ NumericMatrix DDM_confidence_bounds(double v, double a, double ter, double z, in
       }
     }
     DATA(i,3) = evidence;
-    DATA(i,4) = (t + ter);
-    DATA(i,5) = DATA(i,4) - DATA(i,0);
+    DATA(i,4) = (t + t2 + ter + ter2);
+    DATA(i,5) = t2 + ter2;
   }
   return DATA; //RT (including non-decision time), resp (1 or -1), accuracy (1 or 0), evidence2 (control variable), RTfull, RTconfidence, ConfidenceRating (high-1 or low-0)
 }

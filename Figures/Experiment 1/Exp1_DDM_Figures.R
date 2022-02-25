@@ -42,7 +42,7 @@ ggplot(df, aes(x = manipulation, y = v1)) +
   geom_point() +
   geom_line(aes(group = sub), alpha = 0.2) +
   stat_summary(aes(y = v1, group = 1), fun = mean, colour="Blue", size = 4, shape = 95) +
-  scale_x_discrete(labels = c("Fast decision\nFast confidence rating", "Accurate decision\nFast confidence rating", "Accurate decision\nAccurate confidence rating", "Fast decision\nAccurate confidence rating")) 
+  scale_x_discrete(labels = c("Accurate decision\nAccurate confidence rating", "Accurate decision\nFast confidence rating", "Fast decision\nAccurate confidence rating", "Fast decision\nFast confidence rating")) 
   
 # v2
 
@@ -50,7 +50,7 @@ ggplot(df, aes(x = manipulation, y = v2)) +
   geom_point() +
   geom_line(aes(group = sub), alpha = 0.2) +
   stat_summary(aes(y = v2, group = 1), fun = mean, colour="Blue", size = 4, shape = 95) +
-  scale_x_discrete(labels = c("Fast decision\nFast confidence rating", "Accurate decision\nFast confidence rating", "Accurate decision\nAccurate confidence rating", "Fast decision\nAccurate confidence rating")) 
+  scale_x_discrete(labels = c("Accurate decision\nAccurate confidence rating", "Accurate decision\nFast confidence rating", "Fast decision\nAccurate confidence rating", "Fast decision\nFast confidence rating")) 
 
 # v3
 
@@ -58,7 +58,7 @@ ggplot(df, aes(x = manipulation, y = v3)) +
   geom_point() +
   geom_line(aes(group = sub), alpha = 0.2) +
   stat_summary(aes(y = v3, group = 1), fun = mean, colour="Blue", size = 4, shape = 95) +
-  scale_x_discrete(labels = c("Fast decision\nFast confidence rating", "Accurate decision\nFast confidence rating", "Accurate decision\nAccurate confidence rating", "Fast decision\nAccurate confidence rating")) 
+  scale_x_discrete(labels = c("Accurate decision\nAccurate confidence rating", "Accurate decision\nFast confidence rating", "Fast decision\nAccurate confidence rating", "Fast decision\nFast confidence rating")) 
 
 # v comparison
 
@@ -72,7 +72,7 @@ ggplot(df, aes(x = manipulation)) +
   stat_summary(aes(y = v1, group = 1), fun = mean, colour= 'darkred', size = 4, shape = 95) +
   stat_summary(aes(y = v2, group = 1), fun = mean, colour= 'blue', size = 4, shape = 95) +
   stat_summary(aes(y = v3, group = 1), fun = mean, colour= 'green', size = 4, shape = 95) +
-  scale_x_discrete(labels = c("Fast decision\nFast confidence rating", "Accurate decision\nFast confidence rating", "Accurate decision\nAccurate confidence rating", "Fast decision\nAccurate confidence rating")) 
+  scale_x_discrete(labels = c("Accurate decision\nAccurate confidence rating", "Accurate decision\nFast confidence rating", "Fast decision\nAccurate confidence rating", "Fast decision\nFast confidence rating")) 
 
 
 # a
@@ -81,7 +81,7 @@ ggplot(df, aes(x = manipulation, y = a)) +
   geom_point() +
   geom_line(aes(group = sub), alpha = 0.2) +
   stat_summary(aes(y = a, group = 1), fun = mean, colour="Blue", size = 4, shape = 95) +
-  scale_x_discrete(labels = c("Fast decision\nFast confidence rating", "Accurate decision\nFast confidence rating", "Accurate decision\nAccurate confidence rating", "Fast decision\nAccurate confidence rating")) 
+  scale_x_discrete(labels = c("Accurate decision\nAccurate confidence rating", "Accurate decision\nFast confidence rating", "Fast decision\nAccurate confidence rating", "Fast decision\nFast confidence rating")) 
 
 # a2
 
@@ -89,7 +89,7 @@ ggplot(df, aes(x = manipulation, y = a2)) +
   geom_point() +
   geom_line(aes(group = sub), alpha = 0.2) +
   stat_summary(aes(y = a2, group = 1), fun = mean, colour="Blue", size = 4, shape = 95) +
-  scale_x_discrete(labels = c("Fast decision\nFast confidence rating", "Accurate decision\nFast confidence rating", "Accurate decision\nAccurate confidence rating", "Fast decision\nAccurate confidence rating")) 
+  scale_x_discrete(labels = c("Accurate decision\nAccurate confidence rating", "Accurate decision\nFast confidence rating", "Fast decision\nAccurate confidence rating", "Fast decision\nFast confidence rating")) 
 
 # ter
 
@@ -97,7 +97,7 @@ ggplot(df, aes(x = manipulation, y = ter)) +
   geom_point() +
   geom_line(aes(group = sub), alpha = 0.2) +
   stat_summary(aes(y = ter, group = 1), fun = mean, colour="Blue", size = 4, shape = 95) +
-  scale_x_discrete(labels = c("Fast decision\nFast confidence rating", "Accurate decision\nFast confidence rating", "Accurate decision\nAccurate confidence rating", "Fast decision\nAccurate confidence rating")) 
+  scale_x_discrete(labels = c("Accurate decision\nAccurate confidence rating", "Accurate decision\nFast confidence rating", "Fast decision\nAccurate confidence rating", "Fast decision\nFast confidence rating")) 
 
 # postdriftmod
 
@@ -105,7 +105,7 @@ ggplot(df, aes(x = manipulation, y = postdriftmod)) +
   geom_point() +
   geom_line(aes(group = sub), alpha = 0.2) +
   stat_summary(aes(y = postdriftmod, group = 1), fun = mean, colour="Blue", size = 4, shape = 95) +
-  scale_x_discrete(labels = c("Fast decision\nFast confidence rating", "Accurate decision\nFast confidence rating", "Accurate decision\nAccurate confidence rating", "Fast decision\nAccurate confidence rating")) 
+  scale_x_discrete(labels = c("Accurate decision\nAccurate confidence rating", "Accurate decision\nFast confidence rating", "Fast decision\nAccurate confidence rating", "Fast decision\nFast confidence rating")) 
 
 # a2_slope
 
@@ -113,7 +113,7 @@ ggplot(df, aes(x = manipulation, y = a2_slope)) +
   geom_point() +
   geom_line(aes(group = sub), alpha = 0.2) +
   stat_summary(aes(y = a2_slope, group = 1), fun = mean, colour="Blue", size = 4, shape = 95) +
-  scale_x_discrete(labels = c("Fast decision\nFast confidence rating", "Accurate decision\nFast confidence rating", "Accurate decision\nAccurate confidence rating", "Fast decision\nAccurate confidence rating")) 
+  scale_x_discrete(labels = c("Accurate decision\nAccurate confidence rating", "Accurate decision\nFast confidence rating", "Fast decision\nAccurate confidence rating", "Fast decision\nFast confidence rating")) 
 
 # ter2
 
@@ -121,13 +121,14 @@ ggplot(df, aes(x = manipulation, y = ter2)) +
   geom_point() +
   geom_line(aes(group = sub), alpha = 0.2) +
   stat_summary(aes(y = ter2, group = 1), fun = mean, colour="Blue", size = 4, shape = 95) +
-  scale_x_discrete(labels = c("Fast decision\nFast confidence rating", "Accurate decision\nFast confidence rating", "Accurate decision\nAccurate confidence rating", "Fast decision\nAccurate confidence rating")) 
+  scale_x_discrete(labels = c("Accurate decision\nAccurate confidence rating", "Accurate decision\nFast confidence rating", "Fast decision\nAccurate confidence rating", "Fast decision\nFast confidence rating")) 
 
 
 
 
 ### Simulations based on estimated parameters ### 
 
+par(mfrow = c(4, 3))
 
 # DDM parameters
 
@@ -139,9 +140,6 @@ dt <- 0.01  # Precision
 # Loop parameters
 
 n <- 40  # Number of participants to include (40)
-plot_number <- 1  
-plot_list_RT = list()
-plot_list_RTconf = list()
 
 # Vectors
 
@@ -156,6 +154,7 @@ e_observed <- df_obs %>% filter(sub <= n & cor == 0)
 high_conf_observed <- df_obs %>% filter(sub <= n & cj == 1)
 low_conf_observed <- df_obs %>% filter(sub <= n & cj == 0)
 
+# RT's
 # Loop through manipulations
 
 for (j in 1:4){
@@ -166,11 +165,60 @@ for (j in 1:4){
     
     c_predicted <- NULL
     e_predicted <- NULL
-    high_conf_predicted <- NULL
-    low_conf_predicted <- NULL
     
     c_observed_temp <- c_observed %>% filter(manipulation == manipulation_vector[j] & coherence == coherence_vector[k])
     e_observed_temp <- e_observed %>% filter(manipulation == manipulation_vector[j] & coherence == coherence_vector[k])
+    
+    # Loop through participants
+    
+    for (i in 1:n){
+      
+      # Select correct estimated parameters
+      
+      df_temp <- df %>% filter(sub == i & manipulation == manipulation_vector[j])
+      v <- df_temp[[k + 2]]
+      
+      # Simulate data     
+      predictions <- data.frame(DDM_confidence_bounds(v = v, a = df_temp$a, ter = df_temp$ter, z = z, ntrials = ntrials, s = sigma, dt = dt, a2 = df_temp$a2, postdriftmod = df_temp$postdriftmod, a2_slope = df_temp$a2_slope, ter2 = df_temp$ter2))
+      names(predictions) <- c('rt', 'resp', 'cor', 'evidence2', 'rtfull', 'rtconf', 'cj')
+      
+      # Separate predictions according to the response
+      
+      c_predicted_temp <- predictions[predictions$cor == 1,]
+      e_predicted_temp <- predictions[predictions$cor == 0,]
+      
+      # Merge predictions
+      
+      c_predicted <- rbind(c_predicted, c_predicted_temp)
+      e_predicted <- rbind(e_predicted, e_predicted_temp)
+      print(i)
+    }
+    
+    # Draw plots
+    
+    tempC <- hist(c_observed_temp$rt, breaks=seq(0,6.2,.1), xlim = c(0,3), prob = F, col = rgb(0,1,0,.25), border = "white", ylab = "", xlab = "", cex.lab = 2, cex.main = 1.5, cex.axis = 1.5, main = paste0('Manipulation: ', manipulation_vector[j], '\n', 'Coherence: ', coherence_vector[k]))
+    tempE <- hist(e_observed_temp$rt, breaks=seq(0,6.2,.1), prob = F, add = T, col = rgb(1,0,0,.25), border = 'white')
+    Cors <- hist(c_predicted$rt, breaks = seq(0,30,.1), plot = F)
+    Errs <- hist(e_predicted$rt, breaks = seq(0,30,.1),plot=F)
+    lines(Cors$counts/(sum(Cors$counts)/sum(tempC$counts))~Cors$mids,type='l',col='green',lwd=3)
+    lines(Errs$counts/(sum(Errs$counts)/sum(tempE$counts))~Errs$mids,type='l',col='red',lwd=3)
+    #legend("topright",fill=c("white","white","green","red"),border=F,legend=c("Simulated corrects","Simulated errors","Empirical corrects","Empirical errors"),col=rep(c("Green","Red"),2),bty='n',lwd=c(1,1,-1,-1))
+
+  }
+  
+}
+
+# Confidence rating RT's
+# Loop through manipulations
+
+for (j in 1:4){
+  
+  # Loop through coherence levels
+  
+  for (k in 1:3){
+    
+    high_conf_predicted <- NULL
+    low_conf_predicted <- NULL
     
     high_conf_observed_temp <- high_conf_observed %>% filter(manipulation == manipulation_vector[j] & coherence == coherence_vector[k])
     low_conf_observed_temp <- low_conf_observed %>% filter(manipulation == manipulation_vector[j] & coherence == coherence_vector[k])
@@ -184,15 +232,9 @@ for (j in 1:4){
       df_temp <- df %>% filter(sub == i & manipulation == manipulation_vector[j])
       v <- df_temp[[k + 2]]
       
-      # Simulate data     #!!!! add other vars later
-      ### ter2
+      # Simulate data    
       predictions <- data.frame(DDM_confidence_bounds(v = v, a = df_temp$a, ter = df_temp$ter, z = z, ntrials = ntrials, s = sigma, dt = dt, a2 = df_temp$a2, postdriftmod = df_temp$postdriftmod, a2_slope = df_temp$a2_slope, ter2 = df_temp$ter2))
       names(predictions) <- c('rt', 'resp', 'cor', 'evidence2', 'rtfull', 'rtconf', 'cj')
-      
-      # Separate predictions according to the response
-      
-      c_predicted_temp <- predictions[predictions$cor == 1,]
-      e_predicted_temp <- predictions[predictions$cor == 0,]
       
       # Separate predictions according the the cj
       
@@ -200,44 +242,26 @@ for (j in 1:4){
       low_conf_predicted_temp <- predictions[predictions$cj == 0,]
       
       # Merge predictions
-      
-      c_predicted <- rbind(c_predicted, c_predicted_temp)
-      e_predicted <- rbind(e_predicted, e_predicted_temp)
+    
       high_conf_predicted <- rbind(high_conf_predicted, high_conf_predicted_temp)
       low_conf_predicted <- rbind(low_conf_predicted, low_conf_predicted_temp)
-      
+
       print(i)
     }
     
-    # Save plots in list
-      
-    plot_list_RT[[plot_number]] <- ggplot() +
-      geom_histogram(data = c_observed_temp, aes(x = rt, y = ..density..), fill = 'green', alpha = 0.5, bins = 20) +
-      geom_density(data = c_predicted, aes(x = rt), colour = 'green') +
-      geom_histogram(data = e_observed_temp, aes(x = rt, y = ..density..), fill = 'red', alpha = 0.5, bins = 20) +
-      geom_density(data = e_predicted, aes(x = rt), colour = 'red') +
-      xlim(0, 5) +
-      ylim(0, 2) +
-      ggtitle(paste('coherence: ', coherence_vector[k], 'manipulation: ', manipulation_vector[j]))
+    # Draw plots
     
-    plot_list_RTconf[[plot_number]] <- ggplot() +
-      geom_histogram(data = high_conf_observed_temp, aes(x = rtconf, y = ..density..), fill = 'green', alpha = 0.5, bins = 20) +
-      geom_density(data = high_conf_predicted, aes(x = rtconf), colour = 'green') +
-      geom_histogram(data = low_conf_observed_temp, aes(x = rtconf, y = ..density..), fill = 'red', alpha = 0.5, bins = 20) +
-      geom_density(data = low_conf_predicted, aes(x = rtconf), colour = 'red') +
-      xlim(0, 5) +
-      ylim(0, 2) +
-      ggtitle(paste('coherence: ', coherence_vector[k], 'manipulation: ', manipulation_vector[j]))
-    
-    plot_number <- plot_number + 1
+    tempC <- hist(c_observed_temp$rtconf, breaks=seq(0,6.2,.1), xlim = c(0,3), prob = F, col = rgb(0,1,0,.25), border = "white", ylab = "", xlab = "", cex.lab = 2, cex.main = 1.5, cex.axis = 1.5, main = paste0('Manipulation: ', manipulation_vector[j], '\n', 'Coherence: ', coherence_vector[k]))
+    tempE <- hist(e_observed_temp$rtconf, breaks=seq(0,6.2,.1), prob = F, add = T, col = rgb(1,0,0,.25), border = 'white')
+    Cors <- hist(high_conf_predicted$rtconf, breaks = seq(-1,30,.1), plot = F)
+    Errs <- hist(low_conf_predicted$rtconf, breaks = seq(-1,30,.1),plot=F)
+    lines(Cors$counts/(sum(Cors$counts)/sum(tempC$counts))~Cors$mids,type='l',col='green',lwd=3)
+    lines(Errs$counts/(sum(Errs$counts)/sum(tempE$counts))~Errs$mids,type='l',col='red',lwd=3)
+    #legend("topright",fill=c("white","white","green","red"),border=F,legend=c("Simulated corrects","Simulated errors","Empirical corrects","Empirical errors"),col=rep(c("Green","Red"),2),bty='n',lwd=c(1,1,-1,-1))
     
   }
   
 }
 
-marrangeGrob(plot_list_RT,
-          ncol = 4, nrow = 3)
-marrangeGrob(plot_list_RTconf,
-             ncol = 4, nrow = 3)
 
 

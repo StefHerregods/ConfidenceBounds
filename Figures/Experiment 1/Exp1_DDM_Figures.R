@@ -196,7 +196,7 @@ for (j in 1:4){
     
     # Draw plots
     
-    tempC <- hist(c_observed_temp$rt, breaks=seq(0,6.2,.1), xlim = c(0,3), prob = F, col = rgb(0,1,0,.25), border = "white", ylab = "", xlab = "", cex.lab = 2, cex.main = 1.5, cex.axis = 1.5, main = paste0('Manipulation: ', manipulation_vector[j], '\n', 'Coherence: ', coherence_vector[k]))
+    tempC <- hist(c_observed_temp$rt, breaks=seq(0,6.2,.1), xlim = c(0,3), prob = F, col = rgb(0,1,0,.25), border = "white", ylab = "", xlab = "", cex.lab = 2, cex.main = 1.5, cex.axis = 1.5, main = "")
     tempE <- hist(e_observed_temp$rt, breaks=seq(0,6.2,.1), prob = F, add = T, col = rgb(1,0,0,.25), border = 'white')
     Cors <- hist(c_predicted$rt, breaks = seq(0,30,.1), plot = F)
     Errs <- hist(e_predicted$rt, breaks = seq(0,30,.1),plot=F)
@@ -251,14 +251,13 @@ for (j in 1:4){
     
     # Draw plots
     
-    tempC <- hist(c_observed_temp$rtconf, breaks=seq(0,6.2,.1), xlim = c(0,3), prob = F, col = rgb(0,1,0,.25), border = "white", ylab = "", xlab = "", cex.lab = 2, cex.main = 1.5, cex.axis = 1.5, main = paste0('Manipulation: ', manipulation_vector[j], '\n', 'Coherence: ', coherence_vector[k]))
-    tempE <- hist(e_observed_temp$rtconf, breaks=seq(0,6.2,.1), prob = F, add = T, col = rgb(1,0,0,.25), border = 'white')
+    tempC <- hist(high_conf_observed$rtconf, breaks=seq(0,6.2,.1), xlim = c(0,3), prob = F, col = rgb(0,1,0,.25), border = "white", ylab = "", xlab = "", cex.lab = 2, cex.main = 1.5, cex.axis = 1.5, main = "")
+    tempE <- hist(low_conf_observed$rtconf, breaks=seq(0,6.2,.1), prob = F, add = T, col = rgb(1,0,0,.25), border = 'white')
     Cors <- hist(high_conf_predicted$rtconf, breaks = seq(-1,30,.1), plot = F)
     Errs <- hist(low_conf_predicted$rtconf, breaks = seq(-1,30,.1),plot=F)
     lines(Cors$counts/(sum(Cors$counts)/sum(tempC$counts))~Cors$mids,type='l',col='green',lwd=3)
     lines(Errs$counts/(sum(Errs$counts)/sum(tempE$counts))~Errs$mids,type='l',col='red',lwd=3)
     #legend("topright",fill=c("white","white","green","red"),border=F,legend=c("Simulated corrects","Simulated errors","Empirical corrects","Empirical errors"),col=rep(c("Green","Red"),2),bty='n',lwd=c(1,1,-1,-1))
-    
   }
   
 }

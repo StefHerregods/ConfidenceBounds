@@ -29,7 +29,6 @@ setwd('C:\\Users\\herre\\Desktop\\Internship\\Results\\Exp1_Results')
 
 library(Rcpp)  # To source, compile and run C++ functions
 library(DEoptim)  # Optimization algorithm
-library(RcppZiggurat)  # Random number generator (normal distribution) 
 library(dplyr)
 
 # Give R access to the DDM simulation function in C++
@@ -38,12 +37,12 @@ sourceCpp("C:\\Users\\herre\\OneDrive\\Documenten\\GitHub\\ConfidenceBounds\\Ana
 
 # Variable settings
 
-overwrite <- F  # Overwrite already existing files?
+overwrite <- T  # Overwrite already existing files?
 
 z <- 0.5  # Starting point (accuracy-coded dataset -> 0.5)
 ntrials <- 1000  # Number of decision-making simulations per observation
 sigma <- 1  # Within-trial noise
-dt <- 0.1  # Precision
+dt <- 0.01  # Precision
 
 itermax <- 500  # Number of DeOptim iterations
 
@@ -60,20 +59,20 @@ chi_square_optim <- function(params, all_observations, returnFit){
   
   # Reset chi-square
   
-  chiSquare <- 0
+  chiSquare <<- 0
   
   # Name parameters
   
-  names(params) <- c('v1', 'v2', 'v3', 'a', 'ter', 'a2', 'postdriftmod', 'a2_slope')
+  names(params) <- c('v1', 'v2', 'v3', 'a', 'ter', 'a2', 'postdriftmod', 'a2_slope', 'ter2')
   
   # Calculate separate chi-square for each level of coherence
   
-  for (i in 1:3){
-    observations <- all_observations %>% filter(coherence == coherence_vector[i])
+  for (coh in 1:3){
+    observations <- all_observations %>% filter(coherence == coherence_vector[coh])
     
     # Generate predictions 
     
-    predictions <<- data.frame(DDM_confidence_bounds(v = params[v_vector[i]], a = params['a'], ter = params['ter'], z = z, ntrials = ntrials, s = sigma, dt = dt, a2 = params['a2'], postdriftmod = params['postdriftmod'], a2_slope = params['a2_slope']))
+    predictions <<- data.frame(DDM_confidence_bounds(v = params[v_vector[coh]], a = params['a'], ter = params['ter'], z = z, ntrials = ntrials, s = sigma, dt = dt, a2 = params['a2'], postdriftmod = params['postdriftmod'], a2_slope = params['a2_slope'], ter2 = params['ter2']))
     names(predictions) <- c('rt', 'resp', 'cor', 'conf_evidence', 'rtfull', 'rtconf', 'cj')
     
     # Separate predictions according to the response
@@ -213,19 +212,20 @@ chi_square_optim <- function(params, all_observations, returnFit){
       
       # Calculate chi-square
       
-      chiSquare_temp = sum( ( (obs_props - pred_props)^ 2) / pred_props)
+      chiSquare_temp <<- sum( ( (obs_props - pred_props)^ 2) / pred_props)
       
       # Add chi-squares 
       
-      chiSquare <- chiSquare + chiSquare_temp
+      chiSquare <<- chiSquare + chiSquare_temp
     
-  }
+    }
   
+  }
+      
   # Return chiSquare
     
   return(chiSquare)
     
-  }
 }
 
 # Load data
@@ -236,7 +236,7 @@ N<-length(subs)
 
 # Optimize (extended) DDM parameters 
 
-for(i in 1:N){  # For each participant separately
+for(i in 1:40){  # For each participant separately
    
   print(paste('Running participant', subs[i], 'from', N))
   condLab <- unique(df$manipulation)  
@@ -249,7 +249,7 @@ for(i in 1:N){  # For each participant separately
     
     # Load existing individual results if these already exist
     
-    file_name <- paste0('Parameter_estimation\\results_sub_', i, '_', condLab[c], '.Rdata')
+    file_name <- paste0('Parameter_estimation_test\\results_sub_', i, '_', condLab[c], '.Rdata')
     if (overwrite == F & file.exists(file_name)){
 
       load(file_name)
@@ -261,9 +261,9 @@ for(i in 1:N){  # For each participant separately
       # Optimization function
       
       optimal_params <- DEoptim(chi_square_optim,  # Function to optimize
-                                # Possible values for v (for each level of coherence: 0.1, 0.2 and 0.4), a, ter, a2, postdriftmod 
-                                lower = c(0, 0, 0, .5,   0, 0,   0,  0),  
-                                upper = c(3, 3, 3,  4, 1.5, 5.5, 15, 0),
+                                # Possible values for v (for each level of coherence: 0.1, 0.2 and 0.4), a, ter, a2, postdriftmod, a2_slope, ter2
+                                lower = c(0, 0, 0, .5,   0, 0,   0,  0, -2),  
+                                upper = c(3, 3, 3,  4, 1.5, 5.5, 15, 10, 2),
                                 all_observations = tempDat, returnFit = 1, control = c(itermax = itermax))
       
       results <- summary(optimal_params)

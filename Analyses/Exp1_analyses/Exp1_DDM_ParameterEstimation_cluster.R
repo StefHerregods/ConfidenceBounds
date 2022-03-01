@@ -25,7 +25,7 @@ ntrials <- 1000  # Number of decision-making simulations per observation
 sigma <- 1  # Within-trial noise
 dt <- 0.01  # Precision
 
-itermax <- 2000  # Number of DeOptim iterations
+itermax <- 1000  # Number of DeOptim iterations
 
 # Variable vectors
 
@@ -99,6 +99,13 @@ chi_square_optim <- function(params, all_observations, returnFit){
       c_quantiles <- quantile(c_observed$rt, probs = c(.1,.3,.5,.7,.9), names = FALSE)
       e_quantiles <- quantile(e_observed$rt, probs = c(.1,.3,.5,.7,.9), names = FALSE)
       
+      if (any(is.na(c_quantiles))) {
+        c_quantiles <- rep(0,5)
+      }
+      if (any(is.na(e_quantiles))) {
+        e_quantiles <- rep(0,5)
+      }
+      
       # To combine correct and incorrect trials, we scale the expected interquantile probability by the proportion of correct and incorrect respectively
       
       prop_obs_c <- dim(c_observed)[1] / dim(observations)[1]
@@ -148,6 +155,13 @@ chi_square_optim <- function(params, all_observations, returnFit){
       high_conf_quantiles <- quantile(high_conf_observed$rtconf, probs = c(.1,.3,.5,.7,.9), names = FALSE)
       low_conf_quantiles <- quantile(low_conf_observed$rtconf, probs = c(.1,.3,.5,.7,.9), names = FALSE)
       
+      if (any(is.na(high_conf_quantiles))) {
+        high_conf_quantiles <- rep(0,5)
+      }
+      if (any(is.na(low_conf_quantiles))) {
+        low_conf_quantiles <- rep(0,5)
+      }
+      
       # To combine correct and incorrect trials, we scale the expected interquantile probability by the proportion of correct and incorrect respectively
       
       prop_obs_high_conf <- dim(high_conf_observed)[1] / dim(observations)[1]
@@ -186,14 +200,14 @@ chi_square_optim <- function(params, all_observations, returnFit){
       
       ### 3 - Calculating chi-square
       
-      # Combine the quantiles for RTs and confidence RT's
+      # Combine the quantiles for RT's and confidence RT's
       
-      obs_props <- c(obs_props, conf_obs_props) 
-      pred_props <- c(pred_props_rt, pred_props_rtconf) 
+      obs_props <- c(obs_props) #conf_obs_props
+      pred_props <- c(pred_props_rt) #pred_props_rtconf
       
       # Calculate chi-square
       
-      chiSquare_temp = sum( ( (obs_props - pred_props)^ 2) / pred_props)
+      chiSquare_temp = sum( ( (obs_props - pred_props)^ 2) )
       
       # Add chi-squares 
       
@@ -237,7 +251,7 @@ for(c in 1:4){  # For each condition separately
   
   # Load existing individual results if these already exist
   
-  file_name <- paste0('simple_results_sub_', i, '_', condLab[c], '.Rdata')
+  file_name <- paste0('test_results_sub_', i, '_', condLab[c], '.Rdata')
   if (overwrite == F & file.exists(file_name)){
 
     load(file_name)
@@ -250,8 +264,8 @@ for(c in 1:4){  # For each condition separately
     
     optimal_params <- DEoptim(chi_square_optim,  # Function to optimize
                               # Possible values for v (for each level of coherence: 0.1, 0.2 and 0.4), a, ter, a2, postdriftmod, a2_slope, ter2
-                              lower = c(0, 0, 0, 0,   0, 0,   0,  0, 0),  
-                              upper = c(3, 3, 3, 4, 1.5, 5.5, 15, 0, 0),
+                              lower = c(0, 0, 0, 0.3, 0,   0.3,  0,  0,  -2),  
+                              upper = c(3, 3, 3, 4,   1.5, 5.5,  15, 10, 2),
                               all_observations = tempDat, returnFit = 1, control = c(itermax = itermax))
     
     results <- summary(optimal_params)

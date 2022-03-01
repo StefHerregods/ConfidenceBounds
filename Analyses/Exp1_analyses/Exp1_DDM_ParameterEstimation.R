@@ -59,7 +59,7 @@ chi_square_optim <- function(params, all_observations, returnFit){
   
   # Reset chi-square
   
-  chiSquare <<- 0
+  chiSquare <- 0
   
   # Name parameters
   
@@ -118,6 +118,13 @@ chi_square_optim <- function(params, all_observations, returnFit){
       c_quantiles <- quantile(c_observed$rt, probs = c(.1,.3,.5,.7,.9), names = FALSE)
       e_quantiles <- quantile(e_observed$rt, probs = c(.1,.3,.5,.7,.9), names = FALSE)
       
+      if (any(is.na(c_quantiles))) {
+        c_quantiles <- rep(0,5)
+      }
+      if (any(is.na(e_quantiles))) {
+        e_quantiles <- rep(0,5)
+      }
+      
       # To combine correct and incorrect trials, we scale the expected interquantile probability by the proportion of correct and incorrect respectively
       
       prop_obs_c <- dim(c_observed)[1] / dim(observations)[1]
@@ -167,6 +174,13 @@ chi_square_optim <- function(params, all_observations, returnFit){
       high_conf_quantiles <- quantile(high_conf_observed$rtconf, probs = c(.1,.3,.5,.7,.9), names = FALSE)
       low_conf_quantiles <- quantile(low_conf_observed$rtconf, probs = c(.1,.3,.5,.7,.9), names = FALSE)
       
+      if (any(is.na(high_conf_quantiles))) {
+        high_conf_quantiles <- rep(0,5)
+      }
+      if (any(is.na(low_conf_quantiles))) {
+        low_conf_quantiles <- rep(0,5)
+      }
+      
       # To combine correct and incorrect trials, we scale the expected interquantile probability by the proportion of correct and incorrect respectively
       
       prop_obs_high_conf <- dim(high_conf_observed)[1] / dim(observations)[1]
@@ -203,7 +217,8 @@ chi_square_optim <- function(params, all_observations, returnFit){
       pred_props_rtconf[pred_props_rtconf == 0] <- .0000001
       
       
-      ### 3 - Calculating chi-square
+      ### 3 - Calculating chi-square ###
+      
       
       # Combine the quantiles for RTs and confidence RT's
       
@@ -212,7 +227,7 @@ chi_square_optim <- function(params, all_observations, returnFit){
       
       # Calculate chi-square
       
-      chiSquare_temp <<- sum( ( (obs_props - pred_props)^ 2) / pred_props)
+      chiSquare_temp <<- sum( ( (obs_props - pred_props)^ 2))
       
       # Add chi-squares 
       

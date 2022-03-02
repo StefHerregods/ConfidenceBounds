@@ -119,7 +119,7 @@ chi_square_optim <- function(params, all_observations, returnFit){
       
       c_obs_proportion = prop_obs_c * c(.1, .2, .2, .2, .2, .1)
       e_obs_proportion = prop_obs_e * c(.1, .2, .2, .2, .2, .1)
-      obs_props <- c(c_obs_proportion,e_obs_proportion)
+      obs_props <- c(c_obs_proportion, e_obs_proportion)
       
       # Calculate proportion of responses that fall between the observed quantiles when applied to the predicted data 
       
@@ -151,12 +151,12 @@ chi_square_optim <- function(params, all_observations, returnFit){
       ### 2 - Confidence rating RT comparison (1) ###
       
       
-      # Separate observations into high and low confidence
+      # Separate observations into high and low accuracy
       
       high_conf_observed <- observations[observations$cj == 1,]
       low_conf_observed <- observations[observations$cj == 0,]
       
-      # Get the quantile confidence RTs on the "observed data" for correct and error distributions separately (for quantiles .1, .3, .5, .7, .9)
+      # Get the quantile confidence RT's on the "observed data" for correct and error distributions separately (for quantiles .1, .3, .5, .7, .9)
       
       high_conf_quantiles <- quantile(high_conf_observed$rtconf, probs = c(.1,.3,.5,.7,.9), names = FALSE)
       low_conf_quantiles <- quantile(low_conf_observed$rtconf, probs = c(.1,.3,.5,.7,.9), names = FALSE)
@@ -201,7 +201,7 @@ chi_square_optim <- function(params, all_observations, returnFit){
       
       # Avoid zeros in the the data (because of division by predictions for chi square statistic) -> set to small number
       
-      pred_props_rtconf[pred_props_rtconf_1 == 0] <- .0000001
+      pred_props_rtconf_1[pred_props_rtconf_1 == 0] <- .0000001
       
       
       ### 3 - Confidence rating RT comparison (2) ###

@@ -20,13 +20,15 @@ setwd('C:\\Users\\herre\\Desktop\\Internship\\Results\\Exp1_Results')
 
 # Load data (long format)
 
+exclude <- c()
+
 df <- data.frame(matrix(ncol = 11, nrow = 40*4))
 colnames(df) <- c('sub', 'manipulation', 'v1', 'v2', 'v3', 'a', 'ter', 'a2', 'postdriftmod', 'a2_slope', 'ter2')
 condLab <- c('FastFast', 'AccFast', 'AccAcc', 'FastAcc') 
 j <- 1
-for (i in 1:40){ 
+for (i in (1:40)){ 
   for(c in 1:4){
-    file_name <- paste0('Parameter_estimation_both\\Parameter_estimation_both%5Cresults_sub_', i, '_', condLab[c], '.Rdata')
+    file_name <- paste0('Parameter_estimation_both\\test_results_sub_', i, '_', condLab[c], '.Rdata')
     load(file_name)
     df[j,] <- c(i, condLab[c], results$optim$bestmem[1], results$optim$bestmem[2], results$optim$bestmem[3], results$optim$bestmem[4], results$optim$bestmem[5], results$optim$bestmem[6], results$optim$bestmem[7], results$optim$bestmem[8], results$optim$bestmem[9])
     j <- j + 1
@@ -62,6 +64,16 @@ ggplot(df, aes(x = manipulation, y = v3)) +
 
 # v comparison
 
+df_temp <- select(df, v1, v2, v3, manipulation)
+v_mean <- df_temp %>%
+  group_by(manipulation) %>% 
+  summarise_each(funs(mean)) %>%
+  pivot_longer(cols = c(v1, v2, v3))
+
+ggplot(v_mean, aes(x = manipulation, y = value)) +
+  geom_point() +
+  geom_line(aes(group = name, colour = name), lty = 5, plt = 5, size = 1)
+  
 ggplot(df, aes(x = manipulation)) +
   geom_point(aes(y = v1), colour = 'darkred') +
   geom_point(aes(y = v2), colour = 'blue') +
@@ -73,7 +85,6 @@ ggplot(df, aes(x = manipulation)) +
   stat_summary(aes(y = v2, group = 1), fun = mean, colour= 'blue', size = 4, shape = 95) +
   stat_summary(aes(y = v3, group = 1), fun = mean, colour= 'green', size = 4, shape = 95) +
   scale_x_discrete(labels = c("Accurate decision\nAccurate confidence rating", "Accurate decision\nFast confidence rating", "Fast decision\nAccurate confidence rating", "Fast decision\nFast confidence rating")) 
-
 
 # a
 
@@ -126,9 +137,10 @@ ggplot(df, aes(x = manipulation, y = ter2)) +
 
 
 
+
 ### Simulations based on estimated parameters ### 
 
-par(mfrow = c(4, 3))
+par(mfrow = c(4, 3), mai = c(0.3, 0.3, 0.3, 0.3))
 
 # DDM parameters
 
@@ -154,6 +166,7 @@ e_observed <- df_obs %>% filter(sub <= n & cor == 0)
 high_conf_observed <- df_obs %>% filter(sub <= n & cj == 1)
 low_conf_observed <- df_obs %>% filter(sub <= n & cj == 0)
 
+
 # RT's
 # Loop through manipulations
 
@@ -171,7 +184,7 @@ for (j in 1:4){
     
     # Loop through participants
     
-    for (i in 1:n){
+    for (i in (1:n)){
       
       # Select correct estimated parameters
       
@@ -196,7 +209,7 @@ for (j in 1:4){
     
     # Draw plots
     
-    tempC <- hist(c_observed_temp$rt, breaks=seq(0,6.2,.1), xlim = c(0,3), prob = F, col = rgb(0,1,0,.25), border = "white", ylab = "", xlab = "", cex.lab = 2, cex.main = 1.5, cex.axis = 1.5, main = "")
+    tempC <- hist(c_observed_temp$rt, breaks=seq(0,6.2,.1), xlim = c(0,3), ylim = c(0,300), prob = F, col = rgb(0,1,0,.25), border = "white", ylab = "", xlab = "", cex.lab = 2, cex.main = 1.5, cex.axis = 1.5, main = "")
     tempE <- hist(e_observed_temp$rt, breaks=seq(0,6.2,.1), prob = F, add = T, col = rgb(1,0,0,.25), border = 'white')
     Cors <- hist(c_predicted$rt, breaks = seq(0,30,.1), plot = F)
     Errs <- hist(e_predicted$rt, breaks = seq(0,30,.1),plot=F)
@@ -208,7 +221,7 @@ for (j in 1:4){
   
 }
 
-# Confidence rating RT's
+# Confidence rating RT's (high vs. low cj)
 # Loop through manipulations
 
 for (j in 1:4){
@@ -225,7 +238,7 @@ for (j in 1:4){
     
     # Loop through participants
     
-    for (i in 1:n){
+    for (i in (1:n)){
       
       # Select correct estimated parameters
       
@@ -245,22 +258,83 @@ for (j in 1:4){
     
       high_conf_predicted <- rbind(high_conf_predicted, high_conf_predicted_temp)
       low_conf_predicted <- rbind(low_conf_predicted, low_conf_predicted_temp)
-
-      print(i)
+            
+      #print(i)
     }
     
     # Draw plots
     
-    tempC <- hist(high_conf_observed$rtconf, breaks=seq(0,6.2,.1), xlim = c(0,3), prob = F, col = rgb(0,1,0,.25), border = "white", ylab = "", xlab = "", cex.lab = 2, cex.main = 1.5, cex.axis = 1.5, main = "")
-    tempE <- hist(low_conf_observed$rtconf, breaks=seq(0,6.2,.1), prob = F, add = T, col = rgb(1,0,0,.25), border = 'white')
-    Cors <- hist(high_conf_predicted$rtconf, breaks = seq(-1,30,.1), plot = F)
-    Errs <- hist(low_conf_predicted$rtconf, breaks = seq(-1,30,.1),plot=F)
+    tempC <- hist(high_conf_observed_temp$rtconf, breaks=seq(0,6.2,.1), xlim = c(0,1.5), ylim = c(0,500), prob = F, col = rgb(0,1,0,.25), border = "white", ylab = "", xlab = "", cex.lab = 2, cex.main = 1.5, cex.axis = 1.5, main = "")
+    tempE <- hist(low_conf_observed_temp$rtconf, breaks=seq(0,6.2,.1), prob = F, add = T, col = rgb(1,0,0,.25), border = 'white')
+    Cors <- hist(high_conf_predicted$rtconf, breaks = seq(-2,30,.1), plot = F)
+    Errs <- hist(low_conf_predicted$rtconf, breaks = seq(-2,30,.1),plot=F)
     lines(Cors$counts/(sum(Cors$counts)/sum(tempC$counts))~Cors$mids,type='l',col='green',lwd=3)
     lines(Errs$counts/(sum(Errs$counts)/sum(tempE$counts))~Errs$mids,type='l',col='red',lwd=3)
     #legend("topright",fill=c("white","white","green","red"),border=F,legend=c("Simulated corrects","Simulated errors","Empirical corrects","Empirical errors"),col=rep(c("Green","Red"),2),bty='n',lwd=c(1,1,-1,-1))
+    
+    print(paste0("Proportion of negative RT's: ", (nrow(high_conf_predicted[high_conf_predicted$rtconf < 0,]) + nrow(low_conf_predicted[low_conf_predicted$rtconf < 0,]))/(nrow(high_conf_predicted) + nrow(low_conf_predicted))))
+    
+    #hist(high_conf_predicted$rtconf, ylim = c(0, 56000), xlim = c(0, 1.5), breaks=seq(-2,20,.1))
+    #hist(low_conf_predicted$rtconf, ylim = c(0, 56000), xlim = c(0, 1.5), breaks=seq(-2,20,.1))
   }
   
 }
 
+# Confidence rating RT's (after correct vs. wrong decision)
+# Loop through manipulations
+
+for (j in 1:4){
+  
+  # Loop through coherence levels
+  
+  for (k in 1:3){
+    
+    c_conf_predicted <- NULL
+    e_conf_predicted <- NULL
+    
+    c_conf_observed_temp <- c_observed %>% filter(manipulation == manipulation_vector[j] & coherence == coherence_vector[k])
+    e_conf_observed_temp <- e_observed %>% filter(manipulation == manipulation_vector[j] & coherence == coherence_vector[k])
+    
+    # Loop through participants
+    
+    for (i in (1:n)){
+      
+      # Select correct estimated parameters
+      
+      df_temp <- df %>% filter(sub == i & manipulation == manipulation_vector[j])
+      v <- df_temp[[k + 2]]
+      
+      # Simulate data    
+      predictions <- data.frame(DDM_confidence_bounds(v = v, a = df_temp$a, ter = df_temp$ter, z = z, ntrials = ntrials, s = sigma, dt = dt, a2 = df_temp$a2, postdriftmod = df_temp$postdriftmod, a2_slope = df_temp$a2_slope, ter2 = df_temp$ter2))
+      names(predictions) <- c('rt', 'resp', 'cor', 'evidence2', 'rtfull', 'rtconf', 'cj')
+      
+      # Separate predictions according the the cj
+      
+      c_conf_predicted_temp <- predictions[predictions$cor == 1,]
+      e_conf_predicted_temp <- predictions[predictions$cor == 0,]
+      
+      # Merge predictions
+      
+      c_conf_predicted <- rbind(c_conf_predicted, c_conf_predicted_temp)
+      e_conf_predicted <- rbind(e_conf_predicted, e_conf_predicted_temp)
+      
+      #print(i)
+    }
+    
+    # Draw plots
+    
+    tempC <- hist(c_conf_observed_temp$rtconf, breaks=seq(0,6.2,.1), xlim = c(0,1.5), ylim = c(0,500), prob = F, col = rgb(0,1,0,.25), border = "white", ylab = "", xlab = "", cex.lab = 2, cex.main = 1.5, cex.axis = 1.5, main = "")
+    tempE <- hist(e_conf_observed_temp$rtconf, breaks=seq(0,6.2,.1), prob = F, add = T, col = rgb(1,0,0,.25), border = 'white')
+    Cors <- hist(c_conf_predicted$rtconf, breaks = seq(-2,30,.1), plot = F)
+    Errs <- hist(e_conf_predicted$rtconf, breaks = seq(-2,30,.1),plot=F)
+    lines(Cors$counts/(sum(Cors$counts)/sum(tempC$counts))~Cors$mids,type='l',col='green',lwd=3)
+    lines(Errs$counts/(sum(Errs$counts)/sum(tempE$counts))~Errs$mids,type='l',col='red',lwd=3)
+    #legend("topright",fill=c("white","white","green","red"),border=F,legend=c("Simulated corrects","Simulated errors","Empirical corrects","Empirical errors"),col=rep(c("Green","Red"),2),bty='n',lwd=c(1,1,-1,-1))
+    
+    #hist(high_conf_predicted$rtconf, ylim = c(0, 56000), xlim = c(0, 1.5), breaks=seq(-2,20,.1))
+    #hist(low_conf_predicted$rtconf, ylim = c(0, 56000), xlim = c(0, 1.5), breaks=seq(-2,20,.1))
+  }
+  
+}
 
 

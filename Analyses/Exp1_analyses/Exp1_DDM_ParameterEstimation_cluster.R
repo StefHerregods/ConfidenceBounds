@@ -48,13 +48,13 @@ chi_square_optim <- function(params, all_observations, returnFit){
   
   # Calculate separate chi-square for each level of coherence
   
-  for (i in 1:3){
+  for (coh in 1:3){
     
-    observations <- all_observations %>% filter(coherence == coherence_vector[i])
+    observations <- all_observations %>% filter(coherence == coherence_vector[coh])
     
     # Generate predictions 
     
-    predictions <- data.frame(DDM_confidence_bounds(v = params[v_vector[i]], a = params['a'], ter = params['ter'], z = z, ntrials = ntrials, s = sigma, dt = dt, a2 = params['a2'], postdriftmod = params['postdriftmod'], a2_slope = params['a2_slope'], ter2 = params['ter2']))
+    predictions <- data.frame(DDM_confidence_bounds(v = params[v_vector[coh]], a = params['a'], ter = params['ter'], z = z, ntrials = ntrials, s = sigma, dt = dt, a2 = params['a2'], postdriftmod = params['postdriftmod'], a2_slope = params['a2_slope'], ter2 = params['ter2']))
     names(predictions) <- c('rt', 'resp', 'cor', 'conf_evidence', 'rtfull', 'rtconf', 'cj')
     
     # Separate predictions according to the response
@@ -218,10 +218,10 @@ chi_square_optim <- function(params, all_observations, returnFit){
       e_conf_quantiles <- quantile(e_conf_observed$rtconf, probs = c(.1,.3,.5,.7,.9), names = FALSE)
       
       if (any(is.na(c_conf_quantiles))) {
-        high_conf_quantiles <- rep(0,5)
+        c_conf_quantiles <- rep(0,5)
       }
       if (any(is.na(e_conf_quantiles))) {
-        low_conf_quantiles <- rep(0,5)
+        e_conf_quantiles <- rep(0,5)
       }
       
       # To combine correct and incorrect trials, we scale the expected interquantile probability by the proportion of correct and incorrect respectively
@@ -326,8 +326,8 @@ for(c in 1:4){  # For each condition separately
     
     optimal_params <- DEoptim(chi_square_optim,  # Function to optimize
                               # Possible values for v (for each level of coherence: 0.1, 0.2 and 0.4), a, ter, a2, postdriftmod, a2_slope, ter2
-                              lower = c(0, 0, 0, 0.3, 0,   0.3,  0,  -10,  -2),  
-                              upper = c(3, 3, 3, 4,   1.5, 5.5,  15, 10, 2),
+                              lower = c(0, 0, 0, .3, 0, .3, 0, 0, -2),  
+                              upper = c(3, 3, 3, 4, 1.5, 5.5, 15, 10, 2),
                               all_observations = tempDat, returnFit = 1, control = c(itermax = itermax))
     
     results <- summary(optimal_params)

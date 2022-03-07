@@ -151,7 +151,7 @@ chi_square_optim <- function(params, all_observations, returnFit){
       ### 2 - Confidence rating RT comparison (1) ###
       
       
-      # Separate observations into high and low accuracy
+      # Separate observations into high and low confidence
       
       high_conf_observed <- observations[observations$cj == 1,]
       low_conf_observed <- observations[observations$cj == 0,]
@@ -207,7 +207,7 @@ chi_square_optim <- function(params, all_observations, returnFit){
       ### 3 - Confidence rating RT comparison (2) ###
       
       
-      # Separate observations into high and low confidence
+      # Separate observations into correct and wrong decisions
       
       c_conf_observed <- observations[observations$cor == 1,]
       e_conf_observed <- observations[observations$cor == 0,]

@@ -29,6 +29,9 @@ data_viable <- read.csv(file="Exp2_data_viable.csv")
 data_viable <- data_viable[data_viable$block > 3,] # Remove training trials
 data_viable <- data_viable[data_viable$slow_trial == 0,]  # Remove too slow trials
 
+data_viable_c <- data_viable[data_viable$cor == 1,]
+data_viable_e <- data_viable[data_viable$cor == 0,]
+
 
 # Calculating averages per participant
 
@@ -47,6 +50,16 @@ coherence_mean <- data_viable %>%
 manipulation_mean <- data_viable %>%
   group_by(sub, manipulation) %>% 
   summarise_each(funs(mean))
+
+manipulation_mean_c <- data_viable_c %>%
+  group_by(sub, manipulation) %>% 
+  summarise_each(funs(mean))
+
+manipulation_mean_e <- data_viable_e %>%
+  group_by(sub, manipulation) %>% 
+  summarise_each(funs(mean))
+
+manipulation_mean_2 <- rbind(manipulation_mean_c, manipulation_mean_e)
 
 # Calculating averages per participant/manipulation/coherence
 
@@ -149,6 +162,13 @@ ggplot(data = coherence_mean, aes(x = coherence, y = cj), shape = 5) +
   geom_line(aes(group = sub), alpha = 0.2) +
   geom_point(shape = 16, size = 3, colour = "Blue", alpha = 0.3) +  stat_summary(aes(y = cj, group = 1), fun = mean, colour="Blue", size = 4, shape = 95) +
   labs(x = "Coherence", y = "Mean confidence rating") 
+
+ggplot(data = manipulation_mean_2, aes(x = manipulation, y = cj, colour = as.factor(cor)), shape = 5) +
+  geom_jitter(shape = 16, size = 3, alpha = 0.4, width = 0.15) +
+  stat_summary(aes(y = cj, group = as.factor(cor)), fun = mean, size = 4, shape = 95) +
+  scale_x_discrete(labels = c("AccAcc" = "Accurate decision\nAccurate confidence rating", "AccFast" = "Accurate decision\nFast confidence rating", "FastFast" = "Fast decision\nFast confidence rating", "FastAcc" = "Fast decision\nAccurate confidence rating")) +
+  labs(x = "Manipulation", y = "Mean confidence rating") +
+  theme_bw()
 
 ggplot(data = manipulation_mean, aes(x = manipulation, y = cj), shape = 5) +
   geom_line(aes(group = sub), alpha = 0.2) +

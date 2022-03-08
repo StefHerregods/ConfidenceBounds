@@ -60,7 +60,7 @@ chi_square_optim <- function(params, all_observations, returnFit){
     # Generate predictions 
     
     predictions <- data.frame(DDM_confidence_bounds(v = params[v_vector[i]], a = params['a'], ter = params['ter'], z = z, ntrials = ntrials, s = sigma, dt = dt, a2 = params['a2'], postdriftmod = params['postdriftmod'], a2_slope = params['a2_slope'], ter2 = params['ter2']))
-    names(predictions) <- c('rt', 'resp', 'cor', 'conf_evidence', 'rtfull', 'rtconf', 'cj')
+    names(predictions) <- c('rt', 'resp', 'cor', 'evidence_2', 'rtfull', 'rtconf', 'cj')
     
     # Separate predictions according to the response
     

@@ -8,7 +8,7 @@ static Ziggurat::Ziggurat::Ziggurat zigg;
 NumericMatrix DDM_confidence_bounds(double v, double a, double ter, double z, int ntrials, double s, double dt, double a2, double postdriftmod, double a2_slope, double ter2) {
   
   // initialize output
-  NumericMatrix DATA(ntrials,8);
+  NumericMatrix DATA(ntrials,7);
   
   // loop over trials
   for (int i = 0; i < ntrials; i++) {

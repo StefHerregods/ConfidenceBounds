@@ -1,27 +1,94 @@
 
-#activating packages
+# Activating packages
+
 library(Rcpp)
 library(ggplot2)
 
-#set-up
+# Set-up
+
 rm(list=ls())
-setwd("C:/Users/herre/Desktop/Internship/Simulations")
-sourceCpp("DDM_confidence_bound.cpp")
+sourceCpp("C:\\Users\\herre\\OneDrive\\Documenten\\GitHub\\ConfidenceBounds\\Analyses\\Exp1_analyses\\DDM_confidence_bounds.cpp") 
 
 
-### manipulating decision bound x confidence bound
+# Constant variables
 
-#Constant variables
-N <-100 #N participants (100)
-samples <- 500 #ntrials, multiplied by 9 below
-sigma <- 1 #within-trial noise
-dt <- 0.001 #precision; dt=.001 is better (but only when finished because slow)
-bound <- 1 #upper bound (lower = 0) #!!!Change this to continuous variable?
-z <- 0.5 #starting point (0.5 == middle, no bias)
+ntrials <- 50000 # Number of trials
+sigma <- 1 # Within-trial noise
+dt <- 0.01 # Precision; dt=.001 is better (but only when finished because slow)
+a <- 1 # Upper bound (lower = 0) 
+z <- 0.5 # Starting point (0.5 == middle, no bias)
 
-#manipulated variables
-drift <- c(0, 0.5, 1, 1.5, 2) #drift rate
-a2 <- c(0.5, 1, 1.5, 2, 2.5) #confidence bound 
+# Manipulated variables
+
+v <- c(0, 0.5, 1, 1.5, 2)     # Drift rate; i
+a <- c(1)                     # Upper bound (lower = 0); j
+a2 <- seq(0.1, 3, 0.1)  # Confidence bound; k
+ter <- c(0.1)                 # Non-decision time; l
+ter2 <- c(0)                  # Second non-decision time; m
+a2_slope <- c(0)              # Urgency; n
+postdriftmod <- c(1)          # Multiplied with v to calculate post-decisional drift rate
+
+### Simulate data ###
+
+predictions <- NULL
+simulation <- 0
+simulation_tot <- length(v)*length(a)*length(a2)*length(ter)*length(ter2)*length(a2_slope)*length(postdriftmod)
+print(paste0('Number of simulations: ', simulation_tot, ' (with ', ntrials, ' trials per simulation)'))
+
+for (i in 1:length(v)){
+  for (j in 1:length(a)){
+    for (k in 1:length(a2)){
+      for (l in 1:length(ter)){
+        for (m in 1:length(ter2)){
+          for (n in 1:length(a2_slope)){
+            for (o in 1:length(postdriftmod)){
+                
+              predictions_temp <- data.frame(DDM_confidence_bounds(v = v[i], a = a[j], ter = ter[l], z = z, ntrials = ntrials, s = sigma, dt = dt, a2 = a2[k], postdriftmod = postdriftmod[o], a2_slope = a2_slope[n], ter2 = ter2[m]))
+              predictions_temp$v <- v[i]
+              predictions_temp$a <- a[j]
+              predictions_temp$a2 <- a2[k]
+              predictions_temp$ter <- ter[l]
+              predictions_temp$ter2 <- ter2[m]
+              predictions_temp$a2_slope <- a2_slope[n]
+              predictions_temp$postdriftmod <- postdriftmod[o]
+              predictions <- rbind(predictions, predictions_temp)
+              
+              simulation <- simulation + 1
+              print(paste0(simulation, ' / ', simulation_tot))
+        
+            }
+          }
+        }
+      }
+    }  
+  }
+}
+
+names(predictions) <- c('rt', 'resp', 'cor', 'evidence_2', 'rtfull', 'rtconf', 'cj', 'v', 'a', 'a2', 'ter', 'ter2', 'a2_slope', 'postdriftmod')
+
+
+### Plots ###
+
+a2_mean <- predictions %>%
+  group_by(a2) %>% 
+  summarise_each(funs(mean))
+
+ggplot(data = a2_mean, aes(x = a2, y = cj)) +
+  geom_line(size = 1) +
+  theme_bw()
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 #empty dataframe
 data <- data.frame('rt' = numeric(0),    # Create empty data frame

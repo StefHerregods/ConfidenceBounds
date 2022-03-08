@@ -180,7 +180,7 @@ chi_square_optim <- function(params, all_observations, returnFit){
       
       high_conf_obs_proportion = prop_obs_high_conf * c(.1, .2, .2, .2, .2, .1)
       low_conf_obs_proportion = prop_obs_low_conf * c(.1, .2, .2, .2, .2, .1)
-      conf_obs_props_1 <- c(c_obs_proportion, e_obs_proportion)
+      conf_obs_props_1 <- c(high_conf_obs_proportion, low_conf_obs_proportion)
       
       # Calculate proportion of responses that fall between the observed quantiles when applied to the predicted data 
       

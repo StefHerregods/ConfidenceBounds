@@ -55,7 +55,7 @@ chi_square_optim <- function(params, all_observations, returnFit){
     # Generate predictions 
     
     predictions <- data.frame(DDM_confidence_bounds(v = params[v_vector[coh]], a = params['a'], ter = params['ter'], z = z, ntrials = ntrials, s = sigma, dt = dt, a2 = params['a2'], postdriftmod = params['postdriftmod'], a2_slope = params['a2_slope'], ter2 = params['ter2']))
-    names(predictions) <- c('rt', 'resp', 'cor', 'conf_evidence', 'rtfull', 'rtconf', 'cj')
+    names(predictions) <- c('rt', 'resp', 'cor', 'evidence_2', 'rtfull', 'rtconf', 'cj')
     
     # Separate predictions according to the response
     
@@ -313,7 +313,7 @@ for(c in 1:4){  # For each condition separately
   
   # Load existing individual results if these already exist
   
-  file_name <- paste0('test_results_sub_', i, '_', condLab[c], '.Rdata')
+  file_name <- paste0('both_results_sub_', i, '_', condLab[c], '.Rdata')
   if (overwrite == F & file.exists(file_name)){
 
     load(file_name)

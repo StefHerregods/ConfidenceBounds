@@ -202,11 +202,6 @@ chi_square_optim <- function(params, all_observations, returnFit){
         conf_quantiles_6 <- rep(0,5)
       }
       
-      
-      # Avoid zeros in the the data 
-      
-      pred_props_rtconf_1[pred_props_rtconf_1 == 0] <- .0000001
-      
       # To combine correct and incorrect trials, we scale the expected interquantile probability by the proportion of correct and incorrect respectively
       
       prop_obs_conf_1 <- dim(conf_observed_1)[1] / dim(observations)[1]

@@ -66,10 +66,7 @@ chi_square_optim <- function(params, all_observations, returnFit){
     
     predictions$conf_evidence <- ifelse(predictions$resp == 1, predictions$evidence_2 - params['a'], (-1) * predictions$evidence_2)
     predictions$conf_evidence <- predictions$conf_evidence + (params['a2'] / 2)
-    predictions$conf_evidence <- 6 * predictions$conf_evidence / params['a2']
-    predictions$conf_evidence <- round(predictions$conf_evidence)
-    predictions$conf_evidence[predictions$conf_evidence > 6] <- 6
-    predictions$conf_evidence[predictions$conf_evidence < 1] <- 6
+    predictions$cj_6 <- cut(predictions$conf_evidence, breaks=c(-Inf, params['a2'] / 6, 2 * params['a2'] / 6, 3 * params['a2'] / 6, 4 * params['a2'] / 6, 5 * params['a2'] / 6, Inf), labels = c(1, 2, 3, 4, 5, 6))
     
     # Separate predictions according to the response
     
@@ -380,7 +377,7 @@ condLab <- unique(df$manipulation)
 
 # Optimize (extended) DDM parameters 
 
-for(i in 1:40){  # For each participant separately
+for(i in 1:N){  # For each participant separately
    
   print(paste('Running participant', subs[i], 'from', N))
   tempAll <- subset(df, sub == subs[i])

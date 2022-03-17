@@ -61,10 +61,7 @@ chi_square_optim <- function(params, all_observations, returnFit){
     
     predictions$conf_evidence <- ifelse(predictions$resp == 1, predictions$evidence_2 - params['a'], (-1) * predictions$evidence_2)
     predictions$conf_evidence <- predictions$conf_evidence + (params['a2'] / 2)
-    predictions$conf_evidence <- 6 * predictions$conf_evidence / params['a2']
-    predictions$conf_evidence <- round(predictions$conf_evidence)
-    predictions$conf_evidence[predictions$conf_evidence > 6] <- 6
-    predictions$conf_evidence[predictions$conf_evidence < 1] <- 6
+    predictions$cj_6 <- cut(predictions$conf_evidence, breaks=c(-Inf, params['a2'] / 6, 2 * params['a2'] / 6, 3 * params['a2'] / 6, 4 * params['a2'] / 6, 5 * params['a2'] / 6, Inf), labels = c(1, 2, 3, 4, 5, 6))
     
     # Separate predictions according to the response
     
@@ -204,6 +201,11 @@ chi_square_optim <- function(params, all_observations, returnFit){
       if (any(is.na(conf_quantiles_6))) {
         conf_quantiles_6 <- rep(0,5)
       }
+      
+      
+      # Avoid zeros in the the data 
+      
+      pred_props_rtconf_1[pred_props_rtconf_1 == 0] <- .0000001
       
       # To combine correct and incorrect trials, we scale the expected interquantile probability by the proportion of correct and incorrect respectively
       

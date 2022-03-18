@@ -21,15 +21,15 @@ setwd('C:\\Users\\herre\\Desktop\\Internship\\Results\\Exp2_Results')
 
 # Load data (long format)
 
-exclude <- c()
+exclude <- c(1, 5, 17, 32, 35)
 
 df <- data.frame(matrix(ncol = 11, nrow = 20*4))
 colnames(df) <- c('sub', 'manipulation', 'v1', 'v2', 'v3', 'a', 'ter', 'a2', 'postdriftmod', 'a2_slope', 'ter2')
 condLab <- c('FastFast', 'AccFast', 'AccAcc', 'FastAcc') 
 j <- 1
-for (i in (1:20)){ 
+for (i in (1:40)[-exclude]){ 
   for(c in 1:4){
-    file_name <- paste0('Parameter_estimation_test\\test_results_sub_', i, '_', condLab[c], '.Rdata')
+    file_name <- paste0('Parameter_estimation_test\\both_results_sub_', i, '_', condLab[c], '.Rdata')
     load(file_name)
     df[j,] <- c(i, condLab[c], results$optim$bestmem[1], results$optim$bestmem[2], results$optim$bestmem[3], results$optim$bestmem[4], results$optim$bestmem[5], results$optim$bestmem[6], results$optim$bestmem[7], results$optim$bestmem[8], results$optim$bestmem[9])
     j <- j + 1
@@ -316,7 +316,7 @@ dt <- 0.01  # Precision
 
 # Loop parameters
 
-n <- 20  # Number of participants to include (40)
+n <- 40  # Number of participants to include (40)
 
 # Vectors
 
@@ -325,11 +325,15 @@ manipulation_vector <- c('FastFast', 'AccFast', 'AccAcc', 'FastAcc')
 
 # Selecting observation data
 
-df_obs <- read.csv(file = "Exp1_data_viable.csv")
+df_obs <- read.csv(file = "Exp2_data_viable.csv")
 c_observed <- df_obs %>% filter(sub <= n & cor == 1) 
 e_observed <- df_obs %>% filter(sub <= n & cor == 0)
-high_conf_observed <- df_obs %>% filter(sub <= n & cj == 1)
-low_conf_observed <- df_obs %>% filter(sub <= n & cj == 0)
+conf_observed_1 <- df_obs %>% filter(sub <= n & cj == 1)
+conf_observed_2 <- df_obs %>% filter(sub <= n & cj == 2)
+conf_observed_3 <- df_obs %>% filter(sub <= n & cj == 3)
+conf_observed_4 <- df_obs %>% filter(sub <= n & cj == 4)
+conf_observed_5 <- df_obs %>% filter(sub <= n & cj == 5)
+conf_observed_6 <- df_obs %>% filter(sub <= n & cj == 6)
 
 
 # RT's
@@ -349,7 +353,7 @@ for (j in 1:4){
     
     # Loop through participants
     
-    for (i in (1:n)){
+    for (i in (1:n)[-exclude]){
       
       # Select correct estimated parameters
       
@@ -398,15 +402,24 @@ for (j in 1:4){
   
   for (k in 1:3){
     
-    high_conf_predicted <- NULL
-    low_conf_predicted <- NULL
+    conf_predicted_1 <- NULL
+    conf_predicted_2 <- NULL
+    conf_predicted_3 <- NULL
+    conf_predicted_4 <- NULL
+    conf_predicted_5 <- NULL
+    conf_predicted_6 <- NULL
+        
+    conf_observed_1_temp <- conf_observed_1 %>% filter(manipulation == manipulation_vector[j] & coherence == coherence_vector[k])
+    conf_observed_2_temp <- conf_observed_2 %>% filter(manipulation == manipulation_vector[j] & coherence == coherence_vector[k])
+    conf_observed_3_temp <- conf_observed_3 %>% filter(manipulation == manipulation_vector[j] & coherence == coherence_vector[k])
+    conf_observed_4_temp <- conf_observed_4 %>% filter(manipulation == manipulation_vector[j] & coherence == coherence_vector[k])
+    conf_observed_5_temp <- conf_observed_5 %>% filter(manipulation == manipulation_vector[j] & coherence == coherence_vector[k])
+    conf_observed_6_temp <- conf_observed_6 %>% filter(manipulation == manipulation_vector[j] & coherence == coherence_vector[k])
     
-    high_conf_observed_temp <- high_conf_observed %>% filter(manipulation == manipulation_vector[j] & coherence == coherence_vector[k])
-    low_conf_observed_temp <- low_conf_observed %>% filter(manipulation == manipulation_vector[j] & coherence == coherence_vector[k])
-    
+        
     # Loop through participants
     
-    for (i in (1:n)){
+    for (i in (1:n)[-exclude]){
       
       # Select correct estimated parameters
       
@@ -419,25 +432,45 @@ for (j in 1:4){
       
       # Separate predictions according the the cj
       
-      high_conf_predicted_temp <- predictions[predictions$cj == 1,]
-      low_conf_predicted_temp <- predictions[predictions$cj == 0,]
+      conf_predicted_1_temp <- predictions[predictions$cj == 1,]
+      conf_predicted_2_temp <- predictions[predictions$cj == 2,]
+      conf_predicted_3_temp <- predictions[predictions$cj == 3,]
+      conf_predicted_4_temp <- predictions[predictions$cj == 4,]
+      conf_predicted_5_temp <- predictions[predictions$cj == 5,]
+      conf_predicted_6_temp <- predictions[predictions$cj == 6,]
       
       # Merge predictions
     
-      high_conf_predicted <- rbind(high_conf_predicted, high_conf_predicted_temp)
-      low_conf_predicted <- rbind(low_conf_predicted, low_conf_predicted_temp)
-            
+      conf_predicted_1 <- rbind(conf_predicted_1, conf_predicted_1_temp)
+      conf_predicted_2 <- rbind(conf_predicted_2, conf_predicted_2_temp)
+      conf_predicted_3 <- rbind(conf_predicted_3, conf_predicted_3_temp)
+      conf_predicted_4 <- rbind(conf_predicted_4, conf_predicted_4_temp)
+      conf_predicted_5 <- rbind(conf_predicted_5, conf_predicted_5_temp)
+      conf_predicted_6 <- rbind(conf_predicted_6, conf_predicted_6_temp)
+
       #print(i)
     }
     
     # Draw plots
     
-    tempC <- hist(high_conf_observed_temp$rtconf, breaks=seq(0,6.2,.1), xlim = c(0,1.5), ylim = c(0,500), prob = F, col = rgb(0,1,0,.25), border = "white", ylab = "", xlab = "", cex.lab = 2, cex.main = 1.5, cex.axis = 1.5, main = "")
-    tempE <- hist(low_conf_observed_temp$rtconf, breaks=seq(0,6.2,.1), prob = F, add = T, col = rgb(1,0,0,.25), border = 'white')
-    Cors <- hist(high_conf_predicted$rtconf, breaks = seq(-2,30,.1), plot = F)
-    Errs <- hist(low_conf_predicted$rtconf, breaks = seq(-2,30,.1),plot=F)
-    lines(Cors$counts/(sum(Cors$counts)/sum(tempC$counts))~Cors$mids,type='l',col='green',lwd=3)
-    lines(Errs$counts/(sum(Errs$counts)/sum(tempE$counts))~Errs$mids,type='l',col='red',lwd=3)
+    temp1 <- hist(conf_observed_1_temp$rtconf, breaks=seq(0,6.2,.1), xlim = c(0,1.5), ylim = c(0,150), prob = F, col = rgb(0.5,0,0,.25), border = "white", ylab = "", xlab = "", cex.lab = 2, cex.main = 1.5, cex.axis = 1.5, main = "")
+    temp2 <- hist(conf_observed_2_temp$rtconf, breaks=seq(0,6.2,.1), prob = F, add = T, col = rgb(0.5,0,0,.25), border = 'white')
+    temp3 <- hist(conf_observed_3_temp$rtconf, breaks=seq(0,6.2,.1), prob = F, add = T, col = rgb(0.5,0,0,.25), border = 'white')
+    temp4 <- hist(conf_observed_4_temp$rtconf, breaks=seq(0,6.2,.1), prob = F, add = T, col = rgb(0.5,0,0,.25), border = 'white')
+    temp5 <- hist(conf_observed_5_temp$rtconf, breaks=seq(0,6.2,.1), prob = F, add = T, col = rgb(0.5,0,0,.25), border = 'white')
+    temp6 <- hist(conf_observed_6_temp$rtconf, breaks=seq(0,6.2,.1), prob = F, add = T, col = rgb(0.5,0,0,.25), border = 'white')
+    pred1 <- hist(conf_predicted_1$rtconf, breaks = seq(-2,30,.1), plot = F)
+    pred2 <- hist(conf_predicted_2$rtconf, breaks = seq(-2,30,.1), plot = F)
+    pred3 <- hist(conf_predicted_3$rtconf, breaks = seq(-2,30,.1), plot = F)
+    pred4 <- hist(conf_predicted_4$rtconf, breaks = seq(-2,30,.1), plot = F)
+    pred5 <- hist(conf_predicted_5$rtconf, breaks = seq(-2,30,.1), plot = F)
+    pred6 <- hist(conf_predicted_6$rtconf, breaks = seq(-2,30,.1), plot = F)
+    lines(pred1$counts/(sum(pred1$counts)/sum(temp1$counts))~pred1$mids,type='l',col='red',lwd=2)
+    lines(pred2$counts/(sum(pred2$counts)/sum(temp2$counts))~pred2$mids,type='l',col='red',lwd=2)
+    lines(pred3$counts/(sum(pred3$counts)/sum(temp3$counts))~pred3$mids,type='l',col='red',lwd=2)
+    lines(pred4$counts/(sum(pred4$counts)/sum(temp4$counts))~pred4$mids,type='l',col='red',lwd=2)
+    lines(pred5$counts/(sum(pred5$counts)/sum(temp5$counts))~pred5$mids,type='l',col='red',lwd=2)
+    lines(pred6$counts/(sum(pred6$counts)/sum(temp6$counts))~pred6$mids,type='l',col='red',lwd=2)
     #legend("topright",fill=c("white","white","green","red"),border=F,legend=c("Simulated corrects","Simulated errors","Empirical corrects","Empirical errors"),col=rep(c("Green","Red"),2),bty='n',lwd=c(1,1,-1,-1))
     
     print(paste0("Proportion of negative RT's: ", (nrow(high_conf_predicted[high_conf_predicted$rtconf < 0,]) + nrow(low_conf_predicted[low_conf_predicted$rtconf < 0,]))/(nrow(high_conf_predicted) + nrow(low_conf_predicted))))
@@ -465,7 +498,7 @@ for (j in 1:4){
     
     # Loop through participants
     
-    for (i in (1:n)){
+    for (i in (1:n)[-exclude]){
       
       # Select correct estimated parameters
       

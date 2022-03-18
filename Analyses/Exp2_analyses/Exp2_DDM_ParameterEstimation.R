@@ -280,7 +280,7 @@ chi_square_optim <- function(params, all_observations, returnFit){
         sum(conf_predicted_6_rtconf > conf_quantiles_6[5])
       ) / dim(predictions)[1]
       
-      pred_props_rtconf_1 <- c(conf_1_pred_proportion, conf_2_pred_proportion, conf_2_pred_proportion, conf_4_pred_proportion, conf_5_pred_proportion, conf_6_pred_proportion)
+      pred_props_rtconf_1 <- c(conf_1_pred_proportion, conf_2_pred_proportion, conf_3_pred_proportion, conf_4_pred_proportion, conf_5_pred_proportion, conf_6_pred_proportion)
       
       # Avoid zeros in the the data (because of division by predictions for chi square statistic) -> set to small number
       

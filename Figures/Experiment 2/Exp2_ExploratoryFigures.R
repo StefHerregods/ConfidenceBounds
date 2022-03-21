@@ -172,7 +172,8 @@ ggplot(data = manipulation_mean, aes(x = manipulation, y = rt), shape = 5) +
   geom_point(shape = 16, size = 3, colour = "Blue", alpha = 0.3) +
   stat_summary(aes(y = rt, group = 1), fun = mean, colour="Blue", size = 4, shape = 95) +
   scale_x_discrete(labels = c("AccAcc" = "Accurate decision\nAccurate confidence rating", "AccFast" = "Accurate decision\nFast confidence rating", "FastFast" = "Fast decision\nFast confidence rating", "FastAcc" = "Fast decision\nAccurate confidence rating")) +
-  labs(x = "Manipulation", y = "Mean decision reaction time")
+  labs(x = "Manipulation", y = "Mean decision reaction time") +
+  geom_point(data = data_39, aes(x = manipulation, y = rt), color = 'red', size = 5) + theme_bw()
 
 # RT manipulations (predictions)
 
@@ -282,7 +283,8 @@ ggplot(data = manipulation_mean, aes(x = manipulation, y = cor), shape = 5) +
   geom_point(shape = 16, size = 3, colour = "Blue", alpha = 0.3) +
   stat_summary(aes(y = cor, group = 1), fun = mean, colour="Blue", size = 4, shape = 95) +
   scale_x_discrete(labels = c("AccAcc" = "Accurate decision\nAccurate confidence rating", "AccFast" = "Accurate decision\nFast confidence rating", "FastFast" = "Fast decision\nFast confidence rating", "FastAcc" = "Fast decision\nAccurate confidence rating")) +
-  labs(x = "Manipulation", y = "Mean accuracy")
+  labs(x = "Manipulation", y = "Mean accuracy") +
+  geom_point(data =data_39, aes(x = manipulation, y = cor), color = 'red', size = 5) + theme_bw()
 
 # Accuracy & cj plots + predictions
 
@@ -425,15 +427,25 @@ ggplot(data = manipulation_mean_e, aes(x = manipulation, y = cj), shape = 5) +
     axis.line = element_line(size = 0.5))
 
 
+a <- data.frame(prop.table(table(data_viable_c$cj)), 'correct', 'observations')
+b <- data.frame(prop.table(table(data_viable_e$cj)), 'wrong', 'observations')
+c <- data.frame(prop.table(table(predictions_c$cj)), 'correct', 'predictions')
+d <- data.frame(prop.table(table(predictions_e$cj)), 'wrong', 'predictions')
+colnames(a) <- c('cj', 'freq', 'cor', 'type')
+colnames(b) <- c('cj', 'freq', 'cor', 'type')
+colnames(c) <- c('cj', 'freq', 'cor', 'type')
+colnames(d) <- c('cj', 'freq', 'cor', 'type')
+cj_proportions <- rbind(a, b, c, d)
+
+ggplot() +
+  geom_bar(data = cj_proportions[cj_proportions$type == 'observations',], stat = 'identity', aes(y = freq, x = cj, fill = cor), width = 0.9, position = position_dodge(), color = 'black', alpha = 0.7) +
+  geom_point(data = cj_proportions[cj_proportions$type == 'predictions',], stat = 'identity', aes(y = freq, x = cj, fill = cor), position = position_dodge(width = 0.9), shape = 4, size = 3, stroke = 1) +
+  scale_fill_manual(values=c("#27AE60", "#C0392B")) +
+  theme_bw() 
+
 # Confidence rating plots
 
-# Option 1
-ggplot(data = coherence_mean, aes(x = as.factor(coherence), y = cj), shape = 5) +
-  geom_line(aes(group = sub), alpha = 0.2) +
-  geom_point(shape = 16, size = 3, colour = "Blue", alpha = 0.3) +  stat_summary(aes(y = cj, group = 1), fun = mean, colour="Blue", size = 4, shape = 95) +
-  labs(x = "Coherence", y = "Mean confidence rating") 
 
-# Option 2
 ggplot(data = coherence_mean, aes(x = coherence, y = cj), shape = 5) +
   geom_line(aes(group = sub), alpha = 0.2) +
   geom_point(shape = 16, size = 3, colour = "Blue", alpha = 0.3) +  stat_summary(aes(y = cj, group = 1), fun = mean, colour="Blue", size = 4, shape = 95) +

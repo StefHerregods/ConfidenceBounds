@@ -14,7 +14,7 @@ library(optparse)  # Necessary for parallel computing
 
 # Give R access to the DDM simulation function in C++
 
-sourceCpp("DDM_confidence_bounds.cpp") 
+sourceCpp("DDM_confidence_bounds_separated.cpp") 
 
 # Variable settings
 
@@ -52,7 +52,7 @@ chi_square_optim <- function(params, all_observations, returnFit){
   
   # Name parameters
   
-  names(params) <- c('v1', 'v2', 'v3', 'a', 'ter', 'a2', 'postdriftmod', 'a2_slope', 'ter2')
+  names(params) <- c('v1', 'v2', 'v3', 'a', 'ter', 'a2_upper', 'a2_lower', 'postdriftmod', 'a2_slope_upper', 'a2_slope_lower', 'ter2')
   
   # Calculate separate chi-square for each level of coherence
   

@@ -275,7 +275,7 @@ chi_square_optim <- function(params, all_observations, returnFit){
         sum(conf_predicted_6_rtconf > conf_quantiles_6[5])
       ) / dim(predictions)[1]
       
-      pred_props_rtconf_1 <- c(conf_1_pred_proportion, conf_2_pred_proportion, conf_2_pred_proportion, conf_4_pred_proportion, conf_5_pred_proportion, conf_6_pred_proportion)
+      pred_props_rtconf_1 <- c(conf_1_pred_proportion, conf_2_pred_proportion, conf_3_pred_proportion, conf_4_pred_proportion, conf_5_pred_proportion, conf_6_pred_proportion)
       
       # Avoid zeros in the the data (because of division by predictions for chi square statistic) -> set to small number
       
@@ -404,8 +404,8 @@ for(c in 1:4){  # For each condition separately
     
     optimal_params <- DEoptim(chi_square_optim,  # Function to optimize
                               # Possible values for v (for each level of coherence: 0.1, 0.2 and 0.4), a, ter, a2, postdriftmod, a2_slope, ter2
-                              lower = c(0, 0, 0, .3, 0, .3, 0, 0, -2),  
-                              upper = c(3, 3, 3, 4, 1.5, 5.5, 15, 10, 2),
+                              lower = c(0, 0, 0, .3, 0, 0.0001, 0, 0, -2),  
+                              upper = c(3, 3, 3, 4, 1.5,    10, 15, 10, 2),
                               all_observations = tempDat, returnFit = 1, control = c(itermax = itermax))
     
     results <- summary(optimal_params)

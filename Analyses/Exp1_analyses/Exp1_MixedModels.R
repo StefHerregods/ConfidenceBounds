@@ -55,6 +55,7 @@ df$cj <- as.factor(df$cj)
 # Based on correct data only
 
 df_correct <- subset(df, cor == 1)
+df_incorrect <- subset(df, cor == 0)
 
 # Are random slopes necessary? -> Yes (but less for coherence)
 
@@ -417,12 +418,14 @@ cj_8 <- glmer(cj ~ 1 + rt_manipulation * rtconf_manipulation * coherence + (1 + 
 cj_9 <- glmer(cj ~ 1 + rt_manipulation * rtconf_manipulation * coherence + (1 + coherence * rtconf_manipulation + rt_manipulation|sub), 
               data = df_correct, family = binomial, control = glmerControl(optimizer = "bobyqa"))  # Boundary (singular) fit
 
+anova(cj_6, cj_8)  # Not significant
+
 # Model assumptions
 
 # (1) Independence of errors
 # Gray lines indicate plus and minus 2 standard-error bounds (around 95% of residuals)
-binnedplot(fitted(cj_8), 
-           residuals(cj_8, type = "response"), 
+binnedplot(fitted(cj_6), 
+           residuals(cj_6, type = "response"), 
            nclass = NULL, 
            xlab = "Expected Values", 
            ylab = "Average residual", 
@@ -431,24 +434,24 @@ binnedplot(fitted(cj_8),
            col.pts = 1, 
            col.int = "gray")
 
-plot(cj_8)
-plot(predict(cj_8), residuals(cj_8), col = c("blue","red")[as.numeric(df$cor)])
+plot(cj_6)
+plot(predict(cj_6), residuals(cj_6), col = c("blue","red")[as.numeric(df$cor)])
 abline(h=0,lty=2,col="grey")
-lines(lowess(predict(cj_8), residuals(cj_8)), col="black", lwd=2)
+lines(lowess(predict(cj_6), residuals(cj_6)), col="black", lwd=2)
 
-rl=lm(residuals(cj_8)~bs(predict(cj_8),8))
+rl=lm(residuals(cj_6)~bs(predict(cj_6),8))
 y=predict(rl,se=TRUE)
-segments(predict(cj_8),y$fit+2*y$se.fit,predict(cj_8),y$fit-2*y$se.fit,col="green")
+segments(predict(cj_6),y$fit+2*y$se.fit,predict(cj_6),y$fit-2*y$se.fit,col="green")
 
 # (2) Linearity (no continuous variables)
 
 # (3) Absence of multicollinearity
 
-vif.lme(cj_8)
+vif.lme(cj_6)
 
 # Model interpretation
 
-Anova(cj_8)
+Anova(cj_6)
 
 plot(effect('rt_manipulation', cj_8))  # Not significant
 plot(effect('rtconf_manipulation', cj_8))   # Not significant
@@ -461,6 +464,10 @@ ranef(RTconf_6)
 
 
 
+
+cj_9 <- glmer(cj ~ 1 + rt_manipulation * rtconf_manipulation * coherence + (1 + rt_manipulation + coherence|sub), 
+              data = df_incorrect, family = binomial, control = glmerControl(optimizer = "bobyqa"))  # Boundary (singular) fit
+Anova(cj_9)
 
 
 

@@ -223,10 +223,10 @@ chi_square_optim <- function(params, all_observations, returnFit){
       e_conf_quantiles <- quantile(e_conf_observed$rtconf, probs = c(.1,.3,.5,.7,.9), names = FALSE)
       
       if (any(is.na(c_conf_quantiles))) {
-        high_conf_quantiles <- rep(0,5)
+        c_conf_quantiles <- rep(0,5)
       }
       if (any(is.na(e_conf_quantiles))) {
-        low_conf_quantiles <- rep(0,5)
+        e_conf_quantiles <- rep(0,5)
       }
       
       # To combine correct and incorrect trials, we scale the expected interquantile probability by the proportion of correct and incorrect respectively

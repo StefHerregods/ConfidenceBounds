@@ -296,10 +296,10 @@ chi_square_optim <- function(params, all_observations, returnFit){
       e_conf_quantiles <- quantile(e_conf_observed$rtconf, probs = c(.1,.3,.5,.7,.9), names = FALSE)
       
       if (any(is.na(c_conf_quantiles))) {
-        high_conf_quantiles <- rep(0,5)
+        c_conf_quantiles <- rep(0,5)
       }
       if (any(is.na(e_conf_quantiles))) {
-        low_conf_quantiles <- rep(0,5)
+        e_conf_quantiles <- rep(0,5)
       }
       
       # To combine correct and incorrect trials, we scale the expected interquantile probability by the proportion of correct and incorrect respectively
@@ -391,7 +391,7 @@ for(c in 1:4){  # For each condition separately
   
   # Load existing individual results if these already exist
   
-  file_name <- paste0('both_results_sub_', i, '_', condLab[c], '.Rdata')
+  file_name <- paste0('exp2_simple_results_sub_', i, '_', condLab[c], '.Rdata')
   if (overwrite == F & file.exists(file_name)){
 
     load(file_name)

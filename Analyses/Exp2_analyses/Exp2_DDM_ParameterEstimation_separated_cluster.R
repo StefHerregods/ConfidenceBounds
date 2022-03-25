@@ -23,7 +23,7 @@ overwrite <- T  # Overwrite already existing files?
 z <- 0.5  # Starting point (accuracy-coded dataset -> 0.5)
 ntrials <- 1000  # Number of decision-making simulations per observation
 sigma <- 1  # Within-trial noise
-dt <- 0.01  # Precision
+dt <- 0.001  # Precision
 
 itermax <- 1000  # Number of DeOptim iterations
 

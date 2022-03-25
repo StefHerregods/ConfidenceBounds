@@ -30,20 +30,12 @@ ntrials <- 100  # Number of decision-making simulations per observation
 sigma <- 1  # Within-trial noise
 dt <- 0.1  # Precision
 
-itermax <- 300  # Number of DeOptim iterations
+itermax <- 100  # Number of DeOptim iterations
 
 # Variable vectors
 
 v_vector <- c('v1', 'v2', 'v3')
 coherence_vector <- c(0.1, 0.2, 0.4)
-
-# Calculate intersection
-
-intersect <- function(l1, l2){
-  x <- (l2[1] - l1[1]) / (l1[2] - l2[2])
-  y <- l1[1] + l1[2] * x
-  return(xy=c(x, y))
-}
 
 
 ### Calculate Chi-square (expected versus observed values)
@@ -70,29 +62,10 @@ chi_square_optim <- function(params, all_observations, returnFit){
     predictions <- data.frame(DDM_confidence_bounds(v = params[v_vector[i]], a = params['a'], ter = params['ter'], z = z, ntrials = ntrials, s = sigma, dt = dt, a2_upper = params['a2_upper'], a2_lower = params['a2_lower'], postdriftmod = params['postdriftmod'], a2_slope_upper = params['a2_slope_upper'], a2_slope_lower = params['a2_slope_lower'], ter2 = params['ter2']))
     names(predictions) <- c('rt', 'resp', 'cor', 'evidence_2', 'rtfull', 'rtconf', 'cj')
     
-    # Calculate intersection confidence slopes
-    
-    l1 <- c(params['a2_lower'] + params['a2_upper'], -(params['a2_slope_upper']))  # Y = l1[1] + l1[2] * X
-    l2 <- c(0, params['a2_slope_lower'])  # Y = l2[1] + l2[2] * X
-    xy <- intersect(l1, l2)
-    xy_2 <- (params['a2_lower'] + params['a2_upper']) - xy[2]
-    
     # Transform predicted conf_evidence into cj
-
-    for (i in 1:nrow(predictions)){
-      
-      if (predictions$resp[i] == 1){
-        
-        predictions$conf_evidence[i] <- predictions$evidence_2[i] - params['a'] + params['a2_lower']
-        predictions$cj_6[i] <- cut(predictions$conf_evidence[i], breaks = c(-Inf, xy[2] / 3, 2 * xy[2] / 3, xy[2], xy[2] + (xy_2 / 3), xy[2] + (2 * xy_2 / 3), Inf), labels = c(1, 2, 3, 4, 5, 6))
-        
-      } else {
-        
-        predictions$conf_evidence[i] <- -(predictions$evidence_2[i]) + params['a2_lower']
-        predictions$cj_6[i] <- cut(predictions$conf_evidence[i], breaks = c(-Inf, xy_2 / 3, 2 * xy_2 / 3, xy_2, xy_2 + (xy[2] / 3), xy_2 + (2 * xy[2] / 3), Inf), labels = c(1, 2, 3, 4, 5, 6))
-        
-      }
-    }
+    
+    predictions$conf_evidence <- ifelse(predictions$resp == 1, predictions$evidence_2 - params['a'], (-1) * predictions$evidence_2)
+    predictions$cj_6 <- cut(predictions$conf_evidence, breaks=c(-Inf, -(2 * params['a2_lower'] / 3), -(params['a2_lower'] / 3), 0, params['a2_upper'] / 3, 2 * params['a2_upper'] / 3, Inf), labels = c(1, 2, 3, 4, 5, 6))
     
     # Separate predictions according to the response
     
@@ -327,10 +300,10 @@ chi_square_optim <- function(params, all_observations, returnFit){
       e_conf_quantiles <- quantile(e_conf_observed$rtconf, probs = c(.1,.3,.5,.7,.9), names = FALSE)
       
       if (any(is.na(c_conf_quantiles))) {
-        high_conf_quantiles <- rep(0,5)
+        c_conf_quantiles <- rep(0,5)
       }
       if (any(is.na(e_conf_quantiles))) {
-        low_conf_quantiles <- rep(0,5)
+        e_conf_quantiles <- rep(0,5)
       }
       
       # To combine correct and incorrect trials, we scale the expected interquantile probability by the proportion of correct and incorrect respectively
@@ -383,7 +356,7 @@ chi_square_optim <- function(params, all_observations, returnFit){
       # Add chi-squares 
       
       chiSquare <- chiSquare + chiSquare_temp
-    
+
     }
   
   }
@@ -408,7 +381,7 @@ for(i in 1:N){  # For each participant separately
   print(paste('Running participant', subs[i], 'from', N))
   tempAll <- subset(df, sub == subs[i])
   
-  for(c in 1:4){  # For each condition separately 
+  for(c in 2:4){  # For each condition separately 
     
     tempDat <- subset(tempAll, manipulation == condLab[c])
     tempDat <- tempDat[,c('rt', 'cor', 'resp', 'cj', 'manipulation', 'rtconf', 'coherence')]

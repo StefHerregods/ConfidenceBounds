@@ -25,23 +25,23 @@ data_viable_e <- data_viable[data_viable$cor == 0,]
 
 # Simulating data based on estimated parameters
 
-sourceCpp("C:\\Users\\herre\\OneDrive\\Documenten\\GitHub\\ConfidenceBounds\\Analyses\\Exp1_analyses\\DDM_confidence_bounds.cpp") 
+sourceCpp("C:\\Users\\herre\\OneDrive\\Documenten\\GitHub\\ConfidenceBounds\\Analyses\\Exp1_analyses\\DDM_confidence_bounds_separated.cpp") 
 
 exclude <- c()
 
-df <- data.frame(matrix(ncol = 11, nrow = 40*4))
-colnames(df) <- c('sub', 'manipulation', 'v1', 'v2', 'v3', 'a', 'ter', 'a2', 'postdriftmod', 'a2_slope', 'ter2')
+df <- data.frame(matrix(ncol = 13, nrow = 40*4))
+colnames(df) <- c('sub', 'manipulation', 'v1', 'v2', 'v3', 'a', 'ter', 'a2_upper', 'a2_lower', 'postdriftmod', 'a2_slope_upper', 'a2_slope_lower', 'ter2')
 condLab <- c('FastFast', 'AccFast', 'AccAcc', 'FastAcc') 
 j <- 1
-for (i in (1:40)){ 
+for (i in (21:40)){ 
   for(c in 1:4){
-    file_name <- paste0('Parameter_estimation_simple\\exp2_simple_results_sub_', i, '_', condLab[c], '.Rdata')
+    file_name <- paste0('Parameter_estimation_separated\\exp2_separated_results_sub_', i, '_', condLab[c], '.Rdata')
     load(file_name)
-    df[j,] <- c(i, condLab[c], results$optim$bestmem[1], results$optim$bestmem[2], results$optim$bestmem[3], results$optim$bestmem[4], results$optim$bestmem[5], results$optim$bestmem[6], results$optim$bestmem[7], results$optim$bestmem[8], results$optim$bestmem[9])
+    df[j,] <- c(i, condLab[c], results$optim$bestmem[1], results$optim$bestmem[2], results$optim$bestmem[3], results$optim$bestmem[4], results$optim$bestmem[5], results$optim$bestmem[6], results$optim$bestmem[7], results$optim$bestmem[8], results$optim$bestmem[9], results$optim$bestmem[10], results$optim$bestmem[11])
     j <- j + 1
   }
 }
-df[3:11] <- lapply(df[3:11], as.numeric)
+df[3:13] <- lapply(df[3:13], as.numeric)
 
 z <- 0.5  # Starting point (accuracy-coded dataset -> 0.5)
 ntrials <- 1000  # Number of decision-making simulations per observation
@@ -53,25 +53,25 @@ predictions <- NULL
 coherence_vector <- c(0.1, 0.2, 0.4)
 manipulation_vector <- c('FastFast', 'AccFast', 'AccAcc', 'FastAcc')
 
-for (i in (1:n)){
+for (i in (21:n)){
   for (j in 1:4){
     for (k in 1:3){
       
       df_temp <- df %>% filter(sub == i & manipulation == manipulation_vector[j])
       v <- df_temp[[k + 2]]
-      predictions_temp <- data.frame(DDM_confidence_bounds(v = v, a = df_temp$a, ter = df_temp$ter, z = z, ntrials = ntrials, s = sigma, dt = dt, a2 = df_temp$a2, postdriftmod = df_temp$postdriftmod, a2_slope = df_temp$a2_slope, ter2 = df_temp$ter2))
+      predictions_temp <- data.frame(DDM_confidence_bounds(v = v, a = df_temp$a, ter = df_temp$ter, z = z, ntrials = ntrials, s = sigma, dt = dt, a2_upper = df_temp$a2_upper, a2_lower = df_temp$a2_lower, postdriftmod = df_temp$postdriftmod, a2_slope_upper = df_temp$a2_slope_upper, a2_slope_lower = df_temp$a2_slope_lower, ter2 = df_temp$ter2))
       predictions_temp <- cbind(predictions_temp, coherence_vector[k], manipulation_vector[j], i)
       names(predictions_temp) <- c('rt', 'resp', 'cor', 'evidence_2', 'rtfull', 'rtconf', 'cj', 'coherence', 'manipulation', 'sub')
       
       predictions_temp$conf_evidence <- ifelse(predictions_temp$resp == 1, predictions_temp$evidence_2 - df_temp$a, (-1) * predictions_temp$evidence_2)
-      predictions_temp$conf_evidence <- predictions_temp$conf_evidence + (df_temp$a2 / 2)
-      predictions_temp$cj <- cut(predictions_temp$conf_evidence, breaks=c(-Inf, df_temp$a2 / 6, 2 * df_temp$a2 / 6, 3 * df_temp$a2 / 6, 4 * df_temp$a2 / 6, 5 * df_temp$a2 / 6, Inf), labels = c(1, 2, 3, 4, 5, 6))
+      predictions_temp$cj_6 <- cut(predictions_temp$conf_evidence, breaks=c(-Inf, -(2 * df_temp$a2_lower / 3), -(df_temp$a2_lower / 3), 0, df_temp$a2_upper / 3, 2 * df_temp$a2_upper / 3, Inf), labels = c(1, 2, 3, 4, 5, 6))
       
       predictions <- rbind(predictions, predictions_temp)
     }
   }
+  print(i)
 }
-predictions$cj <- as.numeric(predictions$cj)
+predictions$cj <- as.numeric(predictions$cj_6)
 
 predictions_c <- predictions[predictions$cor == 1,]
 predictions_e <- predictions[predictions$cor == 0,]
@@ -427,10 +427,13 @@ ggplot(data = manipulation_mean_e, aes(x = manipulation, y = cj), shape = 5) +
     axis.line = element_line(size = 0.5))
 
 
-a <- data.frame(prop.table(table(data_viable_c$cj)), 'correct', 'observations')
-b <- data.frame(prop.table(table(data_viable_e$cj)), 'wrong', 'observations')
-c <- data.frame(prop.table(table(predictions_c$cj)), 'correct', 'predictions')
-d <- data.frame(prop.table(table(predictions_e$cj)), 'wrong', 'predictions')
+a <- data.frame(table(data_viable_c$cj), 'correct', 'observations')
+b <- data.frame(table(data_viable_e$cj), 'wrong', 'observations')
+c <- data.frame(table(predictions_c$cj), 'correct', 'predictions')
+c$freq <- c$freq * sum(a$freq) / sum(c$freq)
+d <- data.frame(table(predictions_e$cj), 'wrong', 'predictions')
+d$freq <- d$freq * sum(b$freq) / sum(d$freq)
+
 colnames(a) <- c('cj', 'freq', 'cor', 'type')
 colnames(b) <- c('cj', 'freq', 'cor', 'type')
 colnames(c) <- c('cj', 'freq', 'cor', 'type')
@@ -450,7 +453,6 @@ for (i in 1:6){
 
 
 n <- 40
-#xbar <- sub_mean$
 
 ggplot() +
   geom_bar(data = cj_proportions[cj_proportions$type == 'observations',], stat = 'identity', aes(y = freq, x = cj, fill = cor), width = 0.9, position = position_dodge(), color = 'black', alpha = 0.7) +
@@ -458,7 +460,7 @@ ggplot() +
   scale_fill_manual(values=c("#27AE60", "#C0392B")) +
   theme_bw()
 
-# Confidence rating plots
+  # Confidence rating plots
 
 
 ggplot(data = coherence_mean, aes(x = coherence, y = cj), shape = 5) +

@@ -32,13 +32,6 @@ itermax <- 1000  # Number of DeOptim iterations
 v_vector <- c('v1', 'v2', 'v3')
 coherence_vector <- c(0.1, 0.2, 0.4)
 
-# Calculate intersection
-
-intersect <- function(l1, l2){
-  x <- (l2[1] - l1[1]) / (l1[2] - l2[2])
-  y <- l1[1] + l1[2] * x
-  return(xy=c(x, y))
-}
 
 
 ### Calculate Chi-square (expected versus observed values)
@@ -65,26 +58,19 @@ chi_square_optim <- function(params, all_observations, returnFit){
     predictions <- data.frame(DDM_confidence_bounds(v = params[v_vector[i]], a = params['a'], ter = params['ter'], z = z, ntrials = ntrials, s = sigma, dt = dt, a2_upper = params['a2_upper'], a2_lower = params['a2_lower'], postdriftmod = params['postdriftmod'], a2_slope_upper = params['a2_slope_upper'], a2_slope_lower = params['a2_slope_lower'], ter2 = params['ter2']))
     names(predictions) <- c('rt', 'resp', 'cor', 'evidence_2', 'rtfull', 'rtconf', 'cj')
     
-    # Calculate intersection confidence slopes
-    
-    l1 <- c(params['a2_lower'] + params['a2_upper'], -(params['a2_slope_upper']))  # Y = l1[1] + l1[2] * X
-    l2 <- c(0, params['a2_slope_lower'])  # Y = l2[1] + l2[2] * X
-    xy <- intersect(l1, l2)
-    xy_2 <- (params['a2_lower'] + params['a2_upper']) - xy[2]
-    
     # Transform predicted conf_evidence into cj
     
-    for (i in 1:nrow(predictions)){
+    for (l in 1:nrow(predictions)){
       
-      if (predictions$resp[i] == 1){
+      if (predictions$resp[l] == 1){
         
-        predictions$conf_evidence[i] <- predictions$evidence_2[i] - params['a'] + params['a2_lower']
-        predictions$cj_6[i] <- cut(predictions$conf_evidence[i], breaks = c(-Inf, xy[2] / 3, 2 * xy[2] / 3, xy[2], xy[2] + (xy_2 / 3), xy[2] + (2 * xy_2 / 3), Inf), labels = c(1, 2, 3, 4, 5, 6))
+        predictions$conf_evidence <- predictions$evidence_2 - params['a']
+        predictions$cj_6 <- cut(predictions$conf_evidence, breaks=c(-Inf, -(2 * params['a2_lower'] / 3), -(params['a2_lower'] / 3), 0, params['a2_upper'] / 3, 2 * params['a2_upper'] / 3, Inf), labels = c(1, 2, 3, 4, 5, 6))
         
       } else {
         
-        predictions$conf_evidence[i] <- -(predictions$evidence_2[i]) + params['a2_lower']
-        predictions$cj_6[i] <- cut(predictions$conf_evidence[i], breaks = c(-Inf, xy_2 / 3, 2 * xy_2 / 3, xy_2, xy_2 + (xy[2] / 3), xy_2 + (2 * xy[2] / 3), Inf), labels = c(1, 2, 3, 4, 5, 6))
+        predictions$conf_evidence <- (-1) * predictions$evidence_2
+        predictions$cj_6 <- cut(predictions$conf_evidence, breaks=c(-Inf, -(2 * params['a2_upper'] / 3), -(params['a2_upper'] / 3), 0, params['a2_lower'] / 3, 2 * params['a2_lower'] / 3, Inf), labels = c(1, 2, 3, 4, 5, 6))
         
       }
     }
@@ -322,10 +308,10 @@ chi_square_optim <- function(params, all_observations, returnFit){
       e_conf_quantiles <- quantile(e_conf_observed$rtconf, probs = c(.1,.3,.5,.7,.9), names = FALSE)
       
       if (any(is.na(c_conf_quantiles))) {
-        high_conf_quantiles <- rep(0,5)
+        c_conf_quantiles <- rep(0,5)
       }
       if (any(is.na(e_conf_quantiles))) {
-        low_conf_quantiles <- rep(0,5)
+        e_conf_quantiles <- rep(0,5)
       }
       
       # To combine correct and incorrect trials, we scale the expected interquantile probability by the proportion of correct and incorrect respectively
@@ -417,7 +403,7 @@ for(c in 1:4){  # For each condition separately
   
   # Load existing individual results if these already exist
   
-  file_name <- paste0('both_results_sub_', i, '_', condLab[c], '.Rdata')
+  file_name <- paste0('exp2_separated_results_sub_', i, '_', condLab[c], '.Rdata')
   if (overwrite == F & file.exists(file_name)){
 
     load(file_name)
@@ -430,8 +416,8 @@ for(c in 1:4){  # For each condition separately
     
     optimal_params <- DEoptim(chi_square_optim,  # Function to optimize
                               # Possible values for v (for each level of coherence: 0.1, 0.2 and 0.4), a, ter, a2_upper, a2_lower, postdriftmod, a2_slope_upper, a2_slope_lower, ter2
-                              lower = c(0, 0, 0, .5,   0, 0.0001, 0.0001, 0,  0.0001,  0.0001, -2),  
-                              upper = c(3, 3, 3,  4, 1.5,     10,     10, 15, 10,      10,      2),
+                              lower = c(0, 0, 0, .5,   0, 0.0001, 0.0001, 0,  0.0001,  0.0001, -4),  
+                              upper = c(3, 3, 3,  4, 1.5,     10,     10, 15, 10,      10,      4),
                               all_observations = tempDat, returnFit = 1, control = c(itermax = itermax))
     
     results <- summary(optimal_params)

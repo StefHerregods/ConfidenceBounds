@@ -23,7 +23,7 @@ overwrite <- T  # Overwrite already existing files?
 z <- 0.5  # Starting point (accuracy-coded dataset -> 0.5)
 ntrials <- 1000  # Number of decision-making simulations per observation
 sigma <- 1  # Within-trial noise
-dt <- 0.01  # Precision
+dt <- 0.001  # Precision
 
 itermax <- 1000  # Number of DeOptim iterations
 
@@ -313,7 +313,7 @@ for(c in 1:4){  # For each condition separately
   
   # Load existing individual results if these already exist
   
-  file_name <- paste0('both_results_sub_', i, '_', condLab[c], '.Rdata')
+  file_name <- paste0('exp1_simple_results_sub_', i, '_', condLab[c], '.Rdata')
   if (overwrite == F & file.exists(file_name)){
 
     load(file_name)

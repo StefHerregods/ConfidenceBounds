@@ -19,7 +19,7 @@ library(dplyr)
 
 # Give R access to the DDM simulation function in C++
 
-sourceCpp("C:\\Users\\herre\\OneDrive\\Documenten\\GitHub\\ConfidenceBounds\\Analyses\\Exp1_analyses\\DDM_confidence_bounds_separated.cpp") 
+sourceCpp("C:\\Users\\herre\\OneDrive\\Documenten\\GitHub\\ConfidenceBounds\\Analyses\\Exp1_analyses\\DDM_confidence_bounds_separated_2.cpp") 
 
 # Variable settings
 
@@ -28,7 +28,7 @@ overwrite <- T  # Overwrite already existing files?
 z <- 0.5  # Starting point (accuracy-coded dataset -> 0.5)
 ntrials <- 100  # Number of decision-making simulations per observation
 sigma <- 1  # Within-trial noise
-dt <- 1  # Precision
+dt <- 0.1  # Precision
 
 itermax <- 100  # Number of DeOptim iterations
 
@@ -78,6 +78,9 @@ chi_square_optim <- function(params, all_observations, returnFit){
         
       }
     }
+    
+    predictions$conf_evidence <- ifelse(predictions$resp == 1, predictions$evidence_2 - params['a'], (-1) * predictions$evidence_2)
+    predictions$cj_6 <- cut(predictions$conf_evidence, breaks=c(-Inf, -(2 * params['a2_lower'] / 3), -(params['a2_lower'] / 3), 0, params['a2_upper'] / 3, 2 * params['a2_upper'] / 3, Inf), labels = c(1, 2, 3, 4, 5, 6))
     
     # Separate predictions according to the response
     

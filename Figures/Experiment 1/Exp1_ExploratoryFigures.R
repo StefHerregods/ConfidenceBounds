@@ -6,6 +6,7 @@
 
 library(ggplot2)
 library(dplyr)
+library(gridExtra)
 
 # Setting working directory
 
@@ -134,6 +135,30 @@ for (batch in unique(data_full$batch)){
           annotate(geom = "text", x = 42, y = 6, label = "Cutoff", fontface = "bold")) +
     xlim(c(0,42))
 }
+
+# CJ checks (Sanders et al., 2016)
+
+plot1 <- ggplot(data_viable, aes(x = cj, y = cor)) + 
+  stat_summary(aes(group = 1), fun.y = mean, colour = "black", geom = "line", size = 2) + 
+  xlab('Mean confidence rating') +
+  ylab('% correct') +
+  theme_bw()
+
+plot2 <- ggplot(data_viable_c, aes(x = coherence, y = cj)) + 
+  stat_summary(aes(group = 1), fun.y = mean, colour = "green", geom = "line", size = 2) + 
+  stat_summary(data = data_viable_e, aes(x = coherence, y = cj, group = 1), fun.y = mean, colour = "red", geom = "line", size = 2) + 
+  xlab('Coherence') +
+  ylab('Mean confidence rating') +
+  theme_bw()
+
+plot3 <- ggplot(data_viable[data_viable$cj == 1,], aes(x = coherence, y = cor)) + 
+  stat_summary(aes(group = 1), fun.y = mean, colour = "grey", geom = "line", size = 2) + 
+  stat_summary(data = data_viable[data_viable$cj == 0,], aes(x = coherence, y = cor, group = 1), fun.y = mean, colour = "black", geom = "line", size = 2) + 
+  xlab('Coherence') +
+  ylab('% correct') +
+  theme_bw()
+
+grid.arrange(plot1, plot2, plot3, ncol=3)
 
 # RT manipulations (all)
 

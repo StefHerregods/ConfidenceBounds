@@ -63,8 +63,15 @@ for (i in (21:n)){
       predictions_temp <- cbind(predictions_temp, coherence_vector[k], manipulation_vector[j], i)
       names(predictions_temp) <- c('rt', 'resp', 'cor', 'evidence_2', 'rtfull', 'rtconf', 'cj', 'coherence', 'manipulation', 'sub')
       
-      predictions_temp$conf_evidence <- ifelse(predictions_temp$resp == 1, predictions_temp$evidence_2 - df_temp$a, (-1) * predictions_temp$evidence_2)
-      predictions_temp$cj_6 <- cut(predictions_temp$conf_evidence, breaks=c(-Inf, -(2 * df_temp$a2_lower / 3), -(df_temp$a2_lower / 3), 0, df_temp$a2_upper / 3, 2 * df_temp$a2_upper / 3, Inf), labels = c(1, 2, 3, 4, 5, 6))
+      # version 1
+      predictions_temp$cj_6 <- ifelse(predictions_temp$resp == 1,
+                                 cut(predictions_temp$evidence_2 - df_temp$a, breaks=c(-Inf, -(2 * df_temp$a2_lower / 3), -(df_temp$a2_lower / 3), 0, df_temp$a2_upper / 3, 2 * df_temp$a2_upper / 3, Inf), labels = c(1, 2, 3, 4, 5, 6)),
+                                 cut((-1) * predictions_temp$evidence_2, breaks=c(-Inf, -(2 * df_temp$a2_upper / 3), -(df_temp$a2_upper / 3), 0, df_temp$a2_lower / 3, 2 * df_temp$a2_lower / 3, Inf), labels = c(1, 2, 3, 4, 5, 6)))
+      
+      # version 2
+      #predictions_temp$conf_evidence <- ifelse(predictions_temp$resp == 1, predictions_temp$evidence_2 - df_temp$a, (-1) * predictions_temp$evidence_2)
+      #predictions_temp$cj_6 <- cut(predictions_temp$conf_evidence, breaks=c(-Inf, -(2 * df_temp$a2_lower / 3), -(df_temp$a2_lower / 3), 0, df_temp$a2_upper / 3, 2 * df_temp$a2_upper / 3, Inf), labels = c(1, 2, 3, 4, 5, 6))
+      
       
       predictions <- rbind(predictions, predictions_temp)
     }
@@ -427,11 +434,11 @@ ggplot(data = manipulation_mean_e, aes(x = manipulation, y = cj), shape = 5) +
     axis.line = element_line(size = 0.5))
 
 
-a <- data.frame(table(data_viable_c$cj), 'correct', 'observations')
-b <- data.frame(table(data_viable_e$cj), 'wrong', 'observations')
-c <- data.frame(table(predictions_c$cj), 'correct', 'predictions')
+a <- data.frame(prop.table(table(data_viable_c$cj)), 'correct', 'observations')
+b <- data.frame(prop.table(table(data_viable_e$cj)), 'wrong', 'observations')
+c <- data.frame(prop.table(table(predictions_c$cj)), 'correct', 'predictions')
 c$freq <- c$freq * sum(a$freq) / sum(c$freq)
-d <- data.frame(table(predictions_e$cj), 'wrong', 'predictions')
+d <- data.frame(prop.table(table(predictions_e$cj)), 'wrong', 'predictions')
 d$freq <- d$freq * sum(b$freq) / sum(d$freq)
 
 colnames(a) <- c('cj', 'freq', 'cor', 'type')
@@ -460,7 +467,9 @@ ggplot() +
   scale_fill_manual(values=c("#27AE60", "#C0392B")) +
   theme_bw()
 
-  # Confidence rating plots
+
+
+# Confidence rating plots
 
 
 ggplot(data = coherence_mean, aes(x = coherence, y = cj), shape = 5) +

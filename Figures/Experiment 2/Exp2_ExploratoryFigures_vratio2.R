@@ -7,6 +7,9 @@
 library(dplyr)
 library(ggplot2)
 library(forcats)
+library(RcppZiggurat)  # Random number generator (normal distribution)
+library(Rcpp)  # To source, compile and run C++ functions
+
 
 # Setting working directory
 

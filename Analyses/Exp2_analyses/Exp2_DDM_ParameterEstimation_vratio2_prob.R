@@ -24,12 +24,12 @@ sourceCpp("C:\\Users\\herre\\OneDrive\\Documenten\\GitHub\\ConfidenceBounds\\Ana
 
 # Variable settings
 
-overwrite <- T  # Overwrite already existing files?
+overwrite <- F  # Overwrite already existing files?
 
 z <- 0.5  # Starting point (accuracy-coded dataset -> 0.5)
-ntrials <- 100  # Number of decision-making simulations per observation
+ntrials <- 500  # Number of decision-making simulations per observation
 sigma <- 1  # Within-trial noise
-dt <- 0.1  # Precision
+dt <- 0.01  # Precision
 
 itermax <- 500  # Number of DeOptim iterations
 
@@ -382,10 +382,10 @@ chi_square_optim <- function(params, all_observations, returnFit){
       e_conf_quantiles <- quantile(e_conf_observed$rtconf, probs = c(.1,.3,.5,.7,.9), names = FALSE)
       
       if (any(is.na(c_conf_quantiles))) {
-        high_conf_quantiles <- rep(0,5)
+        c_conf_quantiles <- rep(0,5)
       }
       if (any(is.na(e_conf_quantiles))) {
-        low_conf_quantiles <- rep(0,5)
+        e_conf_quantiles <- rep(0,5)
       }
       
       # To combine correct and incorrect trials, we scale the expected interquantile probability by the proportion of correct and incorrect respectively
@@ -466,12 +466,14 @@ for(i in 1:N){  # For each participant separately
   
   for(c in 1:4){  # For each condition separately 
     
+    print(paste('Running participant', subs[i], 'from', N, '(condition:', condLab[c], ')'))
+  
     tempDat <- subset(tempAll, manipulation == condLab[c])
     tempDat <- tempDat[,c('rt', 'cor', 'resp', 'cj', 'manipulation', 'rtconf', 'coherence')]
     
     # Load existing individual results if these already exist
     
-    file_name <- paste0('Parameter_estimation_test\\test_results_sub_', i, '_', condLab[c], '.Rdata')
+    file_name <- paste0('Parameter_estimation_test\\test_prob_results_sub_', i, '_', condLab[c], '.Rdata')
     if (overwrite == F & file.exists(file_name)){
 
       load(file_name)

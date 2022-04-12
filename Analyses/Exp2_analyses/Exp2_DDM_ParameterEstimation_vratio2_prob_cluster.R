@@ -26,12 +26,44 @@ ntrials <- 1000  # Number of decision-making simulations per observation
 sigma <- 1  # Within-trial noise
 dt <- 0.01  # Precision
 
-itermax <- 1000  # Number of DeOptim iterations
+itermax <- 500  # Number of DeOptim iterations
 
 # Variable vectors
 
 v_vector <- c('v1', 'v2', 'v3')
 coherence_vector <- c(0.1, 0.2, 0.4)
+
+
+### Calculate cj based on log-normal distributions
+
+cj_calculation_c_h <- function(var){
+  cj_est <- sample(x = c(4, 5, 6), size = 1,
+                   prob = c(dlnorm(var, meanlog = fit4_c[[1]][1], sdlog = fit4_c[[1]][2]) * prop_table[4,2] + 0.00000001,
+                            dlnorm(var, meanlog = fit5_c[[1]][1], sdlog = fit5_c[[1]][2]) * prop_table[5,2] + 0.00000001,
+                            dlnorm(var, meanlog = fit6_c[[1]][1], sdlog = fit6_c[[1]][2]) * prop_table[6,2] + 0.00000001))
+  return(cj_est)
+}
+cj_calculation_e_h <- function(var){
+  cj_est <- sample(x = c(4, 5, 6), size = 1,
+                   prob = c(dlnorm(var, meanlog = fit4_e[[1]][1], sdlog = fit4_e[[1]][2]) * prop_table[4,1] + 0.00000001,
+                            dlnorm(var, meanlog = fit5_e[[1]][1], sdlog = fit5_e[[1]][2]) * prop_table[5,1] + 0.00000001,
+                            dlnorm(var, meanlog = fit6_e[[1]][1], sdlog = fit6_e[[1]][2]) * prop_table[6,1] + 0.00000001))
+  return(cj_est)
+}
+cj_calculation_c_l <- function(var){
+  cj_est <- sample(x = c(1, 2, 3), size = 1,
+                   prob = c(dlnorm(var, meanlog = fit1_c[[1]][1], sdlog = fit1_c[[1]][2]) * prop_table[1,2] + 0.00000001,
+                            dlnorm(var, meanlog = fit2_c[[1]][1], sdlog = fit2_c[[1]][2]) * prop_table[2,2] + 0.00000001,
+                            dlnorm(var, meanlog = fit3_c[[1]][1], sdlog = fit3_c[[1]][2]) * prop_table[3,2] + 0.00000001))
+  return(cj_est)
+}
+cj_calculation_e_l <- function(var){
+  cj_est <- sample(x = c(1, 2, 3), size = 1,
+                   prob = c(dlnorm(var, meanlog = fit1_e[[1]][1], sdlog = fit1_e[[1]][2]) * prop_table[1,1] + 0.00000001,
+                            dlnorm(var, meanlog = fit2_e[[1]][1], sdlog = fit2_e[[1]][2]) * prop_table[2,1] + 0.00000001,
+                            dlnorm(var, meanlog = fit3_e[[1]][1], sdlog = fit3_e[[1]][2]) * prop_table[3,1] + 0.00000001))
+  return(cj_est)
+}
 
 
 ### Calculate Chi-square (expected versus observed values)
@@ -60,14 +92,58 @@ chi_square_optim <- function(params, all_observations, returnFit){
     
     # Transform predicted conf_evidence into cj
     
-
-    df$vtest1 <- lapply(df$v1, mean)
-    ggplot(data = data_viable, aes(x = rtconf)) + 
-      geom_density() +
-      stat_function(fun = dnorm, color = 'red', args = list(mean = mean(data_viable$rtconf), sd = sd(data_viable$rtconf))) +
-      theme_bw()
+    fit1_c <<- ifelse(length(observations$rtconf[observations$cj == 1 & observations$cor == 1]) > 1,
+                      as.data.frame(fitdistr(observations$rtconf[observations$cj == 1 & observations$cor == 1], densfun = "log-normal")[[1]]),
+                      data.frame(c(0,1)))
+    fit2_c <<- ifelse(length(observations$rtconf[observations$cj == 2 & observations$cor == 1]) > 1,
+                      as.data.frame(fitdistr(observations$rtconf[observations$cj == 2 & observations$cor == 1], densfun = "log-normal")[[1]]),
+                      data.frame(c(0,1)))
+    fit3_c <<- ifelse(length(observations$rtconf[observations$cj == 3 & observations$cor == 1]) > 1,
+                      as.data.frame(fitdistr(observations$rtconf[observations$cj == 3 & observations$cor == 1], densfun = "log-normal")[[1]]),
+                      data.frame(c(0,1)))
+    fit4_c <<- ifelse(length(observations$rtconf[observations$cj == 4 & observations$cor == 1]) > 1,
+                      as.data.frame(fitdistr(observations$rtconf[observations$cj == 4 & observations$cor == 1], densfun = "log-normal")[[1]]),
+                      data.frame(c(0,1)))
+    fit5_c <<- ifelse(length(observations$rtconf[observations$cj == 5 & observations$cor == 1]) > 1,
+                      as.data.frame(fitdistr(observations$rtconf[observations$cj == 5 & observations$cor == 1], densfun = "log-normal")[[1]]),
+                      data.frame(c(0,1)))
+    fit6_c <<- ifelse(length(observations$rtconf[observations$cj == 6 & observations$cor == 1]) > 1,
+                      as.data.frame(fitdistr(observations$rtconf[observations$cj == 6 & observations$cor == 1], densfun = "log-normal")[[1]]),
+                      data.frame(c(0,1)))
     
-       
+    fit1_e <<- ifelse(length(observations$rtconf[observations$cj == 1 & observations$cor == 0]) > 1,
+                      as.data.frame(fitdistr(observations$rtconf[observations$cj == 1 & observations$cor == 0], densfun = "log-normal")[[1]]),
+                      data.frame(c(0,1)))    
+    fit2_e <<- ifelse(length(observations$rtconf[observations$cj == 2 & observations$cor == 0]) > 1,
+                      as.data.frame(fitdistr(observations$rtconf[observations$cj == 2 & observations$cor == 0], densfun = "log-normal")[[1]]),
+                      data.frame(c(0,1)))  
+    fit3_e <<- ifelse(length(observations$rtconf[observations$cj == 3 & observations$cor == 0]) > 1,
+                      as.data.frame(fitdistr(observations$rtconf[observations$cj == 3 & observations$cor == 0], densfun = "log-normal")[[1]]),
+                      data.frame(c(0,1)))  
+    fit4_e <<- ifelse(length(observations$rtconf[observations$cj == 4 & observations$cor == 0]) > 1,
+                      as.data.frame(fitdistr(observations$rtconf[observations$cj == 4 & observations$cor == 0], densfun = "log-normal")[[1]]),
+                      data.frame(c(0,1)))  
+    fit5_e <<- ifelse(length(observations$rtconf[observations$cj == 5 & observations$cor == 0]) > 1,
+                      as.data.frame(fitdistr(observations$rtconf[observations$cj == 5 & observations$cor == 0], densfun = "log-normal")[[1]]),
+                      data.frame(c(0,1)))  
+    fit6_e <<- ifelse(length(observations$rtconf[observations$cj == 6 & observations$cor == 0]) > 1,
+                      as.data.frame(fitdistr(observations$rtconf[observations$cj == 6 & observations$cor == 0], densfun = "log-normal")[[1]]),
+                      data.frame(c(0,1)))  
+    
+    prop_table <<- prop.table(table(factor(observations$cj, levels = 1:6), factor(observations$cor, levels = 0:1)))
+    
+    predictions_c_h <- predictions[predictions$cor == 1 & predictions$cj == 1,]
+    predictions_e_h <- predictions[predictions$cor == 0 & predictions$cj == 1,]
+    predictions_c_l <- predictions[predictions$cor == 1 & predictions$cj == 0,]
+    predictions_e_l <- predictions[predictions$cor == 0 & predictions$cj == 0,]
+    
+    predictions_c_h$cj_6 <- lapply(predictions_c_h$rtconf, cj_calculation_c_h)
+    predictions_e_h$cj_6 <- lapply(predictions_e_h$rtconf, cj_calculation_e_h)
+    predictions_c_l$cj_6 <- lapply(predictions_c_l$rtconf, cj_calculation_c_l)
+    predictions_e_l$cj_6 <- lapply(predictions_e_l$rtconf, cj_calculation_e_l)
+    
+    predictions <- rbind(predictions_c_h, predictions_c_l, predictions_e_h, predictions_e_l)
+    
     # Separate predictions according to the response
     
     c_predicted <- predictions[predictions$cor == 1,]
@@ -396,7 +472,7 @@ for(c in 1:4){  # For each condition separately
   
   # Load existing individual results if these already exist
   
-  file_name <- paste0('exp2_vratio2_results_sub_', i, '_', condLab[c], '.Rdata')
+  file_name <- paste0('exp2_vratio2_prob_results_sub_', i, '_', condLab[c], '.Rdata')
   if (overwrite == F & file.exists(file_name)){
 
     load(file_name)

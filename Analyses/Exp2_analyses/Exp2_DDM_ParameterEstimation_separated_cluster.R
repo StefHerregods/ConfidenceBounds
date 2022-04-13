@@ -60,20 +60,9 @@ chi_square_optim <- function(params, all_observations, returnFit){
     
     # Transform predicted conf_evidence into cj
     
-    for (l in 1:nrow(predictions)){
-      
-      if (predictions$resp[l] == 1){
-        
-        predictions$conf_evidence <- predictions$evidence_2 - params['a']
-        predictions$cj_6 <- cut(predictions$conf_evidence, breaks=c(-Inf, -(2 * params['a2_lower'] / 3), -(params['a2_lower'] / 3), 0, params['a2_upper'] / 3, 2 * params['a2_upper'] / 3, Inf), labels = c(1, 2, 3, 4, 5, 6))
-        
-      } else {
-        
-        predictions$conf_evidence <- (-1) * predictions$evidence_2
-        predictions$cj_6 <- cut(predictions$conf_evidence, breaks=c(-Inf, -(2 * params['a2_upper'] / 3), -(params['a2_upper'] / 3), 0, params['a2_lower'] / 3, 2 * params['a2_lower'] / 3, Inf), labels = c(1, 2, 3, 4, 5, 6))
-        
-      }
-    }
+    predictions$cj_6 <- ifelse(predictions$resp == 1,
+                               cut(predictions$evidence_2 - params['a'], breaks=c(-Inf, -(2 * params['a2_lower'] / 3), -(params['a2_lower'] / 3), 0, params['a2_upper'] / 3, 2 * params['a2_upper'] / 3, Inf), labels = c(1, 2, 3, 4, 5, 6)),
+                               cut((-1) * predictions$evidence_2, breaks=c(-Inf, -(2 * params['a2_upper'] / 3), -(params['a2_upper'] / 3), 0, params['a2_lower'] / 3, 2 * params['a2_lower'] / 3, Inf), labels = c(1, 2, 3, 4, 5, 6)))
     
     # Separate predictions according to the response
     

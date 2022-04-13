@@ -1,6 +1,7 @@
 
 # Load packages
 
+library(rstatix)
 library(tidyr)
 library(ggplot2)
 library(dplyr)
@@ -9,7 +10,6 @@ library(DEoptim)  # Optimization algorithm
 library(RcppZiggurat)  # Random number generator (normal distribution)
 library(ggpubr)
 library(gridExtra)
-library(rstatix)
 
 # Give R access to the DDM simulation function in C++
 
@@ -20,8 +20,6 @@ sourceCpp("C:\\Users\\herre\\OneDrive\\Documenten\\GitHub\\ConfidenceBounds\\Ana
 setwd('C:\\Users\\herre\\Desktop\\Internship\\Results\\Exp1_Results')
 
 # Load data (long format)
-
-exclude <- c()
 
 df <- data.frame(matrix(ncol = 11, nrow = 40*4))
 colnames(df) <- c('sub', 'manipulation', 'v1', 'v2', 'v3', 'a', 'ter', 'a2', 'postdriftmod', 'a2_slope', 'ter2')

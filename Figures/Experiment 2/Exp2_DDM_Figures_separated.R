@@ -267,7 +267,7 @@ data.frame(pwc)
 
 ggplot(df, aes(x = manipulation, y = a2_slope_upper)) +
   #geom_boxplot(outlier.shape = NA, coef = 0) +
-  ylim(c(0,5)) +
+  ylim(c(0,10)) +
   geom_point(colour = "#4D5382", alpha = 0.5, size = 2, shape = 16) +
   geom_line(aes(group = sub), alpha = 0.3) +
   stat_summary(aes(y = a2_slope_upper, group = 1), fun = mean, colour="#4D5382", size = 4, shape = 95) +
@@ -281,7 +281,7 @@ ggplot(df, aes(x = manipulation, y = a2_slope_upper)) +
 
 ggplot(df, aes(x = manipulation, y = a2_slope_lower)) +
   #geom_boxplot(outlier.shape = NA, coef = 0) +
-  ylim(c(0,5)) +
+  ylim(c(0,10)) +
   geom_point(colour = "#4D5382", alpha = 0.5, size = 2, shape = 16) +
   geom_line(aes(group = sub), alpha = 0.3) +
   stat_summary(aes(y = a2_slope_lower, group = 1), fun = mean, colour="#4D5382", size = 4, shape = 95) +

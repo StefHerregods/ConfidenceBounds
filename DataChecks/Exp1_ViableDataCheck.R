@@ -94,7 +94,7 @@ for (batch in unique(data_full$batch)){
 # Subset viable data from full data
 
 data_viable <- subset(data_full, check1 == T & check2 == T & check3 == T & 
-                        check4 == T & block > 3 & slow_trial == 0) 
+                        check4 == T & block > 3 & slow_trial == 0 & rt >= 0.2 & rtconf <= 5) 
 data_viable <- arrange(data_viable, sub)
 
 # Manual check
@@ -112,10 +112,6 @@ for(i in unique(data_viable$sub)){
   plot(cj_block, frame = F, ylab = "confidence judgement", ylim = c(0,1)); abline(h = .5, lty = 2, col = "grey")
   plot(tempDat$rtconf, frame = F, ylab = "RT_conf", col = c('black','grey','grey','black')[as.factor(tempDat$manipulation)])
 }
-  
-# Remove  rtconf outliers -> cut-off at 5 seconds (based on exploratory figures + max rt is 5s)
-
-data_viable <-  subset(data_viable, rtconf <= 5)
 
 # Save viable data
 

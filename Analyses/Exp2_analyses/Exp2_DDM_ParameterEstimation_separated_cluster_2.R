@@ -60,8 +60,10 @@ chi_square_optim <- function(params, all_observations, returnFit){
     
     # Transform predicted conf_evidence into cj
     
+    a2_separation <- params['a2_lower'] + params['a2_upper']
     predictions$conf_evidence <- ifelse(predictions$resp == 1, predictions$evidence_2 - params['a'], (-1) * predictions$evidence_2)
-    predictions$cj_6 <- cut(predictions$conf_evidence, breaks=c(-Inf, -(2 * params['a2_lower'] / 3), -(params['a2_lower'] / 3), 0, params['a2_upper'] / 3, 2 * params['a2_upper'] / 3, Inf), labels = c(1, 2, 3, 4, 5, 6))
+    predictions$conf_evidence <- predictions$conf_evidence + params['a2_lower']
+    predictions$cj_6 <- cut(predictions$conf_evidence, breaks=c(-Inf, a2_separation / 6, 2 * a2_separation / 6, 3 * a2_separation / 6, 4 * a2_separation / 6, 5 * a2_separation / 6, Inf), labels = c(1, 2, 3, 4, 5, 6))
     
     # Separate predictions according to the response
     
@@ -405,7 +407,7 @@ for(c in 1:4){  # For each condition separately
     optimal_params <- DEoptim(chi_square_optim,  # Function to optimize
                               # Possible values for v (for each level of coherence: 0.1, 0.2 and 0.4), a, ter, a2_upper, a2_lower, postdriftmod, a2_slope_upper, a2_slope_lower, ter2
                               lower = c(0, 0, 0, .5,   0, 0.0001, 0.0001, 0,  0.0001,  0.0001, -4),  
-                              upper = c(3, 3, 3,  4, 1.5,     10,     10, 15, 10,      10,      4),
+                              upper = c(3, 3, 3,  4, 1.5,     15,     15, 15, 15,      15,      4),
                               all_observations = tempDat, returnFit = 1, control = c(itermax = itermax))
     
     results <- summary(optimal_params)

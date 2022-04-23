@@ -28,9 +28,9 @@ overwrite <- T  # Overwrite already existing files?
 z <- 0.5  # Starting point (accuracy-coded dataset -> 0.5)
 ntrials <- 100  # Number of decision-making simulations per observation
 sigma <- 1  # Within-trial noise
-dt <- 0.1  # Precision
+dt <- 0.01  # Precision
 
-itermax <- 100  # Number of DeOptim iterations
+itermax <- 300  # Number of DeOptim iterations
 
 # Variable vectors
 
@@ -64,23 +64,10 @@ chi_square_optim <- function(params, all_observations, returnFit){
     
     # Transform predicted conf_evidence into cj
     
-    for (l in 1:nrow(predictions)){
-      
-      if (predictions$resp[l] == 1){
-        
-        predictions$conf_evidence <- predictions$evidence_2 - params['a']
-        predictions$cj_6 <- cut(predictions$conf_evidence, breaks=c(-Inf, -(2 * params['a2_lower'] / 3), -(params['a2_lower'] / 3), 0, params['a2_upper'] / 3, 2 * params['a2_upper'] / 3, Inf), labels = c(1, 2, 3, 4, 5, 6))
-        
-      } else {
-        
-        predictions$conf_evidence <- (-1) * predictions$evidence_2
-        predictions$cj_6 <- cut(predictions$conf_evidence, breaks=c(-Inf, -(2 * params['a2_upper'] / 3), -(params['a2_upper'] / 3), 0, params['a2_lower'] / 3, 2 * params['a2_lower'] / 3, Inf), labels = c(1, 2, 3, 4, 5, 6))
-        
-      }
-    }
-    
+    a2_separation <- params['a2_lower'] + params['a2_upper']
     predictions$conf_evidence <- ifelse(predictions$resp == 1, predictions$evidence_2 - params['a'], (-1) * predictions$evidence_2)
-    predictions$cj_6 <- cut(predictions$conf_evidence, breaks=c(-Inf, -(2 * params['a2_lower'] / 3), -(params['a2_lower'] / 3), 0, params['a2_upper'] / 3, 2 * params['a2_upper'] / 3, Inf), labels = c(1, 2, 3, 4, 5, 6))
+    predictions$conf_evidence <- predictions$conf_evidence + params['a2_lower']
+    predictions$cj_6 <- cut(predictions$conf_evidence, breaks=c(-Inf, a2_separation / 6, 2 * a2_separation / 6, 3 * a2_separation / 6, 4 * a2_separation / 6, 5 * a2_separation / 6, Inf), labels = c(1, 2, 3, 4, 5, 6))
     
     # Separate predictions according to the response
     
@@ -120,7 +107,7 @@ chi_square_optim <- function(params, all_observations, returnFit){
     if(returnFit==0){ 
       return(predictions[,c('rt', 'cor', 'cj', 'rtconf')])
       
-      # If we are fitting the model: compare these predictions to the observations 
+    # If we are fitting the model: compare these predictions to the observations 
       
     }else{ 
       
@@ -396,14 +383,14 @@ for(i in 1:N){  # For each participant separately
   print(paste('Running participant', subs[i], 'from', N))
   tempAll <- subset(df, sub == subs[i])
   
-  for(c in 2:4){  # For each condition separately 
+  for(c in 1:4){  # For each condition separately 
     
     tempDat <- subset(tempAll, manipulation == condLab[c])
     tempDat <- tempDat[,c('rt', 'cor', 'resp', 'cj', 'manipulation', 'rtconf', 'coherence')]
     
     # Load existing individual results if these already exist
     
-    file_name <- paste0('Parameter_estimation_test\\test_results_sub_', i, '_', condLab[c], '.Rdata')
+    file_name <- paste0('Parameter_estimation_test\\new_results_sub_', i, '_', condLab[c], '.Rdata')
     if (overwrite == F & file.exists(file_name)){
 
       load(file_name)

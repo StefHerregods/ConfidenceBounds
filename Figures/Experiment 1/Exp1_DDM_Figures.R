@@ -27,7 +27,7 @@ condLab <- c('FastFast', 'AccFast', 'AccAcc', 'FastAcc')
 j <- 1
 for (i in (1:40)){ 
   for(c in 1:4){
-    file_name <- paste0('Parameter_estimation_both\\test_results_sub_', i, '_', condLab[c], '.Rdata')
+    file_name <- paste0('Parameter_estimation_both_2\\exp1_simple_results_sub_', i, '_', condLab[c], '.Rdata')
     load(file_name)
     df[j,] <- c(i, condLab[c], results$optim$bestmem[1], results$optim$bestmem[2], results$optim$bestmem[3], results$optim$bestmem[4], results$optim$bestmem[5], results$optim$bestmem[6], results$optim$bestmem[7], results$optim$bestmem[8], results$optim$bestmem[9])
     j <- j + 1

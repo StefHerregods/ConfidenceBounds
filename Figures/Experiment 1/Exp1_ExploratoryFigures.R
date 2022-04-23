@@ -7,6 +7,7 @@
 library(ggplot2)
 library(dplyr)
 library(gridExtra)
+library(Rcpp)
 
 # Setting working directory
 
@@ -90,6 +91,10 @@ coherence_mean_e <- data_viable_e %>%
 # Calculating averages per participant/manipulation
 
 manipulation_mean <- data_viable %>%
+  group_by(sub, manipulation) %>% 
+  summarise_each(funs(mean))
+
+predictions_manipulation_mean <- predictions %>%
   group_by(sub, manipulation) %>% 
   summarise_each(funs(mean))
 
@@ -196,11 +201,23 @@ predictions_manipulation_sub_mean <- predictions %>%
   group_by(manipulation) %>% 
   summarise_each(funs(mean))
 
-ggplot(data = manipulation_mean, aes(x = manipulation, y = rt), shape = 5) +
-  geom_jitter(shape = 'circle filled', size = 7, fill = "grey", color = 'white', alpha = 1, width = 0.2, stroke = 1) + 
-  geom_point(data = manipulation_sub_mean, aes(y = rt, x = manipulation), size = 7) +
-  geom_line(data = manipulation_sub_mean, aes(y = rt, x = manipulation), color = 'black', group = 1, linetype = 'dashed', size = 1) +
-  geom_point(data = predictions_manipulation_sub_mean, color = 'red', aes(y = rt, x = manipulation), shape = 4, size = 3, stroke = 2) +
+manipulation_sub_mean$standard_error <- NULL
+for(i in 1:4){
+  manipulation_sub_mean$standard_error[manipulation_sub_mean$manipulation == condLab[i]] <- sd(manipulation_mean$rt[manipulation_mean$manipulation == condLab[i]]) / sqrt(length(manipulation_mean$rt[manipulation_mean$manipulation == condLab[i]]))
+}
+
+predictions_manipulation_sub_mean$standard_error <- NULL
+for(i in 1:4){
+  predictions_manipulation_sub_mean$standard_error[predictions_manipulation_sub_mean$manipulation == condLab[i]] <- sd(predictions_manipulation_mean$rt[predictions_manipulation_mean$manipulation == condLab[i]]) / sqrt(length(predictions_manipulation_mean$rt[predictions_manipulation_mean$manipulation == condLab[i]]))
+}
+
+ggplot(data = manipulation_mean, aes(x = manipulation, y = rt)) +
+  geom_jitter(shape = 'circle filled', size = 6, fill = "grey", color = 'white', alpha = 1, stroke = 1, width = 0.2) + 
+  geom_point(data = manipulation_sub_mean, aes(y = rt, x = manipulation), size = 3) +
+  geom_errorbar(data = manipulation_sub_mean, aes(ymin = rt - standard_error, ymax = rt + standard_error), size = 0.7, width = 0.1) +
+  #geom_line(data = manipulation_sub_mean, aes(y = rt, x = manipulation), color = 'black', group = 1, linetype = 'dashed', size = 1) +
+  geom_point(data = predictions_manipulation_sub_mean, color = 'red', aes(y = rt, x = manipulation), size = 3, position = position_nudge(x = 0.12)) +
+  geom_errorbar(data = predictions_manipulation_sub_mean, aes(ymin = rt - standard_error, ymax = rt + standard_error), colour = 'red', size = 0.7, position = position_nudge(x = 0.12), width = 0.1) +
   scale_x_discrete(labels = c("AccAcc" = "Accurate decision\nAccurate confidence rating", "AccFast" = "Accurate decision\nFast confidence rating", "FastFast" = "Fast decision\nFast confidence rating", "FastAcc" = "Fast decision\nAccurate confidence rating")) +
   labs(x = "Manipulation", y = "Decision RT") +
   theme( 

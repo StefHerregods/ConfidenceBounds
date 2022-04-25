@@ -1,5 +1,14 @@
 
-# Load packages
+
+# To do ----
+
+# Error bars
+# Averaged prediction graphs
+
+# Set-up ----
+
+
+## Packages
 
 library(tidyr)
 library(ggplot2)
@@ -11,35 +20,83 @@ library(ggpubr)
 library(gridExtra)
 library(rstatix)
 
-# Give R access to the DDM simulation function in C++
-
-sourceCpp("C:\\Users\\herre\\OneDrive\\Documenten\\GitHub\\ConfidenceBounds\\Analyses\\Exp1_analyses\\DDM_confidence_bounds_separated.cpp") 
-
-# Set working directory
+## Working directory
 
 setwd('C:\\Users\\herre\\Desktop\\Internship\\Results\\Exp2_Results')
 
-# Load data (long format)
+## Functions
 
-df <- data.frame(matrix(ncol = 13, nrow = 20*4))
-colnames(df) <- c('sub', 'manipulation', 'v1', 'v2', 'v3', 'a', 'ter', 'a2_upper', 'a2_lower', 'postdriftmod', 'a2_slope_upper', 'a2_slope_lower', 'ter2')
+### Give R access to the DDM simulation function in C++
+sourceCpp("C:\\Users\\herre\\OneDrive\\Documenten\\GitHub\\ConfidenceBounds\\Analyses\\Exp1_analyses\\DDM_confidence_bounds_separated_2.cpp") 
+
+
+# Load data ----
+
+
+## Behavioral data ----
+
+df_obs <- read.csv(file = "Exp2_data_viable.csv")
+
+## DDM parameters ----
+
+df_DDM <- data.frame(matrix(ncol = 13, nrow = 40*4))
+colnames(df_DDM) <- c('sub', 'manipulation', 'v1', 'v2', 'v3', 'a', 'ter', 'a2_upper', 'a2_lower', 'postdriftmod', 'a2_slope_upper', 'a2_slope_lower', 'ter2')
 condLab <- c('FastFast', 'AccFast', 'AccAcc', 'FastAcc') 
 j <- 1
-for (i in (21:40)){  #!!!
-  for(c in 1:4){
-    file_name <- paste0('Parameter_estimation_separated\\Exp2_separated_2_results_sub_', i, '_', condLab[c], '.Rdata')
+for (sub_id in (1:40)){  
+  for (cond in 1:4){
+    file_name <- paste0('Parameter_estimation_separated_2\\exp2_separated_2_results_sub_', sub_id, '_', condLab[cond], '.Rdata')
     load(file_name)
-    df[j,] <- c(i, condLab[c], results$optim$bestmem[1], results$optim$bestmem[2], results$optim$bestmem[3], results$optim$bestmem[4], results$optim$bestmem[5], results$optim$bestmem[6], results$optim$bestmem[7], results$optim$bestmem[8], results$optim$bestmem[9], results$optim$bestmem[10], results$optim$bestmem[11])
+    df_DDM[j,] <- c(sub_id, condLab[cond], results$optim$bestmem[1], results$optim$bestmem[2], results$optim$bestmem[3], results$optim$bestmem[4], results$optim$bestmem[5], results$optim$bestmem[6], results$optim$bestmem[7], results$optim$bestmem[8], results$optim$bestmem[9], results$optim$bestmem[10], results$optim$bestmem[11])
     j <- j + 1
   }
 }
+df_DDM[3:13] <- lapply(df_DDM[3:13], as.numeric)
 
-df[3:13] <- lapply(df[3:13], as.numeric)
+## DDM predictions ----
+
+### Variables
+z <- 0.5  # Starting point (accuracy-coded dataset -> 0.5)
+ntrials <- 1000  # Number of decision-making simulations per observation
+sigma <- 1  # Within-trial noise
+dt <- 0.001  # Precision
+df_predictions <- NULL
+coherence_vector <- c(0.1, 0.2, 0.4)
+
+### Generate predictions
+for (j in 1:nrow(df_DDM)){
+  for (coherence in 1:3){
+    df_predictions_temp <- data.frame(rep(df_DDM[j,1], each = ntrials),
+                                      rep(df_DDM[j,2], each = ntrials),
+                                      rep(coherence_vector[coherence], each = ntrials),
+                                      DDM_confidence_bounds(v = df_DDM[j, coherence + 2],
+                                                            a = df_DDM[j,]$a,
+                                                            ter = df_DDM[j,]$ter,
+                                                            z = z,
+                                                            ntrials = ntrials,
+                                                            s = sigma,
+                                                            dt = dt,
+                                                            a2_upper = df_DDM[j,]$a2_upper,
+                                                            a2_lower = df_DDM[j,]$a2_lower,
+                                                            postdriftmod = df_DDM[j,]$postdriftmod,
+                                                            a2_slope_upper = df_DDM[j,]$a2_slope_upper,
+                                                            a2_slope_lower = df_DDM[j,]$a2_slope_lower,
+                                                            ter2 = df_DDM[j,]$ter2))
+    names(df_predictions_temp) <- c('sub', 'manipulation', 'coherence', 'rt', 'resp', 'cor', 'evidence2', 'rtfull', 'rtconf', 'cj_2')
+    a2_separation <- df_DDM[j,]$a2_lower + df_DDM[j,]$a2_upper
+    df_predictions_temp$conf_evidence <- ifelse(df_predictions_temp$resp == 1, df_predictions_temp$evidence2 - df_DDM[j,]$a + df_DDM[j,]$a2_lower, (-1) * df_predictions_temp$evidence2 + df_DDM[j,]$a2_lower)
+    df_predictions_temp$cj <- cut(df_predictions_temp$conf_evidence, breaks=c(-Inf, a2_separation / 6, 2 * a2_separation / 6, 3 * a2_separation / 6, 4 * a2_separation / 6, 5 * a2_separation / 6, Inf), labels = c(1, 2, 3, 4, 5, 6))
+    df_predictions <- rbind(df_predictions, df_predictions_temp)
+  }
+}
+
+# Visualisations ----
 
 
-# v1
+## DDM parameters ----
 
-ggplot(df, aes(x = manipulation, y = v1)) +
+### v1
+ggplot(df_DDM, aes(x = manipulation, y = v1)) +
   geom_point(colour = "#4D5382", alpha = 0.5, size = 5, shape = 16) +
   geom_line(aes(group = sub), alpha = 0.2) +
   stat_summary(aes(y = v1, group = 1), fun = mean, colour="#4D5382", size = 4, shape = 95) +
@@ -50,9 +107,8 @@ ggplot(df, aes(x = manipulation, y = v1)) +
         panel.border = element_blank(),
         panel.background = element_blank())
   
-# v2
-
-ggplot(df, aes(x = manipulation, y = v2)) +
+### v2
+ggplot(df_DDM, aes(x = manipulation, y = v2)) +
   geom_point(colour = "#4D5382", alpha = 0.5, size = 5, shape = 16) +
   geom_line(aes(group = sub), alpha = 0.2) +
   stat_summary(aes(y = v2, group = 1), fun = mean, colour="#4D5382", size = 4, shape = 95) +
@@ -62,9 +118,9 @@ ggplot(df, aes(x = manipulation, y = v2)) +
         panel.grid.minor = element_blank(),
         panel.border = element_blank(),
         panel.background = element_blank())
-# v3
 
-ggplot(df, aes(x = manipulation, y = v3)) +
+### v3
+ggplot(df_DDM, aes(x = manipulation, y = v3)) +
   geom_point(colour = "#4D5382", alpha = 0.5, size = 5, shape = 16) +
   geom_line(aes(group = sub), alpha = 0.2) +
   stat_summary(aes(y = v3, group = 1), fun = mean, colour="#4D5382", size = 4, shape = 95) +
@@ -75,45 +131,17 @@ ggplot(df, aes(x = manipulation, y = v3)) +
         panel.border = element_blank(),
         panel.background = element_blank())
 
-# v comparison
-
-df_temp <- select(df, v1, v2, v3, manipulation)
-v_mean <- df_temp %>%
+### v comparison
+v_mean <- select(df_DDM, v1, v2, v3, manipulation) %>%
   group_by(manipulation) %>% 
   summarise_each(funs(mean)) %>%
   pivot_longer(cols = c(v1, v2, v3))
 
 ggplot(v_mean, aes(x = manipulation, y = value)) +
-  geom_line(aes(group = name, colour = name), lty = 5, plt = 5, size = 1) +
-  geom_point() 
+  geom_line(aes(group = name, colour = name), lty = 5, size = 1) +
+  geom_point()
 
-###
-df2 <- pivot_longer(data = df, cols = c(v1, v2, v3), names_to = 'v_var', values_to = 'v')
-
-res.aov <- anova_test(data = df2, dv = v, wid = sub, within = c(v_var, manipulation))
-res.aov
-
-pwc <- df2 %>%
-  group_by(v_var) %>%
-  pairwise_t_test(
-    v ~ manipulation, paired = TRUE,
-    p.adjust.method = "bonferroni"
-  )
-data.frame(pwc)
-
-pwc <- df2 %>%
-  group_by(manipulation) %>%
-  pairwise_t_test(
-    v ~ v_var, paired = TRUE,
-    p.adjust.method = "bonferroni"
-  )
-data.frame(pwc)
-
-
-
-
-  
-ggplot(df, aes(x = manipulation)) +
+ggplot(df_DDM, aes(x = manipulation)) +
   geom_point(aes(y = v1), colour = 'darkred') +
   geom_point(aes(y = v2), colour = 'blue') +
   geom_point(aes(y = v3), colour = 'green') +
@@ -125,10 +153,8 @@ ggplot(df, aes(x = manipulation)) +
   stat_summary(aes(y = v3, group = 1), fun = mean, colour= 'green', size = 4, shape = 95) +
   scale_x_discrete(labels = c("Accurate decision\nAccurate confidence rating", "Accurate decision\nFast confidence rating", "Fast decision\nAccurate confidence rating", "Fast decision\nFast confidence rating")) 
 
-# a
-
-ggplot(df, aes(x = manipulation, y = a)) +
-  #geom_violin(outlier.shape = NA, coef = 0) +
+### a
+ggplot(df_DDM, aes(x = manipulation, y = a)) +
   geom_point(colour = "#4D5382", alpha = 0.5, size = 5, shape = 16) +
   geom_line(aes(group = sub), alpha = 0.3) +
   stat_summary(aes(y = a, group = 1), fun = mean, colour="#4D5382", size = 4, shape = 95) +
@@ -139,48 +165,8 @@ ggplot(df, aes(x = manipulation, y = a)) +
         panel.border = element_blank(),
         panel.background = element_blank())
 
-###
-
-res.aov <- anova_test(data = df, dv = a, wid = sub, within = manipulation)
-res.aov
-
-pwc <- df %>%
-  pairwise_t_test(
-    a ~ manipulation, paired = TRUE,
-    p.adjust.method = "bonferroni"
-  )
-data.frame(pwc)
-
-
-
-
-
-library(afex)
-#Model Specification
-SCR_ANOVA <- aov_car(a ~ manipulation + Error(sub/manipulation), data = df)
-SCR_ANOVA_summary <- summary(SCR_ANOVA)
-SCR_ANOVA_summary #Significant main effect of Phase
-
-##Contrasts (based on the model with outliers): As the F-test of the model with outliers is insignificant for the interaction, contrasts are expected to be insignificant
-###Setting up a reference grid
-library(lsmeans)
-ref_SCR <- lsmeans(SCR_ANOVA, c("manipulation"))
-ref_SCR
-
-###Specifying the contrasts as a list on the reference grid. Note that we test 2 pre-planned contrasts in which we compare the general SCR pattern between both groups, once for the first two phases and once for the last two phases.
-list_of_contrasts_SCR <- list(contrast1_SCR  = c(1, 0, 0, -1),
-                              contrast2_SCR  = c(0, 1, -1, 0), 
-                              contrast3_SCR  = c(0.5, -0.5, -0.5, 0.5)) #We compare the general SCR pattern between both groups in the acquisition and extinction phase. A positive score indicates higher values in the experimental group as expected.
-
-###Test whether the contrasts are significant. Note that as we have multiple pre-planned contrasts, we have to apply the Bonferroni-Holm correction to avoid inflating the type I error.
-Planned_contrasts_SCR <- summary(contrast(ref_SCR, list_of_contrasts_SCR), adjust = "holm") 
-Planned_contrasts_SCR #As expected, the contrasts are insignificant. However, the absolute value of the contrast suggests that the SCR is higher in the experimental group, particularly in the acquisition phase.
-
-
-# a2
-
-ggplot(df, aes(x = manipulation, y = a2_upper)) +
-  #geom_boxplot(outlier.shape = NA, coef = 0) +
+### a2_upper
+ggplot(df_DDM, aes(x = manipulation, y = a2_upper)) +
   geom_point(colour = "#4D5382", alpha = 0.5, size = 5, shape = 16) +
   geom_line(aes(group = sub), alpha = 0.3) +
   stat_summary(aes(y = a2_upper, group = 1), fun = mean, colour="#4D5382", size = 4, shape = 95) +
@@ -191,8 +177,8 @@ ggplot(df, aes(x = manipulation, y = a2_upper)) +
         panel.border = element_blank(),
         panel.background = element_blank())
 
-ggplot(df, aes(x = manipulation, y = a2_lower)) +
-  #geom_boxplot(outlier.shape = NA, coef = 0) +
+### a2_lower
+ggplot(df_DDM, aes(x = manipulation, y = a2_lower)) +
   geom_point(colour = "#4D5382", alpha = 0.5, size = 5, shape = 16) +
   geom_line(aes(group = sub), alpha = 0.3) +
   stat_summary(aes(y = a2_lower, group = 1), fun = mean, colour="#4D5382", size = 4, shape = 95) +
@@ -203,19 +189,8 @@ ggplot(df, aes(x = manipulation, y = a2_lower)) +
         panel.border = element_blank(),
         panel.background = element_blank())
 
-###
-
-pwc <- df %>%
-  pairwise_t_test(
-    a2 ~ manipulation, paired = TRUE,
-    p.adjust.method = "bonferroni"
-  )
-data.frame(pwc)
-
-# ter
-
-ggplot(df, aes(x = manipulation, y = ter)) +
-  #geom_boxplot(outlier.shape = NA, coef = 0) +
+### ter
+ggplot(df_DDM, aes(x = manipulation, y = ter)) +
   geom_point(colour = "#4D5382", alpha = 0.5, size = 5, shape = 16) +
   geom_line(aes(group = sub), alpha = 0.3) +
   stat_summary(aes(y = ter, group = 1), fun = mean, colour="#4D5382", size = 4, shape = 95) +
@@ -227,21 +202,8 @@ ggplot(df, aes(x = manipulation, y = ter)) +
         panel.background = element_blank()) +
   ylab("non-decision time")
 
-res.aov <- anova_test(data = df, dv = ter, wid = sub, within = manipulation)
-res.aov # significant
-
-
-pwc <- df %>%
-  pairwise_t_test(
-    ter ~ manipulation, paired = TRUE,
-    p.adjust.method = "bonferroni"
-  )
-data.frame(pwc)
-
-# postdriftmod
-
-ggplot(df, aes(x = manipulation, y = postdriftmod)) +
-  #geom_boxplot(outlier.shape = NA, coef = 0) +
+### postdriftmod
+ggplot(df_DDM, aes(x = manipulation, y = postdriftmod)) +
   geom_point(colour = "#4D5382", alpha = 0.5, size = 5, shape = 16) +
   geom_line(aes(group = sub), alpha = 0.3) +
   stat_summary(aes(y = postdriftmod, group = 1), fun = mean, colour="#4D5382", size = 4, shape = 95) +
@@ -253,21 +215,9 @@ ggplot(df, aes(x = manipulation, y = postdriftmod)) +
         panel.background = element_blank()) +
   ylab("postdriftmod")
 
-res.aov <- anova_test(data = df, dv = postdriftmod, wid = sub, within = manipulation)
-res.aov # not significant
-
-pwc <- df %>%
-  pairwise_t_test(
-    postdriftmod ~ manipulation, paired = TRUE,
-    p.adjust.method = "bonferroni"
-  )
-data.frame(pwc)
-
-# a2_slope
-
-ggplot(df, aes(x = manipulation, y = a2_slope_upper)) +
-  #geom_boxplot(outlier.shape = NA, coef = 0) +
-  ylim(c(0,10)) +
+### a2_slope_upper
+ggplot(df_DDM, aes(x = manipulation, y = a2_slope_upper)) +
+  ylim(c(0,15)) +
   geom_point(colour = "#4D5382", alpha = 0.5, size = 2, shape = 16) +
   geom_line(aes(group = sub), alpha = 0.3) +
   stat_summary(aes(y = a2_slope_upper, group = 1), fun = mean, colour="#4D5382", size = 4, shape = 95) +
@@ -279,9 +229,9 @@ ggplot(df, aes(x = manipulation, y = a2_slope_upper)) +
         panel.background = element_blank()) +
   ylab("urgency upper")
 
-ggplot(df, aes(x = manipulation, y = a2_slope_lower)) +
-  #geom_boxplot(outlier.shape = NA, coef = 0) +
-  ylim(c(0,10)) +
+### a2_slope_lower
+ggplot(df_DDM, aes(x = manipulation, y = a2_slope_lower)) +
+  ylim(c(0,15)) +
   geom_point(colour = "#4D5382", alpha = 0.5, size = 2, shape = 16) +
   geom_line(aes(group = sub), alpha = 0.3) +
   stat_summary(aes(y = a2_slope_lower, group = 1), fun = mean, colour="#4D5382", size = 4, shape = 95) +
@@ -293,17 +243,8 @@ ggplot(df, aes(x = manipulation, y = a2_slope_lower)) +
         panel.background = element_blank()) +
   ylab("urgency lower")
 
-
-res.aov <- anova_test(data = df, dv = a2_slope, wid = sub, within = manipulation)
-res.aov # not significant
-
-
-
-
-# ter2
-
-ggplot(df, aes(x = manipulation, y = ter2)) +
-  #geom_boxplot(outlier.shape = NA, coef = 0) +
+### ter2
+ggplot(df_DDM, aes(x = manipulation, y = ter2)) +
   geom_point(colour = "#4D5382", alpha = 0.5, size = 5, shape = 16) +
   geom_line(aes(group = sub), alpha = 0.3) +
   stat_summary(aes(y = ter2, group = 1), fun = mean, colour="#4D5382", size = 4, shape = 95) +
@@ -313,107 +254,117 @@ ggplot(df, aes(x = manipulation, y = ter2)) +
         panel.grid.minor = element_blank(),
         panel.border = element_blank(),
         panel.background = element_blank()) +
-  ylab("non-decision time")
+  ylab("non-decision time 2")
 
-res.aov <- anova_test(data = df, dv = ter2, wid = sub, within = manipulation)
-res.aov # not significant
+## DDM predictions full ----
 
-pwc <- df %>%
-  pairwise_t_test(
-    ter2 ~ manipulation, paired = TRUE,
-    p.adjust.method = "bonferroni"
-  )
-data.frame(pwc)
-
-
-
-
-### Simulations based on estimated parameters ### 
+### Set-up ----
 
 par(mfrow = c(4, 3), mai = c(0.3, 0.3, 0.3, 0.3))
 
-# DDM parameters
+### Decision RT ----
 
-z <- 0.5  # Starting point (accuracy-coded dataset -> 0.5)
-ntrials <- 1000  # Number of decision-making simulations per observation
-sigma <- 1  # Within-trial noise
-dt <- 0.01  # Precision
+for (cond in 1:4){  # Loop through conditions
+  for (coherence in 1:3){  # Loop through coherence levels
 
-# Loop parameters
-
-n <- 40  # Number of participants to include (40)
-
-# Vectors
-
-coherence_vector <- c(0.1, 0.2, 0.4)
-manipulation_vector <- c('FastFast', 'AccFast', 'AccAcc', 'FastAcc')
-
-# Selecting observation data
-
-df_obs <- read.csv(file = "Exp2_data_viable.csv")
-c_observed <- df_obs %>% filter(sub <= n & cor == 1) 
-e_observed <- df_obs %>% filter(sub <= n & cor == 0)
-conf_observed_1 <- df_obs %>% filter(sub <= n & cj == 1)
-conf_observed_2 <- df_obs %>% filter(sub <= n & cj == 2)
-conf_observed_3 <- df_obs %>% filter(sub <= n & cj == 3)
-conf_observed_4 <- df_obs %>% filter(sub <= n & cj == 4)
-conf_observed_5 <- df_obs %>% filter(sub <= n & cj == 5)
-conf_observed_6 <- df_obs %>% filter(sub <= n & cj == 6)
-
-
-# RT's
-# Loop through manipulations
-
-for (j in 1:4){
-  
-  # Loop through coherence levels
-  
-  for (k in 1:3){
-    
-    c_predicted <- NULL
-    e_predicted <- NULL
-    
-    c_observed_temp <- c_observed %>% filter(manipulation == manipulation_vector[j] & coherence == coherence_vector[k])
-    e_observed_temp <- e_observed %>% filter(manipulation == manipulation_vector[j] & coherence == coherence_vector[k])
-    
-    # Loop through participants
-    
-    for (i in (21:n)){
-      
-      # Select correct estimated parameters
-      
-      df_temp <- df %>% filter(sub == i & manipulation == manipulation_vector[j])
-      v <- df_temp[[k + 2]]
-      
-      # Simulate data     
-      predictions <- data.frame(DDM_confidence_bounds(v = v, a = df_temp$a, ter = df_temp$ter, z = z, ntrials = ntrials, s = sigma, dt = dt, a2_upper = df_temp$a2_upper, a2_lower = df_temp$a2_lower, postdriftmod = df_temp$postdriftmod, a2_slope_upper = df_temp$a2_slope_upper, a2_slope_lower = df_temp$a2_slope_lower, ter2 = df_temp$ter2))
-      names(predictions) <- c('rt', 'resp', 'cor', 'evidence2', 'rtfull', 'rtconf', 'cj')
-      
-      # Separate predictions according to the response
-      
-      c_predicted_temp <- predictions[predictions$cor == 1,]
-      e_predicted_temp <- predictions[predictions$cor == 0,]
-      
-      # Merge predictions
-      
-      c_predicted <- rbind(c_predicted, c_predicted_temp)
-      e_predicted <- rbind(e_predicted, e_predicted_temp)
-      print(i)
-    }
-    
     # Draw plots
-    
-    tempC <- hist(c_observed_temp$rt, breaks=seq(0,6.2,.1), xlim = c(0,3), ylim = c(0,300), prob = F, col = rgb(0,1,0,.25), border = "white", ylab = "", xlab = "", cex.lab = 2, cex.main = 1.5, cex.axis = 1.5, main = "")
-    tempE <- hist(e_observed_temp$rt, breaks=seq(0,6.2,.1), prob = F, add = T, col = rgb(1,0,0,.25), border = 'white')
-    Cors <- hist(c_predicted$rt, breaks = seq(0,30,.1), plot = F)
-    Errs <- hist(e_predicted$rt, breaks = seq(0,30,.1),plot=F)
-    lines(Cors$counts/(sum(Cors$counts)/sum(tempC$counts))~Cors$mids,type='l',col='green',lwd=3)
-    lines(Errs$counts/(sum(Errs$counts)/sum(tempE$counts))~Errs$mids,type='l',col='red',lwd=3)
+    tempC <- hist(df_obs$rt[df_obs$cor == 1 & df_obs$coherence == coherence_vector[coherence] & df_obs$manipulation == condLab[cond]], 
+                  breaks=seq(0,6.2,.1), xlim = c(0,3), ylim = c(0,300), prob = F, col = rgb(0,1,0,.25), border = "white", ylab = "", xlab = "", cex.lab = 2, cex.main = 1.5, cex.axis = 1.5, main = "")
+    tempE <- hist(df_obs$rt[df_obs$cor == 0 & df_obs$coherence == coherence_vector[coherence] & df_obs$manipulation == condLab[cond]], 
+                  breaks=seq(0,6.2,.1), prob = F, add = T, col = rgb(1,0,0,.25), border = 'white')
+    Cors <- hist(df_predictions$rt[df_obs$cor == 1 & df_obs$coherence == coherence_vector[coherence] & df_obs$manipulation == condLab[cond]], 
+                 breaks = seq(0,30,.1), plot = F)
+    Errs <- hist(df_predictions$rt[df_obs$cor == 0 & df_obs$coherence == coherence_vector[coherence] & df_obs$manipulation == condLab[cond]], 
+                 breaks = seq(0,30,.1), plot = F)
+    lines(Cors$counts/(sum(Cors$counts)/sum(tempC$counts))~ Cors$mids, type='l', col = 'green', lwd = 3)
+    lines(Errs$counts/(sum(Errs$counts)/sum(tempE$counts))~ Errs$mids, type='l', col = 'red', lwd = 3)
     #legend("topright",fill=c("white","white","green","red"),border=F,legend=c("Simulated corrects","Simulated errors","Empirical corrects","Empirical errors"),col=rep(c("Green","Red"),2),bty='n',lwd=c(1,1,-1,-1))
 
   }
-  
 }
+
+### Confidence RT (accuracy) ----
+
+for (cond in 1:4){  # Loop through conditions
+  for (coherence in 1:3){  # Loop through coherence levels
+    
+    # Draw plots
+    tempC <- hist(df_obs$rtconf[df_obs$cor == 1 & df_obs$coherence == coherence_vector[coherence] & df_obs$manipulation == condLab[cond]], 
+                  breaks=seq(0,6.2,.1), xlim = c(0,3), ylim = c(0,300), prob = F, col = rgb(0,1,0,.25), border = "white", ylab = "", xlab = "", cex.lab = 2, cex.main = 1.5, cex.axis = 1.5, main = "")
+    tempE <- hist(df_obs$rtconf[df_obs$cor == 0 & df_obs$coherence == coherence_vector[coherence] & df_obs$manipulation == condLab[cond]], 
+                  breaks=seq(0,6.2,.1), prob = F, add = T, col = rgb(1,0,0,.25), border = 'white')
+    Cors <- hist(df_predictions$rtconf[df_obs$cor == 1 & df_obs$coherence == coherence_vector[coherence] & df_obs$manipulation == condLab[cond]], 
+                 breaks = seq(-2,30,.1), plot = F)
+    Errs <- hist(df_predictions$rtconf[df_obs$cor == 0 & df_obs$coherence == coherence_vector[coherence] & df_obs$manipulation == condLab[cond]], 
+                 breaks = seq(-2,30,.1), plot = F)
+    lines(Cors$counts/(sum(Cors$counts)/sum(tempC$counts))~ Cors$mids, type='l', col = 'green', lwd = 3)
+    lines(Errs$counts/(sum(Errs$counts)/sum(tempE$counts))~ Errs$mids, type='l', col = 'red', lwd = 3)
+    #legend("topright",fill=c("white","white","green","red"),border=F,legend=c("Simulated corrects","Simulated errors","Empirical corrects","Empirical errors"),col=rep(c("Green","Red"),2),bty='n',lwd=c(1,1,-1,-1))
+    
+  }
+}
+
+### Confidence RT (cj) ----
+
+#### Scale predictions 
+df_predictions_proportions <- data.frame(table(df_predictions$cj, df_predictions$cor))
+names(df_predictions_proportions) <- c('cj', 'cor', 'freq')
+df_predictions_proportions$freq_scaled <- as.numeric(df_predictions_proportions$freq) * nrow(df_obs) / (nrow(df_predictions) * 40)
+
+#### Calculate error bars predictions
+prediction_bars <- NULL
+for (conf in 1:6){
+  for (accuracy in 0:1){
+    df_predictions_temp <- df_predictions %>% filter(cj == conf & cor == accuracy)
+    prediction_table_temp <- table(df_predictions_temp$sub) * nrow(df_obs) / nrow(df_predictions)
+    prediction_bars_temp <- c(conf,
+                              accuracy,
+                              mean(prediction_table_temp) + sd(prediction_table_temp)/sqrt(40),
+                              mean(prediction_table_temp) - sd(prediction_table_temp)/sqrt(40))
+    prediction_bars <- rbind(prediction_bars, prediction_bars_temp)
+  }
+}
+prediction_bars <- data.frame(prediction_bars)
+names(prediction_bars) <- c('cj', 'accuracy', 'ymax', 'ymin')
+
+#### Scale observations
+df_observations_proportions <- data.frame(table(df_obs$cj, df_obs$cor))
+names(df_observations_proportions) <- c('cj', 'cor', 'freq')
+df_observations_proportions$freq_scaled <- as.numeric(df_observations_proportions$freq) / 40
+
+#### Calculate error bars observations
+observation_bars <- NULL
+for (conf in 1:6){
+  for (accuracy in 0:1){
+    df_observations_temp <- df_obs %>% filter(cj == conf & cor == accuracy)
+    observation_table_temp <- table(df_observations_temp$sub) 
+    observation_bars_temp <- c(conf,
+                              accuracy,
+                              mean(observation_table_temp) + sd(observation_table_temp)/sqrt(40),
+                              mean(observation_table_temp) - sd(observation_table_temp)/sqrt(40))
+    observation_bars <- rbind(observation_bars, observation_bars_temp)
+  }
+}
+observation_bars <- data.frame(observation_bars)
+names(observation_bars) <- c('cj', 'accuracy', 'ymax', 'ymin')
+
+#### Plot
+ggplot(data = df_observations_proportions, aes(x = as.factor(cj), y = freq_scaled, fill = as.factor(cor))) +
+  geom_col(position = position_dodge(), width = 0.90, color = 'black') +
+  geom_errorbar(data = observation_bars, aes(x = as.factor(cj), ymin = ymin, ymax = ymax), colour = 'red', size = 0.7, position = position_nudge(x = 0.12), width = 0.1, inherit.aes = F) +
+  scale_fill_manual(name = 'Accuracy', 
+                    values = c('#C0392B', '#27AE60'),
+                    labels = c('Error', 'Correct')) +
+  geom_point(data = df_predictions_proportions, 
+             aes(x = cj, y = freq_scaled), position = position_dodge(width = 0.90),
+             shape = 4, size = 2, stroke = 1) +
+  geom_errorbar(data = prediction_bars, aes(x = as.factor(cj), ymin = ymin, ymax = ymax), colour = 'red', size = 0.7, position = position_nudge(x = 0.12), width = 0.1, inherit.aes = F)
+  
+
+
+
+
+
 
 
 
@@ -523,7 +474,7 @@ for (j in 1:4){
     
     # Loop through participants
     
-    for (i in (21:n)){
+    for (i in (1:n)){
       
       # Select correct estimated parameters
       

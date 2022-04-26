@@ -256,9 +256,7 @@ ggplot(df_DDM, aes(x = manipulation, y = ter2)) +
         panel.background = element_blank()) +
   ylab("non-decision time 2")
 
-## DDM predictions full ----
-
-### Set-up ----
+## DDM full predictions ----
 
 par(mfrow = c(4, 3), mai = c(0.3, 0.3, 0.3, 0.3))
 
@@ -308,8 +306,8 @@ for (cond in 1:4){  # Loop through conditions
 
 #### Scale predictions 
 df_predictions_proportions <- data.frame(table(df_predictions$cj, df_predictions$cor))
-names(df_predictions_proportions) <- c('cj', 'cor', 'freq')
-df_predictions_proportions$freq_scaled <- as.numeric(df_predictions_proportions$freq) * nrow(df_obs) / (nrow(df_predictions) * 40)
+names(df_predictions_proportions) <- c('cj', 'cor', 'freq_pred')
+df_predictions_proportions$freq_scaled_pred <- as.numeric(df_predictions_proportions$freq) * nrow(df_obs) / (nrow(df_predictions) * 40)
 
 #### Calculate error bars predictions
 prediction_bars <- NULL
@@ -319,18 +317,19 @@ for (conf in 1:6){
     prediction_table_temp <- table(df_predictions_temp$sub) * nrow(df_obs) / nrow(df_predictions)
     prediction_bars_temp <- c(conf,
                               accuracy,
-                              mean(prediction_table_temp) + sd(prediction_table_temp)/sqrt(40),
-                              mean(prediction_table_temp) - sd(prediction_table_temp)/sqrt(40))
+                              sum(prediction_table_temp) / 40 + sd(prediction_table_temp)/sqrt(40),
+                              sum(prediction_table_temp) / 40 - sd(prediction_table_temp)/sqrt(40))
     prediction_bars <- rbind(prediction_bars, prediction_bars_temp)
   }
 }
 prediction_bars <- data.frame(prediction_bars)
-names(prediction_bars) <- c('cj', 'accuracy', 'ymax', 'ymin')
+names(prediction_bars) <- c('cj', 'cor', 'ymax_pred', 'ymin_pred')
+prediction_bars <- merge(prediction_bars, df_predictions_proportions, by = c('cj', 'cor'))
 
 #### Scale observations
 df_observations_proportions <- data.frame(table(df_obs$cj, df_obs$cor))
-names(df_observations_proportions) <- c('cj', 'cor', 'freq')
-df_observations_proportions$freq_scaled <- as.numeric(df_observations_proportions$freq) / 40
+names(df_observations_proportions) <- c('cj', 'cor', 'freq_obs')
+df_observations_proportions$freq_scaled_obs <- as.numeric(df_observations_proportions$freq) / 40
 
 #### Calculate error bars observations
 observation_bars <- NULL
@@ -340,32 +339,27 @@ for (conf in 1:6){
     observation_table_temp <- table(df_observations_temp$sub) 
     observation_bars_temp <- c(conf,
                               accuracy,
-                              mean(observation_table_temp) + sd(observation_table_temp)/sqrt(40),
-                              mean(observation_table_temp) - sd(observation_table_temp)/sqrt(40))
+                              sum(observation_table_temp) / 40 + sd(observation_table_temp)/sqrt(40),
+                              sum(observation_table_temp) / 40 - sd(observation_table_temp)/sqrt(40))
     observation_bars <- rbind(observation_bars, observation_bars_temp)
   }
 }
 observation_bars <- data.frame(observation_bars)
-names(observation_bars) <- c('cj', 'accuracy', 'ymax', 'ymin')
+names(observation_bars) <- c('cj', 'cor', 'ymax_obs', 'ymin_obs')
+observation_bars <- merge(observation_bars, df_observations_proportions, by = c('cj', 'cor'))
 
 #### Plot
-ggplot(data = df_observations_proportions, aes(x = as.factor(cj), y = freq_scaled, fill = as.factor(cor))) +
-  geom_col(position = position_dodge(), width = 0.90, color = 'black') +
-  geom_errorbar(data = observation_bars, aes(x = as.factor(cj), ymin = ymin, ymax = ymax), colour = 'red', size = 0.7, position = position_nudge(x = 0.12), width = 0.1, inherit.aes = F) +
+df <- merge(observation_bars, prediction_bars, by = c('cj', 'cor'))
+ggplot(data = df, aes(x = as.factor(cj), y = freq_scaled_obs, fill = as.factor(cor))) +
+  geom_bar(stat = 'identity', position = position_dodge(), color = 'black') +
+  geom_errorbar(aes(ymin = ymin_obs, ymax = ymax_obs), colour = 'black', size = 0.4, position = position_dodge(1.2), width = 0.2) +
+  geom_errorbar(aes(ymin = ymin_pred, ymax = ymax_pred), colour = 'black', size = 0.4, position = position_dodge(0.6), width = 0.2) +
   scale_fill_manual(name = 'Accuracy', 
                     values = c('#C0392B', '#27AE60'),
                     labels = c('Error', 'Correct')) +
-  geom_point(data = df_predictions_proportions, 
-             aes(x = cj, y = freq_scaled), position = position_dodge(width = 0.90),
-             shape = 4, size = 2, stroke = 1) +
-  geom_errorbar(data = prediction_bars, aes(x = as.factor(cj), ymin = ymin, ymax = ymax), colour = 'red', size = 0.7, position = position_nudge(x = 0.12), width = 0.1, inherit.aes = F)
-  
-
-
-
-
-
-
+  geom_point(aes(x = cj, y = freq_scaled_pred), position = position_dodge(width = 0.60),
+             size = 0.7, stroke = 1, color = 'black') +
+  theme_bw()
 
 
 
@@ -514,219 +508,19 @@ for (j in 1:4){
   
 }
 
-
-
-
-
-
-
-
-### (1)
-
-par(mfrow = c(1, 4), mai = c(0.3, 0.3, 0.7, 0.3))
-
-
-
-# RT's
-# Loop through manipulations
-
-for (j in 1:4){
-  
-  c_observed_temp <- c_observed %>% filter(manipulation == manipulation_vector[j])
-  e_observed_temp <- e_observed %>% filter(manipulation == manipulation_vector[j])
-  
-  c_predicted_full <- NULL
-  e_predicted_full <- NULL
-  
-  # Loop through coherence levels
-  
-  for (k in 1:3){
-    
-    c_predicted <- NULL
-    e_predicted <- NULL
-    
-    # Loop through participants
-    
-    for (i in (1:n)){
-      
-      # Select correct estimated parameters
-      
-      df_temp <- df %>% filter(sub == i & manipulation == manipulation_vector[j])
-      v <- df_temp[[k + 2]]
-      
-      # Simulate data     
-      predictions <- data.frame(DDM_confidence_bounds(v = v, a = df_temp$a, ter = df_temp$ter, z = z, ntrials = ntrials, s = sigma, dt = dt, a2 = df_temp$a2, postdriftmod = df_temp$postdriftmod, a2_slope = df_temp$a2_slope, ter2 = df_temp$ter2))
-      names(predictions) <- c('rt', 'resp', 'cor', 'evidence2', 'rtfull', 'rtconf', 'cj')
-      
-      # Separate predictions according to the response
-      
-      c_predicted_temp <- predictions[predictions$cor == 1,]
-      e_predicted_temp <- predictions[predictions$cor == 0,]
-      
-      # Merge predictions
-      
-      c_predicted <- rbind(c_predicted, c_predicted_temp)
-      e_predicted <- rbind(e_predicted, e_predicted_temp)
-      print(i)
-      
-    }
-    
-    c_predicted_full <- rbind(c_predicted, c_predicted_full)
-    e_predicted_full <- rbind(e_predicted, e_predicted_full)
-        
-  }
-  
-  labels <- c("Fast decision\nFast confidence rating", "Accurate decision\nFast confidence rating", "Accurate decision\nAccurate confidence rating", "Fast decision\nAccurate confidence rating")
-  
-  tempC <- hist(c_observed_temp$rt, breaks=seq(0,6.2,.3), xlim = c(0,3), ylim = c(0,1800), prob = F, col = rgb(0,1,0,.25), border = "white", ylab = "", xlab = "", cex.lab = 2, cex.main = 1.5, cex.axis = 1.5, main = labels[j], yaxt="n")
-  tempE <- hist(e_observed_temp$rt, breaks=seq(0,6.2,.3), prob = F, add = T, col = rgb(1,0,0,.25), border = 'white', yaxt="n")
-  Cors <- hist(c_predicted_full$rt, breaks = seq(0,30,.3), plot = F)
-  Errs <- hist(e_predicted_full$rt, breaks = seq(0,30,.3),plot=F)
-  lines(Cors$counts/(sum(Cors$counts)/sum(tempC$counts))~Cors$mids,type='l',col='green',lwd=3)
-  lines(Errs$counts/(sum(Errs$counts)/sum(tempE$counts))~Errs$mids,type='l',col='red',lwd=3)
-    
-  #legend("topright",fill=c("white","white","green","red"),border=F,legend=c("Simulated corrects","Simulated errors","Empirical corrects","Empirical errors"),col=rep(c("Green","Red"),2),bty='n',lwd=c(1,1,-1,-1))
-  
-  
-}
-
-
-# Confidence rating RT's (high vs. low cj)
-# Loop through manipulations
-
-for (j in 1:4){
-  
-  high_conf_observed_temp <- high_conf_observed %>% filter(manipulation == manipulation_vector[j])
-  low_conf_observed_temp <- low_conf_observed %>% filter(manipulation == manipulation_vector[j])
-  
-  high_conf_predicted_full <- NULL
-  low_conf_predicted_full <- NULL
-  
-  # Loop through coherence levels
-  
-  for (k in 1:3){
-    
-    high_conf_predicted <- NULL
-    low_conf_predicted <- NULL
-    
-    # Loop through participants
-    
-    for (i in (1:n)){
-      
-      # Select correct estimated parameters
-      
-      df_temp <- df %>% filter(sub == i & manipulation == manipulation_vector[j])
-      v <- df_temp[[k + 2]]
-      
-      # Simulate data    
-      predictions <- data.frame(DDM_confidence_bounds(v = v, a = df_temp$a, ter = df_temp$ter, z = z, ntrials = ntrials, s = sigma, dt = dt, a2 = df_temp$a2, postdriftmod = df_temp$postdriftmod, a2_slope = df_temp$a2_slope, ter2 = df_temp$ter2))
-      names(predictions) <- c('rt', 'resp', 'cor', 'evidence2', 'rtfull', 'rtconf', 'cj')
-      
-      # Separate predictions according the the cj
-      
-      high_conf_predicted_temp <- predictions[predictions$cj == 1,]
-      low_conf_predicted_temp <- predictions[predictions$cj == 0,]
-      
-      # Merge predictions
-      
-      high_conf_predicted <- rbind(high_conf_predicted, high_conf_predicted_temp)
-      low_conf_predicted <- rbind(low_conf_predicted, low_conf_predicted_temp)
-      
-      #print(i)
-    }
-    
-    high_conf_predicted_full <- rbind(high_conf_predicted, high_conf_predicted_full)
-    low_conf_predicted_full <- rbind(low_conf_predicted, low_conf_predicted_full)
-    
-  }
-  
-  labels <- c("Fast decision\nFast confidence rating", "Accurate decision\nFast confidence rating", "Accurate decision\nAccurate confidence rating", "Fast decision\nAccurate confidence rating")
-  
-  # Draw plots
-  
-  tempC <- hist(high_conf_observed_temp$rtconf, breaks=seq(0,6.2,.15), xlim = c(0,1.5), ylim = c(0,2000), prob = F, col = rgb(0.952941, 0.611765, 0.070588, .35), border = "white", ylab = "", xlab = "", cex.lab = 2, cex.main = 1.5, cex.axis = 1.5, main = labels[j], yaxt="n")
-  tempE <- hist(low_conf_observed_temp$rtconf, breaks=seq(0,6.2,.15), prob = F, add = T, col = rgb(0.121569,0.380392,0.552941,.35), border = 'white')
-  Cors <- hist(high_conf_predicted_full$rtconf, breaks = seq(-2,30,.15), plot = F)
-  Errs <- hist(low_conf_predicted_full$rtconf, breaks = seq(-2,30,.15),plot=F)
-  lines(Cors$counts/(sum(Cors$counts)/sum(tempC$counts))~Cors$mids,type='l',col='#F39C12',lwd=3)
-  lines(Errs$counts/(sum(Errs$counts)/sum(tempE$counts))~Errs$mids,type='l',col='#1F618D',lwd=3)
-  #legend("topright",fill=c("white","white","green","red"),border=F,legend=c("Simulated corrects","Simulated errors","Empirical corrects","Empirical errors"),col=rep(c("Green","Red"),2),bty='n',lwd=c(1,1,-1,-1))
-  
-  print(paste0("Proportion of negative RT's: ", (nrow(high_conf_predicted[high_conf_predicted$rtconf < 0,]) + nrow(low_conf_predicted[low_conf_predicted$rtconf < 0,]))/(nrow(high_conf_predicted) + nrow(low_conf_predicted))))
-  
-}
-
-
-# Confidence rating RT's (after correct vs. wrong decision)
-# Loop through manipulations
-
-for (j in 1:4){
-  
-  c_conf_observed_temp <- c_observed %>% filter(manipulation == manipulation_vector[j])
-  e_conf_observed_temp <- e_observed %>% filter(manipulation == manipulation_vector[j])
-  
-  c_conf_predicted_full <- NULL
-  e_conf_predicted_full <- NULL
-  
-  # Loop through coherence levels
-  
-  for (k in 1:3){
-    
-    c_conf_predicted <- NULL
-    e_conf_predicted <- NULL
-    
-    # Loop through participants
-    
-    for (i in (1:n)){
-      
-      # Select correct estimated parameters
-      
-      df_temp <- df %>% filter(sub == i & manipulation == manipulation_vector[j])
-      v <- df_temp[[k + 2]]
-      
-      # Simulate data    
-      predictions <- data.frame(DDM_confidence_bounds(v = v, a = df_temp$a, ter = df_temp$ter, z = z, ntrials = ntrials, s = sigma, dt = dt, a2 = df_temp$a2, postdriftmod = df_temp$postdriftmod, a2_slope = df_temp$a2_slope, ter2 = df_temp$ter2))
-      names(predictions) <- c('rt', 'resp', 'cor', 'evidence2', 'rtfull', 'rtconf', 'cj')
-      
-      # Separate predictions according the the cj
-      
-      c_conf_predicted_temp <- predictions[predictions$cor == 1,]
-      e_conf_predicted_temp <- predictions[predictions$cor == 0,]
-      
-      # Merge predictions
-      
-      c_conf_predicted <- rbind(c_conf_predicted, c_conf_predicted_temp)
-      e_conf_predicted <- rbind(e_conf_predicted, e_conf_predicted_temp)
-      
-      #print(i)
-    }
-    
-    c_conf_predicted_full <- rbind(c_conf_predicted, c_conf_predicted_full)
-    e_conf_predicted_full <- rbind(e_conf_predicted, e_conf_predicted_full)
-
-  }
-  
-  # Draw plots
-  
-  tempC <- hist(c_conf_observed_temp$rtconf, breaks=seq(0,6.2,.15), xlim = c(0,2), ylim = c(0,2200), prob = F, col = rgb(0.952941, 0.611765, 0.070588, .35), border = "white", ylab = "", xlab = "", cex.lab = 2, cex.main = 1.5, cex.axis = 1.5, main = labels[j], yaxt="n")
-  tempE <- hist(e_conf_observed_temp$rtconf, breaks=seq(0,6.2,.15), prob = F, add = T, col = rgb(0.121569,0.380392,0.552941,.35), border = 'white')
-  Cors <- hist(c_conf_predicted_full$rtconf, breaks = seq(-2,30,.15), plot = F)
-  Errs <- hist(e_conf_predicted_full$rtconf, breaks = seq(-2,30,.15),plot=F)
-  lines(Cors$counts/(sum(Cors$counts)/sum(tempC$counts))~Cors$mids,type='l',col='#F39C12',lwd=3)
-  lines(Errs$counts/(sum(Errs$counts)/sum(tempE$counts))~Errs$mids,type='l',col='#1F618D',lwd=3)
-  #legend("topright",fill=c("white","white","green","red"),border=F,legend=c("Simulated corrects","Simulated errors","Empirical corrects","Empirical errors"),col=rep(c("Green","Red"),2),bty='n',lwd=c(1,1,-1,-1))
-  
-}
-
-
-
-
-
-
-
-### (2)
+## DDM marginal predictions ----
 
 par(mfrow = c(1, 3), mai = c(0.3, 0.3, 0.7, 0.3))
+
+### Decision RT - coherence ----
+
+### Decision RT - manipulations ----
+
+### Confidence RT - coherence ----
+
+### Confidence RT - manipulations ----
+
+
 
 
 

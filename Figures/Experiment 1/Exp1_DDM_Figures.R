@@ -4,14 +4,12 @@
 
 ## Load packages
 
-library(rstatix)
 library(tidyr)
 library(ggplot2)
 library(dplyr)
 library(Rcpp)  # To source, compile and run C++ functions
 library(DEoptim)  # Optimization algorithm
 library(RcppZiggurat)  # Random number generator (normal distribution)
-library(ggpubr)
 library(gridExtra)
 
 ## Give R access to the DDM simulation function in C++

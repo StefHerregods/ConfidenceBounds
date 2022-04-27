@@ -23,9 +23,7 @@ library(rstatix)
 
 setwd('C:\\Users\\herre\\Desktop\\Internship\\Results\\Exp2_Results')
 
-## Functions
-
-### Give R access to the DDM simulation function in C++
+## Give R access to the DDM simulation function in C++
 sourceCpp("C:\\Users\\herre\\OneDrive\\Documenten\\GitHub\\ConfidenceBounds\\Analyses\\Exp1_analyses\\DDM_confidence_bounds_separated_2.cpp") 
 
 
@@ -89,7 +87,7 @@ for (j in 1:nrow(df_DDM)){
   }
 }
 
-# Visualisations ----
+# Visualizations ----
 
 
 ## DDM parameters ----
@@ -269,9 +267,9 @@ for (cond in 1:4){  # Loop through conditions
                   breaks=seq(0,6.2,.1), xlim = c(0,3), ylim = c(0,300), prob = F, col = rgb(0,1,0,.25), border = "white", ylab = "", xlab = "", cex.lab = 2, cex.main = 1.5, cex.axis = 1.5, main = "")
     tempE <- hist(df_obs$rt[df_obs$cor == 0 & df_obs$coherence == coherence_vector[coherence] & df_obs$manipulation == condLab[cond]], 
                   breaks=seq(0,6.2,.1), prob = F, add = T, col = rgb(1,0,0,.25), border = 'white')
-    Cors <- hist(df_predictions$rt[df_obs$cor == 1 & df_obs$coherence == coherence_vector[coherence] & df_obs$manipulation == condLab[cond]], 
+    Cors <- hist(df_predictions$rt[df_predictions$cor == 1 & df_predictions$coherence == coherence_vector[coherence] & df_predictions$manipulation == condLab[cond]], 
                  breaks = seq(0,30,.1), plot = F)
-    Errs <- hist(df_predictions$rt[df_obs$cor == 0 & df_obs$coherence == coherence_vector[coherence] & df_obs$manipulation == condLab[cond]], 
+    Errs <- hist(df_predictions$rt[df_predictions$cor == 0 & df_predictions$coherence == coherence_vector[coherence] & df_predictions$manipulation == condLab[cond]], 
                  breaks = seq(0,30,.1), plot = F)
     lines(Cors$counts/(sum(Cors$counts)/sum(tempC$counts))~ Cors$mids, type='l', col = 'green', lwd = 3)
     lines(Errs$counts/(sum(Errs$counts)/sum(tempE$counts))~ Errs$mids, type='l', col = 'red', lwd = 3)
@@ -290,9 +288,9 @@ for (cond in 1:4){  # Loop through conditions
                   breaks=seq(0,6.2,.1), xlim = c(0,3), ylim = c(0,300), prob = F, col = rgb(0,1,0,.25), border = "white", ylab = "", xlab = "", cex.lab = 2, cex.main = 1.5, cex.axis = 1.5, main = "")
     tempE <- hist(df_obs$rtconf[df_obs$cor == 0 & df_obs$coherence == coherence_vector[coherence] & df_obs$manipulation == condLab[cond]], 
                   breaks=seq(0,6.2,.1), prob = F, add = T, col = rgb(1,0,0,.25), border = 'white')
-    Cors <- hist(df_predictions$rtconf[df_obs$cor == 1 & df_obs$coherence == coherence_vector[coherence] & df_obs$manipulation == condLab[cond]], 
+    Cors <- hist(df_predictions$rtconf[df_predictions$cor == 1 & df_predictions$coherence == coherence_vector[coherence] & df_predictions$manipulation == condLab[cond]], 
                  breaks = seq(-2,30,.1), plot = F)
-    Errs <- hist(df_predictions$rtconf[df_obs$cor == 0 & df_obs$coherence == coherence_vector[coherence] & df_obs$manipulation == condLab[cond]], 
+    Errs <- hist(df_predictions$rtconf[df_predictions$cor == 0 & df_predictions$coherence == coherence_vector[coherence] & df_predictions$manipulation == condLab[cond]], 
                  breaks = seq(-2,30,.1), plot = F)
     lines(Cors$counts/(sum(Cors$counts)/sum(tempC$counts))~ Cors$mids, type='l', col = 'green', lwd = 3)
     lines(Errs$counts/(sum(Errs$counts)/sum(tempE$counts))~ Errs$mids, type='l', col = 'red', lwd = 3)
@@ -398,9 +396,9 @@ for (cond in 1:4){  # Loop through conditions
                   breaks=seq(0,6.2,.1), xlim = c(0,3), ylim = c(0,700), prob = F, col = rgb(0,1,0,.25), border = "white", ylab = "", xlab = "", cex.lab = 2, cex.main = 1.5, cex.axis = 1.5, main = "")
     tempE <- hist(df_obs$rt[df_obs$cor == 0 & df_obs$manipulation == condLab[cond]], 
                   breaks=seq(0,6.2,.1), prob = F, add = T, col = rgb(1,0,0,.25), border = 'white')
-    Cors <- hist(df_predictions$rt[df_obs$cor == 1 & df_obs$manipulation == condLab[cond]], 
+    Cors <- hist(df_predictions$rt[df_predictions$cor == 1 & df_predictions$manipulation == condLab[cond]], 
                  breaks = seq(0,30,.1), plot = F)
-    Errs <- hist(df_predictions$rt[df_obs$cor == 0 & df_obs$manipulation == condLab[cond]], 
+    Errs <- hist(df_predictions$rt[df_predictions$cor == 0 & df_predictions$manipulation == condLab[cond]], 
                  breaks = seq(0,30,.1), plot = F)
     lines(Cors$counts/(sum(Cors$counts)/sum(tempC$counts))~ Cors$mids, type='l', col = 'green', lwd = 3)
     lines(Errs$counts/(sum(Errs$counts)/sum(tempE$counts))~ Errs$mids, type='l', col = 'red', lwd = 3)
@@ -419,9 +417,9 @@ for (coherence in 1:3){  # Loop through coherence levels
                 breaks=seq(0,6.2,.1), xlim = c(0,3), ylim = c(0,1000), prob = F, col = rgb(0,1,0,.25), border = "white", ylab = "", xlab = "", cex.lab = 2, cex.main = 1.5, cex.axis = 1.5, main = "")
   tempE <- hist(df_obs$rt[df_obs$cor == 0 & df_obs$coherence == coherence_vector[coherence]], 
                 breaks=seq(0,6.2,.1), prob = F, add = T, col = rgb(1,0,0,.25), border = 'white')
-  Cors <- hist(df_predictions$rt[df_obs$cor == 1 & df_obs$coherence == coherence_vector[coherence]], 
+  Cors <- hist(df_predictions$rt[df_predictions$cor == 1 & df_predictions$coherence == coherence_vector[coherence]], 
                breaks = seq(0,30,.1), plot = F)
-  Errs <- hist(df_predictions$rt[df_obs$cor == 0 & df_obs$coherence == coherence_vector[coherence]], 
+  Errs <- hist(df_predictions$rt[df_predictions$cor == 0 & df_predictions$coherence == coherence_vector[coherence]], 
                breaks = seq(0,30,.1), plot = F)
   lines(Cors$counts/(sum(Cors$counts)/sum(tempC$counts))~ Cors$mids, type='l', col = 'green', lwd = 3)
   lines(Errs$counts/(sum(Errs$counts)/sum(tempE$counts))~ Errs$mids, type='l', col = 'red', lwd = 3)
@@ -440,9 +438,9 @@ for (cond in 1:4){  # Loop through conditions
                 breaks=seq(0,6.2,.3), xlim = c(0,3), ylim = c(0,1500), prob = F, col = rgb(0,1,0,.25), border = "white", ylab = "", xlab = "", cex.lab = 2, cex.main = 1.5, cex.axis = 1.5, main = "")
   tempE <- hist(df_obs$rtconf[df_obs$cor == 0 & df_obs$manipulation == condLab[cond]], 
                 breaks=seq(0,6.2,.3), prob = F, add = T, col = rgb(1,0,0,.25), border = 'white')
-  Cors <- hist(df_predictions$rtconf[df_obs$cor == 1 & df_obs$manipulation == condLab[cond]], 
+  Cors <- hist(df_predictions$rtconf[df_predictions$cor == 1 & df_predictions$manipulation == condLab[cond]], 
                breaks = seq(-2,30,.3), plot = F)
-  Errs <- hist(df_predictions$rtconf[df_obs$cor == 0 & df_obs$manipulation == condLab[cond]], 
+  Errs <- hist(df_predictions$rtconf[df_predictions$cor == 0 & df_predictions$manipulation == condLab[cond]], 
                breaks = seq(-2,30,.3), plot = F)
   lines(Cors$counts/(sum(Cors$counts)/sum(tempC$counts))~ Cors$mids, type='l', col = 'green', lwd = 3)
   lines(Errs$counts/(sum(Errs$counts)/sum(tempE$counts))~ Errs$mids, type='l', col = 'red', lwd = 3)
@@ -461,9 +459,9 @@ for (coherence in 1:3){  # Loop through coherence levels
                 breaks=seq(0,6.2,.1), xlim = c(0,3), ylim = c(0,1000), prob = F, col = rgb(0,1,0,.25), border = "white", ylab = "", xlab = "", cex.lab = 2, cex.main = 1.5, cex.axis = 1.5, main = "")
   tempE <- hist(df_obs$rtconf[df_obs$cor == 0 & df_obs$coherence == coherence_vector[coherence]], 
                 breaks=seq(0,6.2,.1), prob = F, add = T, col = rgb(1,0,0,.25), border = 'white')
-  Cors <- hist(df_predictions$rtconf[df_obs$cor == 1 & df_obs$coherence == coherence_vector[coherence]], 
+  Cors <- hist(df_predictions$rtconf[df_predictions$cor == 1 & df_predictions$coherence == coherence_vector[coherence]], 
                breaks = seq(-2,30,.1), plot = F)
-  Errs <- hist(df_predictions$rtconf[df_obs$cor == 0 & df_obs$coherence == coherence_vector[coherence]], 
+  Errs <- hist(df_predictions$rtconf[df_predictions$cor == 0 & df_predictions$coherence == coherence_vector[coherence]], 
                breaks = seq(-2,30,.1), plot = F)
   lines(Cors$counts/(sum(Cors$counts)/sum(tempC$counts))~ Cors$mids, type='l', col = 'green', lwd = 3)
   lines(Errs$counts/(sum(Errs$counts)/sum(tempE$counts))~ Errs$mids, type='l', col = 'red', lwd = 3)

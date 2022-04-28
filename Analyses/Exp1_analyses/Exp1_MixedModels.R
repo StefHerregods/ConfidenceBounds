@@ -44,13 +44,11 @@ df <- read.csv(file = "Exp1_data_viable.csv")
 
 ## Transform variables into factors
 
-df$rt_manipulation <- ifelse(df$manipulation %in% c("AccAcc", "AccFast"), 1, 0)
-df$rt_manipulation <- as.factor(df$rt_manipulation)
-df$rtconf_manipulation <- ifelse(df$manipulation %in% c("AccAcc", "FastAcc"), 1, 0)
-df$rtconf_manipulation <- as.factor(df$rtconf_manipulation)
-df$coherence <- as.factor(df$coherence)
-df$cor <- as.factor(df$cor)
-df$cj <- as.factor(df$cj)
+df <- df %>% mutate(rt_manipulation = as.factor(ifelse(df$manipulation %in% c("AccAcc", "AccFast"), 1, 0)),
+                    rtconf_manipulation = as.factor(ifelse(df$manipulation %in% c("AccAcc", "FastAcc"), 1, 0)),
+                    coherence = as.factor(coherence),
+                    cor = as.factor(cor),
+                    cj = as.factor(cj))
 
 
 # Decision RT ----

@@ -13,7 +13,7 @@ df <- NULL
 
 #variables
 sigma <- 1 #within-trial noise
-dt <- 0.005 #precision
+dt <- 0.001 #precision
 a <- 3 #upper bound (lower <- 0) 
 z <- 0.5 #starting point (0.5 == middle, no bias) 
 v <- 0.8 #drift rate

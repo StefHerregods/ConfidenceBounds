@@ -87,7 +87,20 @@ for (j in 1:nrow(df_DDM)){
   }
 }
 
+
 # Visualizations ----
+
+cj_mean_obs <- df_obs %>%
+  group_by(sub, cj) %>% 
+  summarise_each(funs(mean))
+cj_mean_pred <- df_predictions %>%
+  group_by(sub, cj) %>% 
+  summarise_each(funs(mean))
+ggplot(cj_mean_obs, aes(x = as.factor(cj), y = rtconf)) +
+  geom_point() +
+  stat_summary(aes(y = rtconf, group = 1), fun = mean, colour="Black", size = 4, shape = 95) +
+  geom_point(data = cj_mean_pred, aes(x = as.factor(cj), y = rtconf), color = 'red', position = position_nudge(0.2)) +
+  stat_summary(data = cj_mean_pred, aes(y = rtconf, group = 1), fun = mean, colour="Red", size = 4, shape = 95, position = position_nudge(0.2)) 
 
 
 ## DDM parameters ----

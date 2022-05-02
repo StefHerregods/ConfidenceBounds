@@ -7,6 +7,9 @@
 library(rstatix)
 library(tidyr)
 library(dplyr)
+library(ggpubr)
+library(ggplot2)
+library(ggiraph)
 
 ## Set working directory
 
@@ -34,9 +37,71 @@ df_DDM[3:11] <- lapply(df_DDM[3:11], as.numeric)
 # Transform data ----
 
 
-
+df_DDM <- df_DDM %>% mutate(rt_manipulation = as.factor(ifelse(df_DDM$manipulation %in% c("AccAcc", "AccFast"), 1, 0)),
+                            rtconf_manipulation = as.factor(ifelse(df_DDM$manipulation %in% c("AccAcc", "FastAcc"), 1, 0)))
 
 
 # Repeated measures ANOVA ----
+
+
+## Decision bound (a) ----
+
+### Outliers
+plot_a <- ggplot(data = df_DDM) + 
+  geom_point_interactive(aes(x = manipulation, y = a, data_id = sub, tooltip = sub))
+girafe(ggobj = plot_a)
+
+### Normality
+ggqqplot(df_DDM, 'a', facet.by = c('rt_manipulation', 'rtconf_manipulation'))
+
+### ANOVA
+res.aov <- anova_test(
+  data = df_DDM, dv = a, wid = sub,
+  within = c(rt_manipulation, rtconf_manipulation),
+  effect.size = 'pes'
+)
+get_anova_table(res.aov)
+
+
+## Confidence bound (a2) ----
+
+### Outliers
+plot_a2 <- ggplot(data = df_DDM) + 
+  geom_point_interactive(aes(x = manipulation, y = a2, data_id = sub, tooltip = sub))
+girafe(ggobj = plot_a2)
+
+### Normality
+ggqqplot(df_DDM, 'a2', facet.by = c('rt_manipulation', 'rtconf_manipulation'))
+
+### ANOVA
+res.aov <- anova_test(
+  data = df_DDM, dv = a2, wid = sub,
+  within = c(rt_manipulation, rtconf_manipulation),
+  effect.size = 'pes'
+)
+get_anova_table(res.aov)
+
+
+## Urgency (a2_slope) ----
+
+### Outliers
+plot_a2_slope <- ggplot(data = df_DDM) + 
+  geom_point_interactive(aes(x = manipulation, y = a2_slope, data_id = sub, tooltip = sub))
+girafe(ggobj = plot_a2_slope)
+df_DDM_2 <- df_DDM[df_DDM$a2_slope < 5,]
+
+### Normality
+ggqqplot(df_DDM_2, 'a2_slope', facet.by = c('rt_manipulation', 'rtconf_manipulation'))
+
+### ANOVA
+res.aov <- anova_test(
+  data = df_DDM_2, dv = a2_slope, wid = sub,
+  within = c(rt_manipulation, rtconf_manipulation),
+  effect.size = 'pes'
+)
+get_anova_table(res.aov)
+
+
+
 
 

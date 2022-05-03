@@ -21,15 +21,14 @@ setwd('C:\\Users\\herre\\Desktop\\Internship\\Results\\Exp2_Results')
 
 # Load data (long format)
 
-exclude <- c(1, 5, 17, 32, 35)
 
 df <- data.frame(matrix(ncol = 11, nrow = 20*4))
 colnames(df) <- c('sub', 'manipulation', 'v1', 'v2', 'v3', 'a', 'ter', 'a2', 'postdriftmod', 'a2_slope', 'ter2')
 condLab <- c('FastFast', 'AccFast', 'AccAcc', 'FastAcc') 
 j <- 1
-for (i in (1:40)[-exclude]){ 
+for (i in (21:40)){ 
   for(c in 1:4){
-    file_name <- paste0('Parameter_estimation_test\\both_results_sub_', i, '_', condLab[c], '.Rdata')
+    file_name <- paste0('Parameter_estimation_cj5\\Exp2_cj5_results_sub_', i, '_', condLab[c], '.Rdata')
     load(file_name)
     df[j,] <- c(i, condLab[c], results$optim$bestmem[1], results$optim$bestmem[2], results$optim$bestmem[3], results$optim$bestmem[4], results$optim$bestmem[5], results$optim$bestmem[6], results$optim$bestmem[7], results$optim$bestmem[8], results$optim$bestmem[9])
     j <- j + 1
@@ -257,7 +256,7 @@ data.frame(pwc)
 
 ggplot(df, aes(x = manipulation, y = a2_slope)) +
   #geom_boxplot(outlier.shape = NA, coef = 0) +
-  ylim(c(0,5)) +
+  ylim(c(0,3)) +
   geom_point(colour = "#4D5382", alpha = 0.5, size = 2, shape = 16) +
   geom_line(aes(group = sub), alpha = 0.3) +
   stat_summary(aes(y = a2_slope, group = 1), fun = mean, colour="#4D5382", size = 4, shape = 95) +
@@ -353,7 +352,7 @@ for (j in 1:4){
     
     # Loop through participants
     
-    for (i in (1:n)[-exclude]){
+    for (i in (21:n)){
       
       # Select correct estimated parameters
       
@@ -419,7 +418,7 @@ for (j in 1:4){
         
     # Loop through participants
     
-    for (i in (1:n)[-exclude]){
+    for (i in (1:n)){
       
       # Select correct estimated parameters
       
@@ -498,7 +497,7 @@ for (j in 1:4){
     
     # Loop through participants
     
-    for (i in (1:n)[-exclude]){
+    for (i in (21:n)){
       
       # Select correct estimated parameters
       

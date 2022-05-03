@@ -168,45 +168,66 @@ ggplot(df_DDM, aes(x = manipulation)) +
 ggplot(data = df_DDM) +
   geom_line(aes(x = manipulation_jitter, y = a, group = sub), alpha = 0.15, size = 0.5) +
   geom_point(aes(x = manipulation_jitter, y = a), fill = '#999999', color = 'white', size = 6, shape = 21, stroke = 1) +
-  geom_linerange(aes(x = manipulation, y = a, ymin = a_mean - a_sd / sqrt(40), ymax = a_mean + a_sd / sqrt(40)), position = position_nudge(-0.22), size = 1) +
-  geom_point(aes(x = manipulation, y = a_mean), position = position_nudge(-0.22)) +
-  scale_x_discrete(labels = c("Accurate decision\nAccurate confidence rating", "Accurate decision\nFast confidence rating", "Fast decision\nAccurate confidence rating", "Fast decision\nFast confidence rating")) +
+  geom_linerange(aes(x = manipulation, y = a, ymin = a_mean - a_sd / sqrt(40), ymax = a_mean + a_sd / sqrt(40)), position = position_nudge(-0.28), size = 1) +
+  geom_point(aes(x = manipulation, y = a_mean), position = position_nudge(-0.28)) +
+  scale_x_discrete(labels = c(1, 2, 3, 4)) +
+  ylim(c(.66, 3.3)) +
+  xlab(label = 'Condition') +
+  ylab(label = 'Decision boundary separation') +
   theme(axis.line = element_line(colour = 'black'),
-        panel.grid.major = element_blank(),
-        panel.grid.minor = element_blank(),
+        panel.grid.major.x = element_blank(),
+        panel.grid.major.y = element_line(colour = '#e0e0e0', size = 0.7),
+        panel.grid.minor.x = element_blank(),
         panel.border = element_blank(),
+        axis.ticks.length = unit(.2, 'cm'),
         panel.background = element_blank(),
-        text = element_text(family = 'font', size = 11))
+        text = element_text(family = 'font', size = 12),
+        axis.title.y = element_text(margin = margin(t = 0, r = 15, b = 0, l = 0)),
+        axis.title.x = element_text(margin = margin(t = 10, r = 0, b = 0, l = 0)))
 
 ### a2
 
 ggplot(data = df_DDM) +
   geom_line(aes(x = manipulation_jitter, y = a2, group = sub), alpha = 0.15, size = 0.5) +
   geom_point(aes(x = manipulation_jitter, y = a2), fill = '#999999', color = 'white', size = 6, shape = 21, stroke = 1) +
-  geom_linerange(aes(x = manipulation, y = a2, ymin = a2_mean - a2_sd / sqrt(40), ymax = a2_mean + a2_sd / sqrt(40)), position = position_nudge(-0.22), size = 1) +
-  geom_point(aes(x = manipulation, y = a2_mean), position = position_nudge(-0.22)) +
-  scale_x_discrete(labels = c("Accurate decision\nAccurate confidence rating", "Accurate decision\nFast confidence rating", "Fast decision\nAccurate confidence rating", "Fast decision\nFast confidence rating")) +
+  geom_linerange(aes(x = manipulation, y = a2, ymin = a2_mean - a2_sd / sqrt(40), ymax = a2_mean + a2_sd / sqrt(40)), position = position_nudge(-0.28), size = 1) +
+  geom_point(aes(x = manipulation, y = a2_mean), position = position_nudge(-0.28)) +
+  scale_x_discrete(labels = c(1, 2, 3, 4)) +
+  ylim(c(.5, 5.5)) +
+  xlab(label = 'Condition') +
+  ylab(label = 'Confidence boundary separation') +
   theme(axis.line = element_line(colour = 'black'),
-        panel.grid.major = element_blank(),
-        panel.grid.minor = element_blank(),
+        panel.grid.major.x = element_blank(),
+        panel.grid.major.y = element_line(colour = '#e0e0e0', size = 0.7),
+        panel.grid.minor.x = element_blank(),
         panel.border = element_blank(),
+        axis.ticks.length = unit(.2, 'cm'),
         panel.background = element_blank(),
-        text = element_text(family = 'font', size = 11))
+        text = element_text(family = 'font', size = 12),
+        axis.title.y = element_text(margin = margin(t = 0, r = 15, b = 0, l = 0)),
+        axis.title.x = element_text(margin = margin(t = 10, r = 0, b = 0, l = 0)))
 
 ### a2_slope
 
 ggplot(data = df_DDM) +
   geom_line(aes(x = manipulation_jitter, y = a2_slope, group = sub), alpha = 0.15, size = 0.5) +
   geom_point(aes(x = manipulation_jitter, y = a2_slope), fill = '#999999', color = 'white', size = 6, shape = 21, stroke = 1) +
-  geom_linerange(aes(x = manipulation, y = a2_slope, ymin = a2_slope_mean - a2_slope_sd / sqrt(40), ymax = a2_slope_mean + a2_slope_sd / sqrt(40)), position = position_nudge(-0.22), size = 1) +
-  geom_point(aes(x = manipulation, y = a2_slope_mean), position = position_nudge(-0.22)) +
-  scale_x_discrete(labels = c("Accurate decision\nAccurate confidence rating", "Accurate decision\nFast confidence rating", "Fast decision\nAccurate confidence rating", "Fast decision\nFast confidence rating")) +
+  geom_linerange(aes(x = manipulation, y = a2_slope, ymin = a2_slope_mean - a2_slope_sd / sqrt(40), ymax = a2_slope_mean + a2_slope_sd / sqrt(40)), position = position_nudge(-0.28), size = 1) +
+  geom_point(aes(x = manipulation, y = a2_slope_mean), position = position_nudge(-0.28)) +
+  scale_x_discrete(labels = c(1, 2, 3, 4)) +
+  ylim(c(-0.2, 8)) +
+  xlab(label = 'Condition') +
+  ylab(label = 'Urgency') +
   theme(axis.line = element_line(colour = 'black'),
-        panel.grid.major = element_blank(),
-        panel.grid.minor = element_blank(),
+        panel.grid.major.x = element_blank(),
+        panel.grid.major.y = element_line(colour = '#e0e0e0', size = 0.7),
+        panel.grid.minor.x = element_blank(),
         panel.border = element_blank(),
+        axis.ticks.length = unit(.2, 'cm'),
         panel.background = element_blank(),
-        text = element_text(family = 'font', size = 11))
+        text = element_text(family = 'font', size = 12),
+        axis.title.y = element_text(margin = margin(t = 0, r = 15, b = 0, l = 0)),
+        axis.title.x = element_text(margin = margin(t = 10, r = 0, b = 0, l = 0)))
 
 ### ter
 

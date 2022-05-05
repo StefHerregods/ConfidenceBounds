@@ -157,7 +157,6 @@ resid_panel(RT_12)
 vif.lme(RT_12)
 
 ## Model interpretation
-
 Anova(RT_12)  # For p-values
 summary(RT_12)  # For estimates
 confint(RT_12, method = 'boot', parm = 'beta_')
@@ -405,13 +404,13 @@ Cj_10 <- lmer(cj ~ 1 + rt_manipulation * coherence + rtconf_manipulation * coher
 anova(Cj_9, Cj_10)  # Significant
 
 Cj_11 <- lmer(cj ~ 1 + rt_manipulation * coherence + rtconf_manipulation * coherence + (1 + coherence * rt_manipulation + rtconf_manipulation|sub), 
-              data = df_correct, control = lmerControl(optimizer = "bobyqa", optCtrl=list(maxfun=200000)))  # Boundary (singular) fit
+              data = df_correct, control = lmerControl(optimizer = "bobyqa"))  # Boundary (singular) fit
 
 Cj_12 <- lmer(cj ~ 1 + rt_manipulation * coherence + rtconf_manipulation * coherence + (1 + coherence + rt_manipulation * rtconf_manipulation|sub), 
-              data = df_correct, control = lmerControl(optimizer = "bobyqa", optCtrl=list(maxfun=200000))) 
+              data = df_correct, control = lmerControl(optimizer = "bobyqa")) 
 
 Cj_13 <- lmer(cj ~ 1 + rt_manipulation * coherence + rtconf_manipulation * coherence + (1 + coherence * rtconf_manipulation + coherence|sub), 
-              data = df_correct, control = lmerControl(optimizer = "bobyqa", optCtrl=list(maxfun=200000)))  # Boundary (singular) fit
+              data = df_correct, control = lmerControl(optimizer = "bobyqa"))  # Boundary (singular) fit
 
 anova(Cj_10, Cj_12) # Significant
 
@@ -426,11 +425,10 @@ resid_panel(Cj_12)
 
 ### (4) VIF
 
-vif.lme(Cj_12)  
+vif.lme(Cj_12)
 
 ## Model interpretation
-
-Anova(Cj_12)
+write.excel(round(Anova(Cj_12),2))
 summary(Cj_12)
 confint(Cj_12, method = 'boot', parm = 'beta_')
 

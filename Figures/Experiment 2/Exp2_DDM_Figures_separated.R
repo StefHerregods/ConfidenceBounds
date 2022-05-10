@@ -33,6 +33,8 @@ sourceCpp("C:\\Users\\herre\\OneDrive\\Documenten\\GitHub\\ConfidenceBounds\\Ana
 ## Behavioral data ----
 
 df_obs <- read.csv(file = "Exp2_data_viable.csv")
+df_obs <- df_obs %>% mutate(rt_manipulation = ifelse(df_obs$manipulation %in% c("AccAcc", "AccFast"), 1, 0),
+                            rtconf_manipulation = ifelse(df_obs$manipulation %in% c("AccAcc", "FastAcc"), 1, 0))
 
 ## DDM parameters ----
 
@@ -61,6 +63,7 @@ df_predictions <- NULL
 coherence_vector <- c(0.1, 0.2, 0.4)
 
 ### Generate predictions
+pb = txtProgressBar(min = 0, max = 160, initial = 0, style = 3) 
 for (j in 1:nrow(df_DDM)){
   for (coherence in 1:3){
     df_predictions_temp <- data.frame(rep(df_DDM[j,1], each = ntrials),
@@ -84,8 +87,12 @@ for (j in 1:nrow(df_DDM)){
     df_predictions_temp$conf_evidence <- ifelse(df_predictions_temp$resp == 1, df_predictions_temp$evidence2 - df_DDM[j,]$a + df_DDM[j,]$a2_lower, (-1) * df_predictions_temp$evidence2 + df_DDM[j,]$a2_lower)
     df_predictions_temp$cj <- cut(df_predictions_temp$conf_evidence, breaks=c(-Inf, a2_separation / 6, 2 * a2_separation / 6, 3 * a2_separation / 6, 4 * a2_separation / 6, 5 * a2_separation / 6, Inf), labels = c(1, 2, 3, 4, 5, 6))
     df_predictions <- rbind(df_predictions, df_predictions_temp)
+    setTxtProgressBar(pb, j)
   }
 }
+close(pb)
+df_predictions <- df_predictions %>% mutate(rt_manipulation = ifelse(df_predictions$manipulation %in% c("AccAcc", "AccFast"), 1, 0),
+                                            rtconf_manipulation = ifelse(df_predictions$manipulation %in% c("AccAcc", "FastAcc"), 1, 0))
 
 
 # Visualizations ----
@@ -481,3 +488,153 @@ for (coherence in 1:3){  # Loop through coherence levels
   #legend("topright",fill=c("white","white","green","red"),border=F,legend=c("Simulated corrects","Simulated errors","Empirical corrects","Empirical errors"),col=rep(c("Green","Red"),2),bty='n',lwd=c(1,1,-1,-1))
   
 }
+
+## Behavioral data ----
+
+### Preparation ----
+
+df_obs_mean <- df_obs %>%
+  group_by(sub, coherence, manipulation) %>% 
+  summarise_each(funs(mean))
+
+df_predictions_mean <- df_predictions %>%
+  mutate(cj = as.integer(cj))
+  group_by(sub, coherence, manipulation) %>% 
+  summarise_each(funs(mean))
+
+### RT ---- 
+
+a <- ggplot(data = df_obs_mean, aes(x = coherence, y = rt, color = as.factor(rt_manipulation))) +
+  geom_point(size = 3, stroke = 1, shape = 16, alpha = 0.2, position = position_jitterdodge(jitter.width = 0.04, dodge.width = 0.07)) +
+  stat_summary(geom = "point", size = 5, fun = "mean", position = position_dodge(width = 0.07)) +
+  stat_summary(geom = "line", size = 1, fun = "mean", position = position_dodge(width = 0.07)) +
+  stat_summary(data = df_predictions_mean, aes(x = coherence, y = rt, group = as.factor(rt_manipulation)), color = 'black', geom = "point", size = 2, stroke = 1, shape = 4, fun = "mean", position = position_dodge(width = 0.07)) +
+  theme(axis.line = element_line(colour = 'black'),
+        panel.grid.major.x = element_blank(),
+        panel.grid.major.y = element_line(colour = '#e0e0e0', size = 0.7),
+        panel.grid.minor.x = element_blank(),
+        panel.border = element_blank(),
+        axis.ticks.length = unit(.2, 'cm'),
+        panel.background = element_blank(),
+        text = element_text(family = 'font', size = 12),
+        axis.title.y = element_text(margin = margin(t = 0, r = 10, b = 0, l = 0)),
+        axis.title.x = element_text(margin = margin(t = 10, r = 0, b = 0, l = 0)),
+        legend.position = 'none') + 
+  scale_color_manual(values = c('#7EA172', '#C7CB85'))
+
+
+b <- ggplot(data = df_obs_mean, aes(x = coherence, y = rt, color = as.factor(rtconf_manipulation))) +
+  geom_point(size = 3, stroke = 1, shape = 16, alpha = 0.2, position = position_jitterdodge(jitter.width = 0.04, dodge.width = 0.07)) +
+  stat_summary(geom = "point", size = 5, fun = "mean", position = position_dodge(width = 0.07)) +
+  stat_summary(geom = "line", size = 1, fun = "mean", position = position_dodge(width = 0.07)) +
+  stat_summary(data = df_predictions_mean, aes(x = coherence, y = rt, group = as.factor(rtconf_manipulation)), color = 'black', geom = "point", size = 2, stroke = 1, shape = 4, fun = "mean", position = position_dodge(width = 0.07)) +
+  theme(axis.line = element_line(colour = 'black'),
+        panel.grid.major.x = element_blank(),
+        panel.grid.major.y = element_line(colour = '#e0e0e0', size = 0.7),
+        panel.grid.minor.x = element_blank(),
+        panel.border = element_blank(),
+        axis.ticks.length = unit(.2, 'cm'),
+        panel.background = element_blank(),
+        text = element_text(family = 'font', size = 12),
+        axis.title.y = element_text(margin = margin(t = 0, r = 10, b = 0, l = 0)),
+        axis.title.x = element_text(margin = margin(t = 10, r = 0, b = 0, l = 0)),
+        legend.position = 'none') +
+  scale_color_manual(values = c('#CA3C25', '#FFA630'))
+
+
+ggarrange(a, b)
+
+ggplot(data = df_obs_mean, aes(x = coherence, y = rt, color = as.factor(rt_manipulation))) +
+  geom_point(size = 4, stroke = 1, shape = 16, alpha = 0.2, position = position_jitterdodge(jitter.width = 0.04, dodge.width = 0.07)) +
+  stat_summary(geom = "point", size = 4, fun = "mean", position = position_dodge(width = 0.07)) +
+  stat_summary(geom = "line", size = 1, fun = "mean", position = position_dodge(width = 0.07)) +
+  stat_summary(data = df_predictions_mean, aes(x = coherence, y = rt, group = as.factor(rt_manipulation)), color = 'black', geom = "point", size = 2, stroke = 1, shape = 4, fun = "mean", position = position_dodge(width = 0.07)) +
+  scale_x_continuous(labels = scales::percent_format(accuracy = 1)) +
+  scale_color_manual(values = c('#CA3C25', '#FFA630')) +
+  ylab(label = 'Reaction Time (s)') +
+  xlab(label = 'Coherence') +
+  theme(axis.line = element_line(colour = 'black'),
+        panel.grid.major.x = element_blank(),
+        panel.grid.major.y = element_line(colour = '#e0e0e0', size = 0.7),
+        panel.grid.minor.x = element_blank(),
+        panel.border = element_blank(),
+        axis.ticks.length = unit(.2, 'cm'),
+        panel.background = element_blank(),
+        text = element_text(family = 'font', size = 12),
+        axis.title.y = element_text(margin = margin(t = 0, r = 10, b = 0, l = 0)),
+        axis.title.x = element_text(margin = margin(t = 10, r = 0, b = 0, l = 0)),
+        legend.position = 'none') +
+  facet_wrap(~rtconf_manipulation)
+
+### confidence RT ----
+
+ggplot(data = df_obs_mean, aes(x = coherence, y = rtconf, color = as.factor(rt_manipulation))) +
+  geom_point(size = 4, stroke = 1, shape = 16, alpha = 0.2, position = position_jitterdodge(jitter.width = 0.04, dodge.width = 0.07)) +
+  stat_summary(geom = "point", size = 4, fun = "mean", position = position_dodge(width = 0.07)) +
+  stat_summary(geom = "line", size = 1, fun = "mean", position = position_dodge(width = 0.07)) +
+  stat_summary(data = df_predictions_mean, aes(x = coherence, y = rtconf, group = as.factor(rt_manipulation)), color = 'black', geom = "point", size = 2, stroke = 1, shape = 4, fun = "mean", position = position_dodge(width = 0.07)) +
+  scale_x_continuous(labels = scales::percent_format(accuracy = 1)) +
+  scale_color_manual(values = c('#CA3C25', '#FFA630')) +
+  ylab(label = 'Confidence Reaction Time (s)') +
+  xlab(label = 'Coherence') +
+  theme(axis.line = element_line(colour = 'black'),
+        panel.grid.major.x = element_blank(),
+        panel.grid.major.y = element_line(colour = '#e0e0e0', size = 0.7),
+        panel.grid.minor.x = element_blank(),
+        panel.border = element_blank(),
+        axis.ticks.length = unit(.2, 'cm'),
+        panel.background = element_blank(),
+        text = element_text(family = 'font', size = 12),
+        axis.title.y = element_text(margin = margin(t = 0, r = 10, b = 0, l = 0)),
+        axis.title.x = element_text(margin = margin(t = 10, r = 0, b = 0, l = 0)),
+        legend.position = 'none') +
+  facet_wrap(~rtconf_manipulation)
+
+### Accuracy ----
+
+ggplot(data = df_obs_mean, aes(x = coherence, y = cor, color = as.factor(rt_manipulation))) +
+  geom_point(size = 4, stroke = 1, shape = 16, alpha = 0.2, position = position_jitterdodge(jitter.width = 0.04, dodge.width = 0.07)) +
+  stat_summary(geom = "point", size = 4, fun = "mean", position = position_dodge(width = 0.07)) +
+  stat_summary(geom = "line", size = 1, fun = "mean", position = position_dodge(width = 0.07)) +
+  stat_summary(data = df_predictions_mean, aes(x = coherence, y = cor, group = as.factor(rt_manipulation)), color = 'black', geom = "point", size = 2, stroke = 1, shape = 4, fun = "mean", position = position_dodge(width = 0.07)) +
+  scale_x_continuous(labels = scales::percent_format(accuracy = 1)) +
+  scale_y_continuous(labels = scales::percent_format(accuracy = 1)) +
+  scale_color_manual(values = c('#CA3C25', '#FFA630')) +
+  ylab(label = 'Accuracy') +
+  xlab(label = 'Coherence') +
+  theme(axis.line = element_line(colour = 'black'),
+        panel.grid.major.x = element_blank(),
+        panel.grid.major.y = element_line(colour = '#e0e0e0', size = 0.7),
+        panel.grid.minor.x = element_blank(),
+        panel.border = element_blank(),
+        axis.ticks.length = unit(.2, 'cm'),
+        panel.background = element_blank(),
+        text = element_text(family = 'font', size = 12),
+        axis.title.y = element_text(margin = margin(t = 0, r = 10, b = 0, l = 0)),
+        axis.title.x = element_text(margin = margin(t = 10, r = 0, b = 0, l = 0)),
+        legend.position = 'none') +
+  facet_wrap(~rtconf_manipulation)
+
+### Confidence judgement ----
+
+ggplot(data = df_obs_mean, aes(x = coherence, y = cj, color = as.factor(rt_manipulation))) +
+  geom_point(size = 4, stroke = 1, shape = 16, alpha = 0.2, position = position_jitterdodge(jitter.width = 0.04, dodge.width = 0.07)) +
+  stat_summary(geom = "point", size = 4, fun = "mean", position = position_dodge(width = 0.07)) +
+  stat_summary(geom = "line", size = 1, fun = "mean", position = position_dodge(width = 0.07)) +
+  stat_summary(data = df_predictions_mean, aes(x = coherence, y = cj, group = as.factor(rt_manipulation)), color = 'black', geom = "point", size = 2, stroke = 1, shape = 4, fun = "mean", position = position_dodge(width = 0.07)) +
+  scale_x_continuous(labels = scales::percent_format(accuracy = 1)) +
+  scale_color_manual(values = c('#CA3C25', '#FFA630')) +
+  ylab(label = 'Confidence Judgement') +
+  xlab(label = 'Coherence') +
+  theme(axis.line = element_line(colour = 'black'),
+        panel.grid.major.x = element_blank(),
+        panel.grid.major.y = element_line(colour = '#e0e0e0', size = 0.7),
+        panel.grid.minor.x = element_blank(),
+        panel.border = element_blank(),
+        axis.ticks.length = unit(.2, 'cm'),
+        panel.background = element_blank(),
+        text = element_text(family = 'font', size = 12),
+        axis.title.y = element_text(margin = margin(t = 0, r = 10, b = 0, l = 0)),
+        axis.title.x = element_text(margin = margin(t = 10, r = 0, b = 0, l = 0)),
+        legend.position = 'none') +
+  facet_wrap(~rtconf_manipulation)

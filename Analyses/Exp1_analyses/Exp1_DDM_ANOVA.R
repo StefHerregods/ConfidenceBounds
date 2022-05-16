@@ -74,10 +74,13 @@ girafe(ggobj = plot_a2)
 ### Normality
 ggqqplot(df_DDM, 'a2', facet.by = c('rt_manipulation', 'rtconf_manipulation'))
 
-### repeated measures ANOVA (based on trimmed means)
-# Unequal variances -> robust repeated measures ANOVA
-temp <- bwtrim(a2 ~ rt_manipulation * rtconf_manipulation, id = sub, data = df_DDM)
-
+### repeated measures ANOVA 
+res.aov <- anova_test(
+  data = df_DDM, dv = a2, wid = sub,
+  within = c(rt_manipulation, rtconf_manipulation),
+  effect.size = 'pes'
+)
+get_anova_table(res.aov)
 
 ## Urgency (a2_slope) ----
 

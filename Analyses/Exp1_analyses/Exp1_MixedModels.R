@@ -36,6 +36,12 @@ vif.lme <- function (fit) {
   names(v) <- nam
   v }
 
+## 
+
+write.excel <- function(x,row.names=FALSE,col.names=FALSE,...) {
+  write.table(x,"clipboard",sep="\t",row.names=row.names,col.names=col.names,...)
+}
+
 ## Setting working directory
 
 setwd('C:\\Users\\herre\\Desktop\\Internship\\Results\\Exp1_Results')
@@ -176,7 +182,7 @@ plot(effect('rt_manipulation:rtconf_manipulation', RT_12))
 contrast.matrix <- rbind("rt_manipulation1:rtconf_manipulation1" = c(1, 1, 0, 1, 1, 1, 0, 0, 0, 0, 0, 0),
                          "rt_manipulation1:coherence0.4" = c(1, 1, 0, 1, 1, 0, 0, 1, 0, 0, 0, 0),
                          "rt_manipulation1:coherence0.4" = c(1, 1, 0, 1, 1, 1, 0, 1, 0, 0, 0, 0))
-summary(multcomp::glht(RT_12, linfct=contrast.matrix))
+summary(multcomp::glht(RT_12, linfct = contrast.matrix))
 
 #data.frame(effect('rt_manipulation:coherence', RT_12))
 fixef(RT_12)
@@ -239,10 +245,14 @@ anova(RTconf_5, RTconf_6) # Significant
 
 ### (1) Linearity
 ### Categorical/dummy coded predictors -> assumption met by definition
-### (2) Homogeneity of variance: assumption not met -> log transform
+### (2) Homogeneity of variance: assumption not met 
 resid_panel(RTconf_6)
 ### (3) Normality (of errors) assumption
 resid_panel(RTconf_6)
+
+### (4) VIF
+
+vif.lme(RTconf_6)
 
 ## Model interpretation
 
@@ -410,7 +420,6 @@ plot(effect('rt_manipulation', cj_8))
 plot(effect('rtconf_manipulation', cj_8))   
 plot(effect('coherence', cj_8))
 plot(effect('rt_manipulation:coherence', cj_8))
-
 
 
 

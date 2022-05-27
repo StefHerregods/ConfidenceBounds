@@ -24,7 +24,12 @@ library(rstatix)
 setwd('C:\\Users\\herre\\Desktop\\Internship\\Results\\Exp2_Results')
 
 ## Give R access to the DDM simulation function in C++
+
 sourceCpp("C:\\Users\\herre\\OneDrive\\Documenten\\GitHub\\ConfidenceBounds\\Analyses\\Exp1_analyses\\DDM_confidence_bounds_separated_2.cpp") 
+
+## Set font
+
+windowsFonts(font = windowsFont("Times New Roman"))
 
 
 # Load data ----
@@ -184,7 +189,7 @@ a <- ggplot(data = df_DDM) +
   geom_errorbar(aes(x = manipulation, y = a, ymin = a_mean - a_sd / sqrt(40), ymax = a_mean + a_sd / sqrt(40)), position = position_nudge(-0.28), size = 1, width = 0.2) +
   geom_point(aes(x = manipulation, y = a_mean), position = position_nudge(-0.28)) +
   geom_line(aes(x = manipulation, y = a_mean, group = sub), position = position_nudge(-0.28), size = 1) +
-  scale_x_discrete(labels = c('AA', 'AS', 'SA', 'SS')) +
+  scale_x_discrete(labels = c('AA', 'AF', 'FA', 'FF')) +
   xlab(label = 'Condition') +
   ylab(label = 'Decision Boundary Separation') +
   theme(axis.line = element_line(colour = 'black'),
@@ -206,7 +211,7 @@ a2_upper <- ggplot(data = df_DDM) +
   geom_errorbar(aes(x = manipulation, y = a2_upper, ymin = a2_upper_mean - a2_upper_sd / sqrt(40), ymax = a2_upper_mean + a2_upper_sd / sqrt(40)), position = position_nudge(-0.28), size = 1, width = 0.2) +
   geom_point(aes(x = manipulation, y = a2_upper_mean), position = position_nudge(-0.28)) +
   geom_line(aes(x = manipulation, y = a2_upper_mean, group = sub), position = position_nudge(-0.28), size = 1) +
-  scale_x_discrete(labels = c('AA', 'AS', 'SA', 'SS')) +
+  scale_x_discrete(labels = c('AA', 'AF', 'FA', 'FF')) +
   xlab(label = 'Condition') +
   ylab(label = 'High Confidence Boundary') +
   theme(axis.line = element_line(colour = 'black'),
@@ -228,7 +233,7 @@ a2_lower <- ggplot(data = df_DDM) +
   geom_errorbar(aes(x = manipulation, y = a2_lower, ymin = a2_lower_mean - a2_lower_sd / sqrt(40), ymax = a2_lower_mean + a2_lower_sd / sqrt(40)), position = position_nudge(-0.28), size = 1, width = 0.2) +
   geom_point(aes(x = manipulation, y = a2_lower_mean), position = position_nudge(-0.28)) +
   geom_line(aes(x = manipulation, y = a2_lower_mean, group = sub), position = position_nudge(-0.28), size = 1) +
-  scale_x_discrete(labels = c('AA', 'AS', 'SA', 'SS')) +
+  scale_x_discrete(labels = c('AA', 'AF', 'FA', 'FF')) +
   xlab(label = 'Condition') +
   ylab(label = 'Low Confidence Boundary') +
   theme(axis.line = element_line(colour = 'black'),
@@ -250,7 +255,7 @@ a2_slope_lower <- ggplot(data = df_DDM) +
   geom_errorbar(aes(x = manipulation, y = a2_slope_lower, ymin = a2_slope_lower_mean - a2_slope_lower_sd / sqrt(40), ymax = a2_slope_lower_mean + a2_slope_lower_sd / sqrt(40)), position = position_nudge(-0.28), size = 1, width = 0.2) +
   geom_point(aes(x = manipulation, y = a2_slope_lower_mean), position = position_nudge(-0.28)) +
   geom_line(aes(x = manipulation, y = a2_slope_lower_mean, group = sub), position = position_nudge(-0.28), size = 1) +
-  scale_x_discrete(labels = c('AA', 'AS', 'SA', 'SS')) +
+  scale_x_discrete(labels = c('AA', 'AF', 'FA', 'FF')) +
   xlab(label = 'Condition') +
   ylab(label = 'Low Confidence Urgency') +
   theme(axis.line = element_line(colour = 'black'),
@@ -272,7 +277,7 @@ a2_slope_upper <- ggplot(data = df_DDM) +
   geom_errorbar(aes(x = manipulation, y = a2_slope_upper, ymin = a2_slope_upper_mean - a2_slope_upper_sd / sqrt(40), ymax = a2_slope_upper_mean + a2_slope_upper_sd / sqrt(40)), position = position_nudge(-0.28), size = 1, width = 0.2) +
   geom_point(aes(x = manipulation, y = a2_slope_upper_mean), position = position_nudge(-0.28)) +
   geom_line(aes(x = manipulation, y = a2_slope_upper_mean, group = sub), position = position_nudge(-0.28), size = 1) +
-  scale_x_discrete(labels = c('AA', 'AS', 'SA', 'SS')) +
+  scale_x_discrete(labels = c('AA', 'AF', 'FA', 'FF')) +
   xlab(label = 'Condition') +
   ylab(label = 'High Confidence Urgency') +
   theme(axis.line = element_line(colour = 'black'),
@@ -445,40 +450,60 @@ prediction_bars_2 <- prediction_bars
 names(prediction_bars_2) <- c('cj', 'cor', 'ymax', 'ymin', 'freq', 'freq_scaled')
 prediction_bars_2$data <- 'pred'
 df_2 <- rbind(observation_bars_2, prediction_bars_2)
-ggplot(data = df_2[df_2$cor == 1,], aes(x = as.factor(cj), y = freq_scaled, fill = data)) +
+a <- ggplot(data = df_2[df_2$cor == 1,], aes(x = as.factor(cj), y = freq_scaled, fill = data)) +
   geom_bar(stat = 'identity', position = position_dodge(), color = 'black') +
   geom_errorbar(aes(ymin = ymin, ymax = ymax), colour = 'black', size = 0.4, position = position_dodge(0.9), width = 0.2) +
   scale_fill_manual(name = '', 
                     values = c('#F18F01', '#006E90'),
                     labels = c('Observed', 'Predicted')) +
-  theme_bw()
+  theme_bw() +
+  ylab('Frequency') +
+  xlab('Confidence judgment') +
+  theme(text = element_text(family = 'font', size = 12))
+
 
 #### Plot incorrect
-ggplot(data = df_2[df_2$cor == 0,], aes(x = as.factor(cj), y = freq_scaled, fill = data)) +
+b <- ggplot(data = df_2[df_2$cor == 0,], aes(x = as.factor(cj), y = freq_scaled, fill = data)) +
   geom_bar(stat = 'identity', position = position_dodge(), color = 'black') +
   geom_errorbar(aes(ymin = ymin, ymax = ymax), colour = 'black', size = 0.4, position = position_dodge(0.9), width = 0.2) +
   scale_fill_manual(name = '', 
                     values = c('#F18F01', '#006E90'),
                     labels = c('Observed', 'Predicted')) +
-  theme_bw()
+  theme_bw() +
+  ylab('Frequency') +
+  xlab('Confidence judgment') +
+  theme(text = element_text(family = 'font', size = 12))
+
+ggsave(filename = 'test.png',
+       plot = ggarrange(a, b, ncol = 2, nrow = 1),
+       device = 'png',
+       width = 16,
+       height = 7,
+       units = 'cm')
 
 ## DDM marginal predictions ----
 
+png(file="test.png",
+    width=1200, 
+    height=700,
+    res = 170)
+dev.off()
+
 ### Decision RT - manipulations ----
 
-par(mfrow = c(1, 4), mai = c(0.3, 0.3, 0.7, 0.3))
+par(mfrow = c(1, 4), mai = c(0.4, 0.17, 0.2, 0.17))
 
 for (cond in 1:4){  # Loop through conditions
 
     # Draw plots
-    tempC <- hist(df_obs$rt[df_obs$cor == 1 & df_obs$manipulation == condLab[cond]], 
-                  breaks=seq(0,6.2,.1), xlim = c(0,3), ylim = c(0,700), prob = F, col = rgb(0,1,0,.25), border = "white", ylab = "", xlab = "", cex.lab = 2, cex.main = 1.5, cex.axis = 1.5, main = "")
+    tempC <- hist(family='font', df_obs$rt[df_obs$cor == 1 & df_obs$manipulation == condLab[cond]], 
+                  breaks=seq(0,6.2,.5), xlim = c(0,3), ylim = c(0,3000), prob = F, col = rgb(0,1,0,.25), border = "white", ylab = "", xlab = "", cex.lab = 1, cex.main = 1.5, cex.axis = 1, main = "", yaxp = c(0, 3000, 1), tck = -0.03)
     tempE <- hist(df_obs$rt[df_obs$cor == 0 & df_obs$manipulation == condLab[cond]], 
-                  breaks=seq(0,6.2,.1), prob = F, add = T, col = rgb(1,0,0,.25), border = 'white')
+                  breaks=seq(0,6.2,.5), prob = F, add = T, col = rgb(1,0,0,.25), border = 'white')
     Cors <- hist(df_predictions$rt[df_predictions$cor == 1 & df_predictions$manipulation == condLab[cond]], 
-                 breaks = seq(0,30,.1), plot = F)
+                 breaks = seq(0,30,.5), plot = F)
     Errs <- hist(df_predictions$rt[df_predictions$cor == 0 & df_predictions$manipulation == condLab[cond]], 
-                 breaks = seq(0,30,.1), plot = F)
+                 breaks = seq(0,30,.5), plot = F)
     lines(Cors$counts/(sum(Cors$counts)/sum(tempC$counts))~ Cors$mids, type='l', col = 'green', lwd = 3)
     lines(Errs$counts/(sum(Errs$counts)/sum(tempE$counts))~ Errs$mids, type='l', col = 'red', lwd = 3)
     #legend("topright",fill=c("white","white","green","red"),border=F,legend=c("Simulated corrects","Simulated errors","Empirical corrects","Empirical errors"),col=rep(c("Green","Red"),2),bty='n',lwd=c(1,1,-1,-1))
@@ -508,19 +533,19 @@ for (coherence in 1:3){  # Loop through coherence levels
 
 ### Confidence RT - manipulations ----
 
-par(mfrow = c(1, 4), mai = c(0.3, 0.3, 0.7, 0.3))
+par(mfrow = c(1, 4), mai = c(0.4, 0.17, 0.2, 0.17))
 
 for (cond in 1:4){  # Loop through conditions
   
   # Draw plots
   tempC <- hist(df_obs$rtconf[df_obs$cor == 1 & df_obs$manipulation == condLab[cond]], 
-                breaks=seq(0,6.2,.3), xlim = c(0,3), ylim = c(0,1500), prob = F, col = rgb(0,1,0,.25), border = "white", ylab = "", xlab = "", cex.lab = 2, cex.main = 1.5, cex.axis = 1.5, main = "")
+                breaks=seq(-2,6.2,.333), xlim = c(-.333,3), ylim = c(0,3800), prob = F, col = rgb(0,1,0,.25), border = "white", ylab = "", xlab = "", cex.lab = 2, cex.main = 1.5, cex.axis = 1, main = "", yaxp = c(0, 3800, 1), tck = -0.03)
   tempE <- hist(df_obs$rtconf[df_obs$cor == 0 & df_obs$manipulation == condLab[cond]], 
-                breaks=seq(0,6.2,.3), prob = F, add = T, col = rgb(1,0,0,.25), border = 'white')
+                breaks=seq(-2,6.2,.333), prob = F, add = T, col = rgb(1,0,0,.25), border = 'white')
   Cors <- hist(df_predictions$rtconf[df_predictions$cor == 1 & df_predictions$manipulation == condLab[cond]], 
-               breaks = seq(-2,30,.3), plot = F)
+               breaks = seq(-2,30,.333), plot = F)
   Errs <- hist(df_predictions$rtconf[df_predictions$cor == 0 & df_predictions$manipulation == condLab[cond]], 
-               breaks = seq(-2,30,.3), plot = F)
+               breaks = seq(-2,30,.333), plot = F)
   lines(Cors$counts/(sum(Cors$counts)/sum(tempC$counts))~ Cors$mids, type='l', col = 'green', lwd = 3)
   lines(Errs$counts/(sum(Errs$counts)/sum(tempE$counts))~ Errs$mids, type='l', col = 'red', lwd = 3)
   #legend("topright",fill=c("white","white","green","red"),border=F,legend=c("Simulated corrects","Simulated errors","Empirical corrects","Empirical errors"),col=rep(c("Green","Red"),2),bty='n',lwd=c(1,1,-1,-1))
@@ -580,8 +605,8 @@ df_predictions_mean <- df_predictions %>%
          cj_mean = mean(cj),
          cj_sd = sd(cj))
 
-manipulations <- c('0' = 'Accurate CJ',
-                   '1' = 'Fast CJ')
+manipulations <- c('1' = 'Accurate CJ',
+                   '0' = 'Fast CJ')
 
 ### RT ---- 
 
@@ -702,3 +727,4 @@ ggsave(filename = 'test.png',
        width = 17,
        height = 19,
        units = 'cm')
+

@@ -25,7 +25,7 @@ data_viable_e <- data_viable[data_viable$cor == 0,]
 
 # Simulating data based on estimated parameters
 
-sourceCpp("C:\\Users\\herre\\OneDrive\\Documenten\\GitHub\\ConfidenceBounds\\Analyses\\Exp1_analyses\\DDM_confidence_bounds_separated.cpp") 
+sourceCpp("C:\\Users\\herre\\OneDrive\\Documenten\\GitHub\\ConfidenceBounds\\Analyses\\Exp1_analyses\\DDM_confidence_bounds_separated_2.cpp") 
 
 exclude <- c()
 
@@ -33,9 +33,9 @@ df <- data.frame(matrix(ncol = 13, nrow = 40*4))
 colnames(df) <- c('sub', 'manipulation', 'v1', 'v2', 'v3', 'a', 'ter', 'a2_upper', 'a2_lower', 'postdriftmod', 'a2_slope_upper', 'a2_slope_lower', 'ter2')
 condLab <- c('FastFast', 'AccFast', 'AccAcc', 'FastAcc') 
 j <- 1
-for (i in (21:40)){ 
+for (i in (1:40)){ 
   for(c in 1:4){
-    file_name <- paste0('Parameter_estimation_separated\\exp2_separated_results_sub_', i, '_', condLab[c], '.Rdata')
+    file_name <- paste0('Parameter_estimation_separated_2\\exp2_separated_2_results_sub_', i, '_', condLab[c], '.Rdata')
     load(file_name)
     df[j,] <- c(i, condLab[c], results$optim$bestmem[1], results$optim$bestmem[2], results$optim$bestmem[3], results$optim$bestmem[4], results$optim$bestmem[5], results$optim$bestmem[6], results$optim$bestmem[7], results$optim$bestmem[8], results$optim$bestmem[9], results$optim$bestmem[10], results$optim$bestmem[11])
     j <- j + 1
@@ -53,7 +53,7 @@ predictions <- NULL
 coherence_vector <- c(0.1, 0.2, 0.4)
 manipulation_vector <- c('FastFast', 'AccFast', 'AccAcc', 'FastAcc')
 
-for (i in (21:n)){
+for (i in (1:40)){
   for (j in 1:4){
     for (k in 1:3){
       
@@ -62,15 +62,13 @@ for (i in (21:n)){
       predictions_temp <- data.frame(DDM_confidence_bounds(v = v, a = df_temp$a, ter = df_temp$ter, z = z, ntrials = ntrials, s = sigma, dt = dt, a2_upper = df_temp$a2_upper, a2_lower = df_temp$a2_lower, postdriftmod = df_temp$postdriftmod, a2_slope_upper = df_temp$a2_slope_upper, a2_slope_lower = df_temp$a2_slope_lower, ter2 = df_temp$ter2))
       predictions_temp <- cbind(predictions_temp, coherence_vector[k], manipulation_vector[j], i)
       names(predictions_temp) <- c('rt', 'resp', 'cor', 'evidence_2', 'rtfull', 'rtconf', 'cj', 'coherence', 'manipulation', 'sub')
+
+      # Transform cj
+      a2_separation <- df_temp$a2_lower + df_temp$a2_upper
+      predictions_temp$conf_evidence <- ifelse(predictions_temp$resp == 1, predictions_temp$evidence_2 - df_temp$a, (-1) * predictions_temp$evidence_2)
+      predictions_temp$conf_evidence <- predictions_temp$conf_evidence + df_temp$a2_lower
+      predictions_temp$cj_6 <- cut(predictions_temp$conf_evidence, breaks=c(-Inf, a2_separation / 6, 2 * a2_separation / 6, 3 * a2_separation / 6, 4 * a2_separation / 6, 5 * a2_separation / 6, Inf), labels = c(1, 2, 3, 4, 5, 6))
       
-      # version 1
-      predictions_temp$cj_6 <- ifelse(predictions_temp$resp == 1,
-                                 cut(predictions_temp$evidence_2 - df_temp$a, breaks=c(-Inf, -(2 * df_temp$a2_lower / 3), -(df_temp$a2_lower / 3), 0, df_temp$a2_upper / 3, 2 * df_temp$a2_upper / 3, Inf), labels = c(1, 2, 3, 4, 5, 6)),
-                                 cut((-1) * predictions_temp$evidence_2, breaks=c(-Inf, -(2 * df_temp$a2_upper / 3), -(df_temp$a2_upper / 3), 0, df_temp$a2_lower / 3, 2 * df_temp$a2_lower / 3, Inf), labels = c(1, 2, 3, 4, 5, 6)))
-      
-      # version 2
-      #predictions_temp$conf_evidence <- ifelse(predictions_temp$resp == 1, predictions_temp$evidence_2 - df_temp$a, (-1) * predictions_temp$evidence_2)
-      #predictions_temp$cj_6 <- cut(predictions_temp$conf_evidence, breaks=c(-Inf, -(2 * df_temp$a2_lower / 3), -(df_temp$a2_lower / 3), 0, df_temp$a2_upper / 3, 2 * df_temp$a2_upper / 3, Inf), labels = c(1, 2, 3, 4, 5, 6))
       
       
       predictions <- rbind(predictions, predictions_temp)
@@ -468,6 +466,96 @@ ggplot() +
   theme_bw()
 
 
+cj_mean <- data_viable %>%
+  group_by(sub, cj) %>% 
+  summarise_each(funs(mean))
+cj_sub_mean <- data_viable %>%
+  group_by(cj) %>% 
+  summarise_each(funs(mean))
+predictions_cj_sub_mean <- predictions %>%
+  group_by(cj) %>% 
+  summarise_each(funs(mean))
+
+ggplot(data = cj_mean, aes(x = cj, y = rtconf), shape = 5) +
+  geom_jitter(shape = 'circle filled', size = 7, fill = "grey", color = 'white', alpha = 1, width = 0.02, stroke = 1) + 
+  geom_point(data = cj_sub_mean, aes(y = rtconf, x = cj), size = 7) +
+  geom_point(data = predictions_cj_sub_mean, color = 'red', aes(y = rtconf, x = cj), shape = 4, size = 3, stroke = 2) +
+  labs(x = "Cj", y = "Confidence RT") +
+  theme( 
+    panel.grid.major.x = element_blank() ,
+    panel.grid.major.y = element_line( size=.1, color="grey" ), 
+    panel.background = element_blank(),
+    axis.line = element_line(size = 0.5))
+
+cj_mean_c <- data_viable_c %>%
+  group_by(sub, cj) %>% 
+  summarise_each(funs(mean))
+cj_sub_mean_c <- data_viable_c %>%
+  group_by(cj) %>% 
+  summarise_each(funs(mean))
+predictions_cj_sub_mean_c <- predictions[predictions$cor == 1,] %>%
+  group_by(cj) %>% 
+  summarise_each(funs(mean))
+
+a <- ggplot(data = cj_mean_c, aes(x = cj, y = rtconf), shape = 5) +
+  geom_jitter(shape = 'circle filled', size = 7, fill = "grey", color = 'white', alpha = 1, width = 0.02, stroke = 1) + 
+  geom_point(data = cj_sub_mean_c, aes(y = rtconf, x = cj), size = 7) +
+  geom_point(data = predictions_cj_sub_mean_c, color = 'red', aes(y = rtconf, x = cj), shape = 4, size = 3, stroke = 2) +
+  labs(x = "Cj", y = "Confidence RT", title = "After a correct decision") +
+  theme( 
+    panel.grid.major.x = element_blank() ,
+    panel.grid.major.y = element_line( size=.1, color="grey" ), 
+    panel.background = element_blank(),
+    axis.line = element_line(size = 0.5))
+
+cj_mean_e <- data_viable_e %>%
+  group_by(sub, cj) %>% 
+  summarise_each(funs(mean))
+cj_sub_mean_e <- data_viable_e %>%
+  group_by(cj) %>% 
+  summarise_each(funs(mean))
+predictions_cj_sub_mean_e <- predictions[predictions$cor == 0,] %>%
+  group_by(cj) %>% 
+  summarise_each(funs(mean))
+
+b <- ggplot(data = cj_mean_e, aes(x = cj, y = rtconf), shape = 5) +
+  geom_jitter(shape = 'circle filled', size = 7, fill = "grey", color = 'white', alpha = 1, width = 0.02, stroke = 1) + 
+  geom_point(data = cj_sub_mean_e, aes(y = rtconf, x = cj), size = 7) +
+  geom_point(data = predictions_cj_sub_mean_e, color = 'red', aes(y = rtconf, x = cj), shape = 4, size = 3, stroke = 2) +
+  labs(x = "Cj", y = "Confidence RT", title = "After a wrong decision") +
+  theme( 
+    panel.grid.major.x = element_blank() ,
+    panel.grid.major.y = element_line( size=.1, color="grey" ), 
+    panel.background = element_blank(),
+    axis.line = element_line(size = 0.5))
+
+grid.arrange(a, b, ncol=2)
+
+a2 <- ggplot(data = cj_mean_c, aes(x = cj, y = rt), shape = 5) +
+  geom_jitter(shape = 'circle filled', size = 7, fill = "grey", color = 'white', alpha = 1, width = 0.02, stroke = 1) + 
+  geom_point(data = cj_sub_mean_c, aes(y = rt, x = cj), size = 7) +
+  geom_point(data = predictions_cj_sub_mean_c, color = 'red', aes(y = rt, x = cj), shape = 4, size = 3, stroke = 2) +
+  labs(x = "Cj", y = "RT", title = "After a correct decision") +
+  theme( 
+    panel.grid.major.x = element_blank() ,
+    panel.grid.major.y = element_line( size=.1, color="grey" ), 
+    panel.background = element_blank(),
+    axis.line = element_line(size = 0.5))
+
+b2 <- ggplot(data = cj_mean_e, aes(x = cj, y = rt), shape = 5) +
+  geom_jitter(shape = 'circle filled', size = 7, fill = "grey", color = 'white', alpha = 1, width = 0.02, stroke = 1) + 
+  geom_point(data = cj_sub_mean_e, aes(y = rt, x = cj), size = 7) +
+  geom_point(data = predictions_cj_sub_mean_e, color = 'red', aes(y = rt, x = cj), shape = 4, size = 3, stroke = 2) +
+  labs(x = "Cj", y = "RT", title = "After a wrong decision") +
+  theme( 
+    panel.grid.major.x = element_blank() ,
+    panel.grid.major.y = element_line( size=.1, color="grey" ), 
+    panel.background = element_blank(),
+    axis.line = element_line(size = 0.5))
+
+grid.arrange(a, b, a2, b2, ncol=2)
+
+
 
 # Confidence rating plots
 
@@ -490,6 +578,14 @@ ggplot(data = manipulation_mean, aes(x = manipulation, y = cj), shape = 5) +
   stat_summary(aes(y = cj, group=1), fun = mean, colour = "Blue", size = 4, shape = 95) +
   scale_x_discrete(labels = c("AccAcc" = "Accurate decision\nAccurate confidence rating", "AccFast" = "Accurate decision\nFast confidence rating", "FastFast" = "Fast decision\nFast confidence rating", "FastAcc" = "Fast decision\nAccurate confidence rating")) +
   labs(x = "Manipulation", y = "Mean confidence rating")
+
+
+cj_manipulation_sub_mean <- data_viable %>%
+  group_by(cj, manipulation) %>% 
+  summarise_each(funs(mean))
+
+ggplot(data = cj_manipulation_sub_mean, aes(x = manipulation, y = rtconf, colour = as.factor(cj))) +
+  geom_point()
 
 # RT histograms over all participants 
 

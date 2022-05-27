@@ -51,10 +51,9 @@ df_DDM <- df_DDM %>% mutate(rt_manipulation = as.factor(ifelse(df_DDM$manipulati
 plot_a <- ggplot(data = df_DDM) + 
   geom_point_interactive(aes(x = manipulation, y = a, data_id = sub, tooltip = sub))
 girafe(ggobj = plot_a)
-df_DDM_2 <- df_DDM[df_DDM$sub != 10,]
 
 ### Normality
-ggqqplot(df_DDM_2, 'a', facet.by = c('rt_manipulation', 'rtconf_manipulation'))
+ggqqplot(df_DDM, 'a', facet.by = c('rt_manipulation', 'rtconf_manipulation'))
 
 ### ANOVA
 res.aov <- anova_test(
@@ -64,6 +63,9 @@ res.aov <- anova_test(
 )
 get_anova_table(res.aov)
 
+### Pairwise t-test
+df_DDM %>% group_by(rtconf_manipulation) %>%
+  t_test(a ~ rt_manipulation, paired = T)
 
 ## Confidence bound (a2_upper) ----
 
@@ -118,6 +120,13 @@ ggqqplot(df_DDM_2, 'a2_slope_upper', facet.by = c('rt_manipulation', 'rtconf_man
 # Unequal variances -> robust (trimmed mean) repeated measures ANOVA
 bwtrim(a2_slope_upper ~ rt_manipulation * rtconf_manipulation, id = sub, data = df_DDM_2)
 
+### ANOVA
+res.aov <- anova_test(
+  data = df_DDM_2, dv = a2_slope_upper, wid = sub,
+  within = c(rt_manipulation, rtconf_manipulation),
+  effect.size = 'pes'
+)
+get_anova_table(res.aov)
 
 ## Urgency (a2_slope_lower) ----
 

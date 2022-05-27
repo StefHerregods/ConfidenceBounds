@@ -79,6 +79,13 @@ for (n in 1:1){
 }
 
 
+df <- cbind(rownames(df), data.frame(df), n)
+
+a <- ggplot(df, aes(as.numeric(rownames(df)),evidence_list)) + geom_line(group = 1) +
+  theme_void()
+ggsave(a, filename = 'test.png', bg = 'transparent', height = 2.2, width = 6)
+
+
 
 # Pause timer
 for (i in 1:50){

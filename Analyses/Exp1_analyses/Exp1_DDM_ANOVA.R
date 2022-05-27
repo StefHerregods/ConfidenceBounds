@@ -82,6 +82,10 @@ res.aov <- anova_test(
 )
 get_anova_table(res.aov)
 
+### Pairwise t-test
+df_DDM %>% group_by(rt_manipulation) %>%
+  t_test(a2 ~ rtconf_manipulation, paired = T)
+
 ## Urgency (a2_slope) ----
 
 ### Outliers

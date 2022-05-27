@@ -181,7 +181,7 @@ a <- ggplot(data = df_DDM) +
   geom_errorbar(aes(x = manipulation, y = a, ymin = a_mean - a_sd / sqrt(40), ymax = a_mean + a_sd / sqrt(40)), position = position_nudge(-0.28), size = 1, width = 0.2) +
   geom_point(aes(x = manipulation, y = a_mean), position = position_nudge(-0.28)) +
   geom_line(aes(x = manipulation, y = a_mean, group = sub), position = position_nudge(-0.28), size = 1) +
-  scale_x_discrete(labels = c('AA', 'AS', 'SA', 'SS')) +
+  scale_x_discrete(labels = c('AA', 'AF', 'FA', 'FF')) +
   ylim(c(.66, 3.3)) +
   xlab(label = 'Condition') +
   ylab(label = 'Decision Boundary Separation') +
@@ -204,7 +204,7 @@ a2 <- ggplot(data = df_DDM) +
   geom_errorbar(aes(x = manipulation, y = a2, ymin = a2_mean - a2_sd / sqrt(40), ymax = a2_mean + a2_sd / sqrt(40)), position = position_nudge(-0.28), size = 1, width = 0.2) +
   geom_point(aes(x = manipulation, y = a2_mean), position = position_nudge(-0.28)) +
   geom_line(aes(x = manipulation, y = a2_mean, group = sub), position = position_nudge(-0.28), size = 1) +
-  scale_x_discrete(labels = c('AA', 'AS', 'SA', 'SS')) +
+  scale_x_discrete(labels = c('AA', 'AF', 'FA', 'FF')) +
   ylim(c(.5, 5.5)) +
   xlab(label = 'Condition') +
   ylab(label = 'Confidence Boundary Separation') +
@@ -227,7 +227,7 @@ a2_slope <- ggplot(data = df_DDM) +
   geom_errorbar(aes(x = manipulation, y = a2_slope, ymin = a2_slope_mean - a2_slope_sd / sqrt(40), ymax = a2_slope_mean + a2_slope_sd / sqrt(40)), position = position_nudge(-0.28), size = 1, width = 0.2) +
   geom_point(aes(x = manipulation, y = a2_slope_mean), position = position_nudge(-0.28)) +
   geom_line(aes(x = manipulation, y = a2_slope_mean, group = sub), position = position_nudge(-0.28), size = 1) +
-  scale_x_discrete(labels = c('AA', 'AS', 'SA', 'SS')) +
+  scale_x_discrete(labels = c('AA', 'AF', 'FA', 'FF')) +
   ylim(c(-0.2, 8)) +
   xlab(label = 'Condition') +
   ylab(label = 'Urgency') +
@@ -536,8 +536,8 @@ df_predictions_mean <- df_predictions %>%
          cj_mean = mean(cj),
          cj_sd = sd(cj))
 
-manipulations <- c('0' = 'Accurate CJ',
-                   '1' = 'Fast CJ')
+manipulations <- c('0' = 'Fast CJ',
+                   '1' = 'Accurate CJ')
 
 ### RT ---- 
 

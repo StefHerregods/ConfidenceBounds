@@ -95,7 +95,7 @@ data_viable <- subset(data_full, check1 == T & check2 == T & check3 == T &
                                  check4 == T & block > 3 & slow_trial == 0 & rt >= 0.2)
 data_viable <- arrange(data_viable, sub)
 
-# Manual check #!!!
+# Manual check 
 
 par(mfrow=c(2,2))
 for(i in unique(data_viable$sub)){

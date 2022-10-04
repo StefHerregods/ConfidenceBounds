@@ -14,3 +14,6 @@ Experiment 2: https://doi.org/10.17605/OSF.IO/VYH4K
   
 ![Placeholder DDM with confidence bounds figure](Figures/DDM_ConfidenceBounds.png)
 
+## Notes
+
+- Data: Exp1 Batch1 consists of incomplete experimental data and is therefore not included 

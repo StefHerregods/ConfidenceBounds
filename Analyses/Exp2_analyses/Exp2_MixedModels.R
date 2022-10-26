@@ -167,8 +167,8 @@ Anova(RT_12)  # For p-values
 summary(RT_12)  # For estimates
 confint(RT_12, method = 'boot', parm = 'beta_')
 
-plot(effect('rt_manipulation', RT_12))
-plot(effect('rtconf_manipulation', RT_12)) 
+data.frame(effect('rt_manipulation', RT_12))
+data.frame(effect('rtconf_manipulation', RT_12)) 
 plot(effect('coherence', RT_12))
 plot(effect('rt_manipulation:coherence', RT_12))
 plot(effect('rtconf_manipulation:coherence', RT_12))
@@ -257,8 +257,8 @@ Anova(RTconf_6)
 summary(RTconf_6)
 confint(RTconf_6, method = 'boot', parm = 'beta_')
 
-plot(effect('rt_manipulation', RTconf_6))  
-plot(effect('rtconf_manipulation', RTconf_6)) 
+data.frame(effect('rt_manipulation', RTconf_6))  
+data.frame(effect('rtconf_manipulation', RTconf_6)) 
 plot(effect('coherence', RTconf_6))
 plot(effect('rt_manipulation:rtconf_manipulation', RTconf_6))
 
@@ -334,6 +334,10 @@ Anova(Cor_2)
 summary(Cor_2)
 confint(Cor_2, method = 'boot', parm = 'beta_')
 
+
+data.frame(effect('rt_manipulation',Cor_2))
+data.frame(effect('rtconf_manipulation',Cor_2))
+data.frame(effect('coherence',Cor_2))
 
 # Confidence judgements ----
 
@@ -438,3 +442,6 @@ write.excel(round(Anova(Cj_12),2))
 summary(Cj_12)
 confint(Cj_12, method = 'boot', parm = 'beta_')
 
+data.frame(effect('rtconf_manipulation',Cj_12))
+temp <- data.frame(effect('coherence:rtconf_manipulation',Cj_12))
+temp$fit[1:3]-temp$fit[4:6]

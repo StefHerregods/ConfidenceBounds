@@ -44,7 +44,13 @@ write.excel <- function(x,row.names=FALSE,col.names=FALSE,...) {
 
 ## Setting working directory
 
-setwd('C:\\Users\\herre\\Desktop\\Internship\\Results\\Exp2_Results')
+## Setting working directory
+if(Sys.info()['user']=="u0136938"){
+  setwd('C:/Users/u0136938/OneDrive - KU Leuven/Documents/Projecten/Stef - sato op confidence/ConfidenceBounds/Data')
+}else{
+  setwd('C:\\Users\\herre\\Desktop\\Internship\\Results\\Exp2_Results')
+}
+
 
 df <- read.csv(file = "Exp2_data_viable.csv")
 

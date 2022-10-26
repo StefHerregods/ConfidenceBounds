@@ -15,11 +15,19 @@ library(ggpubr)
 
 ## Give R access to the DDM simulation function in C++
 
-sourceCpp("C:\\Users\\herre\\OneDrive\\Documenten\\GitHub\\ConfidenceBounds\\Analyses\\Exp1_analyses\\DDM_confidence_bounds.cpp") 
+if(Sys.info()[["user"]]=="u0136938"){
+  sourceCpp("C:/Users/u0136938/OneDrive - KU Leuven/Documents/Projecten/Stef - sato op confidence/ConfidenceBounds\\Analyses\\Exp1_analyses\\DDM_confidence_bounds.cpp") 
+}else{
+  sourceCpp("C:\\Users\\herre\\OneDrive\\Documenten\\GitHub\\ConfidenceBounds\\Analyses\\Exp1_analyses\\DDM_confidence_bounds.cpp") 
+}
 
 ## Set working directory
 
-setwd('C:\\Users\\herre\\Desktop\\Internship\\Results\\Exp1_Results')
+if(Sys.info()[["user"]]=="u0136938"){
+  setwd("C:/Users/u0136938/OneDrive - KU Leuven/Documents/Projecten/Stef - sato op confidence/ConfidenceBounds/Data")
+}else{
+  setwd('C:\\Users\\herre\\Desktop\\Internship\\Results\\Exp1_Results')
+}
 
 ## Set font
 
@@ -659,3 +667,45 @@ ggsave(filename = 'test.png',
        height = 19,
        units = 'cm')
 
+#Extra plot kobe
+df_obs$cond1 <- "Fast" 
+df_obs$cond1[df_obs$manipulation=="AccAcc"] <- "Acc" 
+df_obs$cond1[df_obs$manipulation=="AccFast"] <- "Acc" 
+df_obs$cond2 <- "Fast" 
+df_obs$cond2[df_obs$manipulation=="AccAcc"] <- "Acc" 
+df_obs$cond2[df_obs$manipulation=="FastAcc"] <- "Acc" 
+table(df_obs$cond1,df_obs$cond2,df_obs$manipulation)
+
+fit <- lme4::glmer(cj~coherence*cond1*cond2+(1|sub),df_obs,family=binomial)
+car::Anova(fit)
+plot(effects::effect('cond1:cond2',fit))
+data.frame(effects::effect('cond1:cond2',fit))
+plot(effects::effect('coherence:cond1',fit))
+data.frame(effects::effect('coherence:cond1',fit))
+
+temp <- with(df_obs,aggregate(cj,by=list(cond1=cond1,cond2=cond2,sub=sub),mean));temp<-reshape::cast(temp,sub~cond1+cond2)
+
+par(mfrow=c(1,1))
+locX <- t(jitter(matrix(rep(1:2,N),2,N),.35)) #jitter for individual points
+plot(colMeans(temp)[1:2],frame=F,cex.lab=1.5,type='n',ylim=range(temp),xlim=c(.75,2.25),ylab="Confidence",xlab="Choice SAT",xaxt='n');axis(1,at=1:2,labels=c('Accurate','Fast'))
+for(i in 1:N) points(locX[i,],temp[i,4:5],pch=21,bg=rgb(.75, 0,0,.25),col="white",cex=2)
+for(i in 1:N) points(locX[i,]+.15,temp[i,2:3],pch=21,bg=rgb(.75,.75,0,.25),col="white",cex=2)
+points(1:2,colMeans(temp)[1:2],pch=19,type='b',col="red",lwd=3,cex=2);
+error.bar(1:2,colMeans(temp)[1:2],matrixStats::colSds(as.matrix(temp))[1:2]/sqrt(N),length=0,lwd=3,col="red")
+points(1:2+.15,colMeans(temp)[3:4],pch=19,type='b',col=rgb(.75,.75,0,1),lwd=3,cex=2,lty=2);
+error.bar(1:2+.15,colMeans(temp)[3:4],matrixStats::colSds(as.matrix(temp))[3:4]/sqrt(N),length=0,lwd=3,col=rgb(.75,.75,0,1))
+legend("top",inset=.01,legend=c('Careful confidence','Fast confidence'),pch=19,box.lty=0,lty=1:2,col=c('red','green'),cex=1.25)
+
+
+temp <- with(df_obs,aggregate(cj,by=list(coherence=coherence,cond1=cond1,sub=sub),mean));temp<-reshape::cast(temp,sub~cond1+coherence)
+N <- dim(temp)[1]
+
+par(mfrow=c(1,1))
+locX <- t(jitter(matrix(rep(1:3,N),3,N),.35)) #jitter for individual points
+plot(colMeans(temp)[1:3],frame=F,cex.lab=1.5,type='n',ylim=range(temp),xlim=c(.5,3.5),ylab="Confidence",xlab="Coherence",xaxt='n');axis(1,at=1:3,labels=coherence_vector)
+for(i in 1:N) points(locX[i,],temp[i,5:7],pch=21,bg=rgb(.75, 0,0,.25),col="white",cex=2)
+for(i in 1:N) points(locX[i,]+.15,temp[i,2:4],pch=21,bg=rgb(.75,.75,0,.25),col="white",cex=2)
+points(1:3,colMeans(temp)[1:3],pch=19,type='b',col="red",lwd=3,cex=2);
+error.bar(1:3,colMeans(temp)[1:3],matrixStats::colSds(as.matrix(temp))[1:3]/sqrt(N),length=0,lwd=3,col="red")
+points(1:3+.15,colMeans(temp)[4:6],pch=19,type='b',col=rgb(.75,.75,0,1),lwd=3,cex=2);
+error.bar(1:3+.15,colMeans(temp)[4:6],matrixStats::colSds(as.matrix(temp))[4:6]/sqrt(N),length=0,lwd=3,col=rgb(.75,.75,0,1))

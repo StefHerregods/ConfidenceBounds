@@ -43,9 +43,12 @@ write.excel <- function(x,row.names=FALSE,col.names=FALSE,...) {
 }
 
 ## Setting working directory
-
-setwd('C:\\Users\\herre\\Desktop\\Internship\\Results\\Exp1_Results')
-
+if(Sys.info()['user']=="u0136938"){
+  setwd('C:/Users/u0136938/OneDrive - KU Leuven/Documents/Projecten/Stef - sato op confidence/ConfidenceBounds/Data')
+}else{
+  setwd('C:\\Users\\herre\\Desktop\\Internship\\Results\\Exp1_Results')
+}
+  
 df <- read.csv(file = "Exp1_data_viable.csv")
 
 ## Transform variables into factors
@@ -175,6 +178,8 @@ plot(effect('rt_manipulation', RT_12))
 plot(effect('rtconf_manipulation', RT_12)) 
 plot(effect('coherence', RT_12))
 plot(effect('rt_manipulation:coherence', RT_12))
+temp <- data.frame(effect('rt_manipulation:coherence', RT_12))
+temp$fit[temp$rt_manipulation==1]-temp$fit[temp$rt_manipulation==0]
 plot(effect('rt_manipulation:rtconf_manipulation', RT_12))
 
 ## Further analysis interactions
@@ -416,11 +421,55 @@ Anova(cj_6)
 summary(cj_6)
 confint(cj_6, method = 'boot', parm = 'beta_')
 
-plot(effect('rt_manipulation', cj_8)) 
-plot(effect('rtconf_manipulation', cj_8))   
-plot(effect('coherence', cj_8))
-plot(effect('rt_manipulation:coherence', cj_8))
+plot(effect('rt_manipulation', cj_6)) 
+plot(effect('rtconf_manipulation', cj_6))   
+plot(effect('coherence', cj_6))
+plot(effect('rt_manipulation:coherence', cj_6))
+data.frame(effect('rt_manipulation:coherence', cj_6))
+data.frame(effect('rt_manipulation:rtconf_manipulation', cj_6)) 
 
 
+#Confidence resolution via type II AUC
+subs <- unique(df$sub);N <- length(subs)
+roc <- data.frame(matrix(NA,N,4));names(roc) <- unique(df$manipulation) 
+for(i in 1:N){
+  tempDat <- subset(df,sub==subs[i])
+  for(c in unique(df$manipulation)){
+    temp <- subset(tempDat,manipulation==c)
+    roc[i,c] <- pROC::auc(as.numeric(temp$cor),as.numeric(temp$cj))
+  }
+}
 
+#code for error bars
+error.bar <- function(x, y, upper, lower=upper, length=0,...){
+  if(length(x) != length(y) | length(y) !=length(lower) | length(lower) != length(upper))
+    stop("vectors must be same length")
+  arrows(x,y+upper, x, y-lower, angle=90, code=3, length=length, ...)
+}
+#plot
+locX <- t(jitter(matrix(rep(1:2,N),2,N),.5)) #jitter for individual points
+plot(colMeans(roc),frame=F,cex.lab=1.5,type='n',ylim=range(roc),xlim=c(.5,2.5),ylab="Type II AUC",xlab="Choice SAT",xaxt='n');axis(1,at=1:2,labels=c("Fast decision","Accurate Decisions"))
+for(i in 1:N) points(locX[i,]-.15,roc[i,1:2],pch=21,bg=rgb(202/255,60/255,37/255,.3),col="white",cex=1.5)
+for(i in 1:N) points(locX[i,]+.15,roc[i,3:4],pch=21,bg=rgb(255/255,166/255,48/255,.3),col="white",cex=1.5)
+lines(1:2-.15,colMeans(roc)[1:2],type='b',lty=2,col="white",bg=rgb(202/255,60/255,37/255,1),pch=21,lwd=2,cex=2)
+lines(1:2+.15,colMeans(roc)[3:4],type='b',lty=2,col="white",bg=rgb(255/255,166/255,48/255,1),pch=21,lwd=2,cex=2)
+error.bar(c(1:2-.15,1:2+.15),colMeans(roc),sapply(roc,sd)/sqrt(N),col=c(rep(rgb(202/255,60/255,37/255,1),2),rep(rgb(255/255,166/255,48/255,1),2)),lwd=2)
+
+roc_long <- reshape::melt(roc)
+roc_long$sub <- rep(1:N,4)
+roc_long$choice <- "acc"
+roc_long$choice[roc_long$variable=="FastFast"] <- "fast"
+roc_long$choice[roc_long$variable=="FastAcc"] <- "fast"
+roc_long$conf <- "acc"
+roc_long$conf[roc_long$variable=="FastFast"] <- "fast"
+roc_long$conf[roc_long$variable=="AccFast"] <- "fast"
+
+roc_long$conf <- factor(roc_long$conf)
+roc_long$choice <- factor(roc_long$choice)
+
+res.aov <- rstatix::anova_test(
+  data = roc_long, dv = value, wid = sub,
+  within = c(choice,conf)
+)
+res.aov
 

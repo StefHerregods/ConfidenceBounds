@@ -1,4 +1,3 @@
-# November 2021
 # Script checks for viability of the data as described in the preregistration of
 # experiment 2: https://doi.org/10.17605/OSF.IO/VYH4K
 

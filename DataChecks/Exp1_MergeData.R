@@ -1,4 +1,3 @@
-# 29 November 2021
 # Merging all experiment 1 data + adding batch-number
 
 

@@ -117,12 +117,8 @@ df_DDM_2 <- df_DDM[!(df_DDM$sub %in% c(9, 28)),]  # Outliers removed
 ggqqplot(df_DDM_2, 'a2_slope_upper', facet.by = c('rt_manipulation', 'rtconf_manipulation'))
 
 ### ANOVA
-# Unequal variances -> robust (trimmed mean) repeated measures ANOVA
-bwtrim(a2_slope_upper ~ rt_manipulation * rtconf_manipulation, id = sub, data = df_DDM_2)
-
-### ANOVA
 res.aov <- anova_test(
-  data = df_DDM_2, dv = a2_slope_upper, wid = sub,
+  data = df_DDM, dv = a2_slope_upper, wid = sub,
   within = c(rt_manipulation, rtconf_manipulation),
   effect.size = 'pes'
 )

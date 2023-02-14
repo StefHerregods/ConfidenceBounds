@@ -438,10 +438,79 @@ resid_panel(Cj_12)
 vif.lme(Cj_12)
 
 ## Model interpretation
-write.excel(round(Anova(Cj_12),2))
+Anova(Cj_12)
 summary(Cj_12)
 confint(Cj_12, method = 'boot', parm = 'beta_')
 
+<<<<<<< Updated upstream
 data.frame(effect('rtconf_manipulation',Cj_12))
 temp <- data.frame(effect('coherence:rtconf_manipulation',Cj_12))
 temp$fit[1:3]-temp$fit[4:6]
+=======
+
+
+
+
+
+
+
+
+
+
+
+
+
+#Confidence resolution via type II AUC
+subs <- unique(df$sub);N <- length(subs)
+roc <- data.frame(matrix(NA,N,4));names(roc) <- unique(df$manipulation) 
+for(i in 1:N){
+  tempDat <- subset(df,sub==subs[i])
+  for(c in unique(df$manipulation)){
+    temp <- subset(tempDat,manipulation==c)
+    roc[i,c] <- pROC::auc(as.numeric(temp$cor),as.numeric(temp$cj))
+  }
+}
+roc_long <- reshape::melt(roc)
+roc_long <- roc_long %>% mutate(rt_manipulation = as.factor(ifelse(roc_long$variable %in% c("AccAcc", "AccFast"), 1, 0)),
+                                rtconf_manipulation = as.factor(ifelse(roc_long$variable %in% c("AccAcc", "FastAcc"), 1, 0))) %>%
+  group_by(rt_manipulation, rtconf_manipulation) %>%
+  mutate(roc_mean = mean(value),
+         roc_sd = sd(value))
+
+
+
+
+
+
+roc_plot <- ggplot(data = roc_long, aes(x = strtoi(rt_manipulation), y = value, color = as.factor(rtconf_manipulation))) +
+  geom_errorbar(aes(ymin = roc_mean - roc_sd / sqrt(40), ymax = roc_mean + roc_sd / sqrt(40), group = as.factor(rtconf_manipulation)), position = position_dodge(width = 0.5), size = 1, width = 0) +
+  geom_point(size = 2.5, stroke = 1, shape = 16, alpha = 0.2, position = position_jitterdodge(jitter.width = 0.2, dodge.width = 0.5)) +
+  stat_summary(geom = "line", size = 1, fun = "mean", position = position_dodge(width = 0.5)) +
+  stat_summary(geom = "point", size = 2.5, fun = "mean", position = position_dodge(width = 0.5)) +
+  scale_x_continuous(labels = c('"Make fast\ndecisions"', '"Make accurate\n decisions"'),breaks = c(0, 1)) +
+  scale_color_manual(values = c('#CA3C25', '#FFA630')) +
+  ylab(label = 'Type II AUC') +
+  xlab(label = '') +
+  theme(axis.line = element_line(colour = 'black'),
+        panel.grid.major.x = element_blank(),
+        panel.grid.major.y = element_line(colour = '#e0e0e0', size = 0.7),
+        panel.grid.minor.x = element_blank(),
+        panel.border = element_blank(),
+        axis.ticks.length = unit(.2, 'cm'),
+        panel.background = element_blank(),
+        text = element_text(family = 'font', size = 12),
+        axis.title.y = element_text(margin = margin(t = 0, r = 5, b = 0, l = 0)),
+        axis.title.x = element_text(margin = margin(t = 5, r = 0, b = 0, l = 0)),
+        legend.position = 'none',
+        strip.background = element_blank(),
+        strip.text.x = element_text(size = 11),
+        plot.margin=unit(c(.5,0.2,.5,0.2),"cm"))
+
+ggsave(filename = 'test.png',
+       plot = roc_plot,
+       device = 'png',
+       width = 9,
+       height = 7,
+       units = 'cm')
+
+>>>>>>> Stashed changes

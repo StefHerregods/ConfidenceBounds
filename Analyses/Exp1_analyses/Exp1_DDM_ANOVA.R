@@ -83,8 +83,9 @@ res.aov <- anova_test(
 get_anova_table(res.aov)
 
 ### Pairwise t-test
-df_DDM %>% group_by(rt_manipulation) %>%
-  t_test(a2 ~ rtconf_manipulation, paired = T)
+df_DDM %>% group_by(rtconf_manipulation) %>%
+  t_test(a2 ~ rt_manipulation, paired = T)
+
 
 ## Urgency (a2_slope) ----
 
@@ -101,6 +102,22 @@ ggqqplot(df_DDM_2, 'a2_slope', facet.by = c('rt_manipulation', 'rtconf_manipulat
 res.aov <- anova_test(
   data = df_DDM_2, dv = a2_slope, wid = sub,
   within = c(rt_manipulation, rtconf_manipulation),
+  effect.size = 'pes'
+)
+get_anova_table(res.aov)
+
+
+## Finally, as a sanity check we confirmed that estimated drift rates scaled with motion coherence ----
+df_DDM_3 <- gather(df_DDM, coherence, drift_rate, v1:v3, factor_key=TRUE)
+
+### Normality
+ggqqplot(df_DDM_3, 'drift_rate', facet.by = c('rt_manipulation', 'coherence'))
+ggqqplot(df_DDM_3, 'drift_rate', facet.by = c('rtconf_manipulation', 'coherence'))
+
+### repeated measures ANOVA 
+res.aov <- anova_test(
+  data = df_DDM_3, dv = drift_rate, wid = sub,
+  within = c(rt_manipulation, rtconf_manipulation, coherence),
   effect.size = 'pes'
 )
 get_anova_table(res.aov)

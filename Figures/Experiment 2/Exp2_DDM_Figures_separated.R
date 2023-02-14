@@ -1,9 +1,5 @@
 
 
-# To do ----
-
-# Error bars
-
 # Set-up ----
 
 
@@ -203,6 +199,30 @@ a <- ggplot(data = df_DDM) +
         axis.title.y = element_text(margin = margin(t = 0, r = 10, b = 0, l = 0)),
         axis.title.x = element_text(margin = margin(t = 10, r = 0, b = 0, l = 0)))
 
+a <- ggplot(data = df_DDM, aes(x = strtoi(rt_manipulation), y = a, color = as.factor(rtconf_manipulation))) +
+  geom_errorbar(aes(ymin = a_mean - a_sd / sqrt(40), ymax = a_mean + a_sd / sqrt(40), group = as.factor(rtconf_manipulation)), position = position_dodge(width = 0.5), size = 1, width = 0) +
+  geom_point(size = 2.5, stroke = 1, shape = 16, alpha = 0.2, position = position_jitterdodge(jitter.width = 0.2, dodge.width = 0.5)) +
+  stat_summary(geom = "line", size = 1, fun = "mean", position = position_dodge(width = 0.5)) +
+  stat_summary(geom = "point", size = 2.5, fun = "mean", position = position_dodge(width = 0.5)) +
+  scale_x_continuous(labels = c('"Make fast\ndecisions"', '"Make accurate\n decisions"'),breaks = c(0, 1)) +
+  scale_color_manual(values = c('#CA3C25', '#FFA630')) +
+  ylab(label = 'Decision Boundary Separation') +
+  xlab(label = '') +
+  theme(axis.line = element_line(colour = 'black'),
+        panel.grid.major.x = element_blank(),
+        panel.grid.major.y = element_line(colour = '#e0e0e0', size = 0.7),
+        panel.grid.minor.x = element_blank(),
+        panel.border = element_blank(),
+        axis.ticks.length = unit(.2, 'cm'),
+        panel.background = element_blank(),
+        text = element_text(family = 'font', size = 12),
+        axis.title.y = element_text(margin = margin(t = 0, r = 5, b = 0, l = 0)),
+        axis.title.x = element_text(margin = margin(t = 5, r = 0, b = 0, l = 0)),
+        legend.position = 'none',
+        strip.background = element_blank(),
+        strip.text.x = element_text(size = 11),
+        plot.margin=unit(c(.5,0.2,.5,0.2),"cm"))
+
 ### a2_upper
 
 a2_upper <- ggplot(data = df_DDM) +
@@ -213,7 +233,8 @@ a2_upper <- ggplot(data = df_DDM) +
   geom_line(aes(x = manipulation, y = a2_upper_mean, group = sub), position = position_nudge(-0.28), size = 1) +
   scale_x_discrete(labels = c('AA', 'AF', 'FA', 'FF')) +
   xlab(label = 'Condition') +
-  ylab(label = 'High Confidence Boundary') +
+  ylab(label = 'Upper Confidence Boundary') +
+  ylim(c(0,15)) +
   theme(axis.line = element_line(colour = 'black'),
         panel.grid.major.x = element_blank(),
         panel.grid.major.y = element_line(colour = '#e0e0e0', size = 0.7),
@@ -224,18 +245,43 @@ a2_upper <- ggplot(data = df_DDM) +
         text = element_text(family = 'font', size = 12),
         axis.title.y = element_text(margin = margin(t = 0, r = 10, b = 0, l = 0)),
         axis.title.x = element_text(margin = margin(t = 10, r = 0, b = 0, l = 0)))
+
+a2_upper <- ggplot(data = df_DDM, aes(x = strtoi(rt_manipulation), y = a2_upper, color = as.factor(rtconf_manipulation))) +
+  geom_errorbar(aes(ymin = a2_upper_mean - a2_upper_sd / sqrt(40), ymax = a2_upper_mean + a2_upper_sd / sqrt(40), group = as.factor(rtconf_manipulation)), position = position_dodge(width = 0.5), size = 1, width = 0) +
+  geom_point(size = 2.5, stroke = 1, shape = 16, alpha = 0.2, position = position_jitterdodge(jitter.width = 0.2, dodge.width = 0.5)) +
+  stat_summary(geom = "line", size = 1, fun = "mean", position = position_dodge(width = 0.5)) +
+  stat_summary(geom = "point", size = 2.5, fun = "mean", position = position_dodge(width = 0.5)) +
+  scale_x_continuous(labels = c('"Make fast\ndecisions"', '"Make accurate\n decisions"'),breaks = c(0, 1)) +
+  scale_color_manual(values = c('#CA3C25', '#FFA630')) +
+  ylab(label = 'Upper Confidence Boundary') +
+  xlab(label = '') +
+  theme(axis.line = element_line(colour = 'black'),
+        panel.grid.major.x = element_blank(),
+        panel.grid.major.y = element_line(colour = '#e0e0e0', size = 0.7),
+        panel.grid.minor.x = element_blank(),
+        panel.border = element_blank(),
+        axis.ticks.length = unit(.2, 'cm'),
+        panel.background = element_blank(),
+        text = element_text(family = 'font', size = 12),
+        axis.title.y = element_text(margin = margin(t = 0, r = 5, b = 0, l = 0)),
+        axis.title.x = element_text(margin = margin(t = 5, r = 0, b = 0, l = 0)),
+        legend.position = 'none',
+        strip.background = element_blank(),
+        strip.text.x = element_text(size = 11),
+        plot.margin=unit(c(.5,0.2,.5,0.2),"cm"))
 
 ### a2_lower
 
 a2_lower <- ggplot(data = df_DDM) +
-  geom_line(aes(x = manipulation_jitter, y = a2_lower, group = sub), alpha = 0.15, size = 0.3) +
-  geom_point(aes(x = manipulation_jitter, y = a2_lower), fill = '#999999', color = 'white', size = 4, shape = 21, stroke = 1) +
-  geom_errorbar(aes(x = manipulation, y = a2_lower, ymin = a2_lower_mean - a2_lower_sd / sqrt(40), ymax = a2_lower_mean + a2_lower_sd / sqrt(40)), position = position_nudge(-0.28), size = 1, width = 0.2) +
-  geom_point(aes(x = manipulation, y = a2_lower_mean), position = position_nudge(-0.28)) +
-  geom_line(aes(x = manipulation, y = a2_lower_mean, group = sub), position = position_nudge(-0.28), size = 1) +
+  geom_line(aes(x = manipulation_jitter, y = -1*a2_lower, group = sub), alpha = 0.15, size = 0.3) +
+  geom_point(aes(x = manipulation_jitter, y = -1*a2_lower), fill = '#999999', color = 'white', size = 4, shape = 21, stroke = 1) +
+  geom_errorbar(aes(x = manipulation, y = -1*a2_lower, ymin = -1*a2_lower_mean - a2_lower_sd / sqrt(40), ymax = -1*a2_lower_mean + a2_lower_sd / sqrt(40)), position = position_nudge(-0.28), size = 1, width = 0.2) +
+  geom_point(aes(x = manipulation, y = -1*a2_lower_mean), position = position_nudge(-0.28)) +
+  geom_line(aes(x = manipulation, y = -1*a2_lower_mean, group = sub), position = position_nudge(-0.28), size = 1) +
   scale_x_discrete(labels = c('AA', 'AF', 'FA', 'FF')) +
   xlab(label = 'Condition') +
-  ylab(label = 'Low Confidence Boundary') +
+  ylab(label = 'Lower Confidence Boundary') +
+  ylim(c(0,-15)) +
   theme(axis.line = element_line(colour = 'black'),
         panel.grid.major.x = element_blank(),
         panel.grid.major.y = element_line(colour = '#e0e0e0', size = 0.7),
@@ -246,6 +292,30 @@ a2_lower <- ggplot(data = df_DDM) +
         text = element_text(family = 'font', size = 12),
         axis.title.y = element_text(margin = margin(t = 0, r = 10, b = 0, l = 0)),
         axis.title.x = element_text(margin = margin(t = 10, r = 0, b = 0, l = 0)))
+
+a2_lower <- ggplot(data = df_DDM, aes(x = strtoi(rt_manipulation), y = -1*a2_lower, color = as.factor(rtconf_manipulation))) +
+  geom_errorbar(aes(ymin = -1*a2_lower_mean - a2_lower_sd / sqrt(40), ymax = -1*a2_lower_mean + a2_lower_sd / sqrt(40), group = as.factor(rtconf_manipulation)), position = position_dodge(width = 0.5), size = 1, width = 0) +
+  geom_point(size = 2.5, stroke = 1, shape = 16, alpha = 0.2, position = position_jitterdodge(jitter.width = 0.2, dodge.width = 0.5)) +
+  stat_summary(geom = "line", size = 1, fun = "mean", position = position_dodge(width = 0.5)) +
+  stat_summary(geom = "point", size = 2.5, fun = "mean", position = position_dodge(width = 0.5)) +
+  scale_x_continuous(labels = c('"Make fast\ndecisions"', '"Make accurate\n decisions"'),breaks = c(0, 1)) +
+  scale_color_manual(values = c('#CA3C25', '#FFA630')) +
+  ylab(label = 'Lower Confidence Boundary') +
+  xlab(label = '') +
+  theme(axis.line = element_line(colour = 'black'),
+        panel.grid.major.x = element_blank(),
+        panel.grid.major.y = element_line(colour = '#e0e0e0', size = 0.7),
+        panel.grid.minor.x = element_blank(),
+        panel.border = element_blank(),
+        axis.ticks.length = unit(.2, 'cm'),
+        panel.background = element_blank(),
+        text = element_text(family = 'font', size = 12),
+        axis.title.y = element_text(margin = margin(t = 0, r = 5, b = 0, l = 0)),
+        axis.title.x = element_text(margin = margin(t = 5, r = 0, b = 0, l = 0)),
+        legend.position = 'none',
+        strip.background = element_blank(),
+        strip.text.x = element_text(size = 11),
+        plot.margin=unit(c(.5,0.2,.5,0.2),"cm"))
 
 ### a2_slope_lower
 
@@ -257,7 +327,8 @@ a2_slope_lower <- ggplot(data = df_DDM) +
   geom_line(aes(x = manipulation, y = a2_slope_lower_mean, group = sub), position = position_nudge(-0.28), size = 1) +
   scale_x_discrete(labels = c('AA', 'AF', 'FA', 'FF')) +
   xlab(label = 'Condition') +
-  ylab(label = 'Low Confidence Urgency') +
+  ylab(label = 'Lower Confidence Urgency') +
+  ylim(c(0,15)) +
   theme(axis.line = element_line(colour = 'black'),
         panel.grid.major.x = element_blank(),
         panel.grid.major.y = element_line(colour = '#e0e0e0', size = 0.7),
@@ -268,6 +339,30 @@ a2_slope_lower <- ggplot(data = df_DDM) +
         text = element_text(family = 'font', size = 12),
         axis.title.y = element_text(margin = margin(t = 0, r = 10, b = 0, l = 0)),
         axis.title.x = element_text(margin = margin(t = 10, r = 0, b = 0, l = 0)))
+
+a2_slope_lower <- ggplot(data = df_DDM, aes(x = strtoi(rt_manipulation), y = a2_slope_lower, color = as.factor(rtconf_manipulation))) +
+  geom_errorbar(aes(ymin = a2_slope_lower_mean - a2_slope_lower_sd / sqrt(40), ymax = a2_slope_lower_mean + a2_slope_lower_sd / sqrt(40), group = as.factor(rtconf_manipulation)), position = position_dodge(width = 0.5), size = 1, width = 0) +
+  geom_point(size = 2.5, stroke = 1, shape = 16, alpha = 0.2, position = position_jitterdodge(jitter.width = 0.2, dodge.width = 0.5)) +
+  stat_summary(geom = "line", size = 1, fun = "mean", position = position_dodge(width = 0.5)) +
+  stat_summary(geom = "point", size = 2.5, fun = "mean", position = position_dodge(width = 0.5)) +
+  scale_x_continuous(labels = c('"Make fast\ndecisions"', '"Make accurate\n decisions"'),breaks = c(0, 1)) +
+  scale_color_manual(values = c('#CA3C25', '#FFA630')) +
+  ylab(label = 'Lower Confidence Urgency') +
+  xlab(label = '') +
+  theme(axis.line = element_line(colour = 'black'),
+        panel.grid.major.x = element_blank(),
+        panel.grid.major.y = element_line(colour = '#e0e0e0', size = 0.7),
+        panel.grid.minor.x = element_blank(),
+        panel.border = element_blank(),
+        axis.ticks.length = unit(.2, 'cm'),
+        panel.background = element_blank(),
+        text = element_text(family = 'font', size = 12),
+        axis.title.y = element_text(margin = margin(t = 0, r = 5, b = 0, l = 0)),
+        axis.title.x = element_text(margin = margin(t = 5, r = 0, b = 0, l = 0)),
+        legend.position = 'none',
+        strip.background = element_blank(),
+        strip.text.x = element_text(size = 11),
+        plot.margin=unit(c(.5,0.2,.5,0.2),"cm"))
 
 ### a2_slope_upper
 
@@ -279,7 +374,8 @@ a2_slope_upper <- ggplot(data = df_DDM) +
   geom_line(aes(x = manipulation, y = a2_slope_upper_mean, group = sub), position = position_nudge(-0.28), size = 1) +
   scale_x_discrete(labels = c('AA', 'AF', 'FA', 'FF')) +
   xlab(label = 'Condition') +
-  ylab(label = 'High Confidence Urgency') +
+  ylab(label = 'Upper Confidence Urgency') +
+  ylim(c(0,15)) +
   theme(axis.line = element_line(colour = 'black'),
         panel.grid.major.x = element_blank(),
         panel.grid.major.y = element_line(colour = '#e0e0e0', size = 0.7),
@@ -291,10 +387,34 @@ a2_slope_upper <- ggplot(data = df_DDM) +
         axis.title.y = element_text(margin = margin(t = 0, r = 10, b = 0, l = 0)),
         axis.title.x = element_text(margin = margin(t = 10, r = 0, b = 0, l = 0)))
 
+a2_slope_upper <- ggplot(data = df_DDM, aes(x = strtoi(rt_manipulation), y = -a2_slope_upper, color = as.factor(rtconf_manipulation))) +
+  geom_errorbar(aes(ymin = -a2_slope_upper_mean - a2_slope_upper_sd / sqrt(40), ymax = -a2_slope_upper_mean + a2_slope_upper_sd / sqrt(40), group = as.factor(rtconf_manipulation)), position = position_dodge(width = 0.5), size = 1, width = 0) +
+  geom_point(size = 2.5, stroke = 1, shape = 16, alpha = 0.2, position = position_jitterdodge(jitter.width = 0.2, dodge.width = 0.5)) +
+  stat_summary(geom = "line", size = 1, fun = "mean", position = position_dodge(width = 0.5)) +
+  stat_summary(geom = "point", size = 2.5, fun = "mean", position = position_dodge(width = 0.5)) +
+  scale_x_continuous(labels = c('"Make fast\ndecisions"', '"Make accurate\n decisions"'), breaks = c(0, 1)) +
+  scale_color_manual(values = c('#CA3C25', '#FFA630')) +
+  ylab(label = 'Upper Confidence Urgency') +
+  xlab(label = '') +
+  theme(axis.line = element_line(colour = 'black'),
+        panel.grid.major.x = element_blank(),
+        panel.grid.major.y = element_line(colour = '#e0e0e0', size = 0.7),
+        panel.grid.minor.x = element_blank(),
+        panel.border = element_blank(),
+        axis.ticks.length = unit(.2, 'cm'),
+        panel.background = element_blank(),
+        text = element_text(family = 'font', size = 12),
+        axis.title.y = element_text(margin = margin(t = 0, r = 5, b = 0, l = 0)),
+        axis.title.x = element_text(margin = margin(t = 5, r = 0, b = 0, l = 0)),
+        legend.position = 'none',
+        strip.background = element_blank(),
+        strip.text.x = element_text(size = 11),
+        plot.margin=unit(c(.5,0.2,.5,0.2),"cm"))
+
 ggsave(filename = 'test.png',
        plot = ggarrange(a, a2_upper, a2_lower, a2_slope_upper, a2_slope_lower, ncol = 3, nrow = 2),
        device = 'png',
-       width = 16,
+       width = 19,
        height = 20,
        units = 'cm')
 
@@ -481,6 +601,103 @@ ggsave(filename = 'test.png',
        height = 7,
        units = 'cm')
 
+
+
+
+df <- data.frame(table(df_obs$cor, df_obs$cj, df_obs$sub))
+names(df) <- c('cor', 'cj', 'sub', 'sum')
+df$mean <- NULL
+df$sd <- NULL
+for(cj in 1:6){
+  for(cor in 0:1){
+    df$mean[df$cj == cj & df$cor == cor] <- mean(df$sum[df$cj == cj & df$cor == cor])
+    df$sd[df$cj == cj & df$cor == cor] <- sd(df$sum[df$cj == cj & df$cor == cor])
+  }
+}
+
+df2 <- data.frame(table(df_predictions$cor, df_predictions$cj, df_predictions$sub))
+names(df2) <- c('cor', 'cj', 'sub', 'sum')
+df2$sum <- df2$sum/16.76973  # Scaling, because more predictions than observations
+
+
+x <- ggplot(data = df, aes(x = as.factor(cj), y = sum, color = as.factor(cor))) +
+  geom_point(size = 3, stroke = 1, shape = 16, alpha = 0.04, position = position_jitterdodge(jitter.width = 0.2, dodge.width = 0.7)) +
+  stat_summary(geom = "point", size = 3, fun = "mean", position = position_dodge(width = 0.7)) +
+  geom_errorbar(aes(ymin = mean - sd / sqrt(40), ymax = mean + sd / sqrt(40), group = as.factor(cor)), position = position_dodge(width = 0.7), size = 1, width = 0) +
+  stat_summary(data = df2, aes(x = as.factor(cj), y = sum, group = as.factor(cor)), color = 'black', geom = "point", size = 1.5, stroke = 1, shape = 4, fun = "mean", position = position_dodge(width = 0.7)) +
+  scale_color_manual(values = c('#D81600', '#8FD694')) +
+  ylab(label = '') +
+  xlab(label = '') +
+  theme(axis.line = element_line(colour = 'black'),
+        panel.grid.major.x = element_blank(),
+        panel.grid.major.y = element_line(colour = '#e0e0e0', size = 0.7),
+        panel.grid.minor.x = element_blank(),
+        panel.border = element_blank(),
+        axis.ticks.length = unit(.2, 'cm'),
+        panel.background = element_blank(),
+        text = element_text(family = 'font', size = 12),
+        axis.title.y = element_text(margin = margin(t = 0, r = 5, b = 0, l = 0)),
+        axis.title.x = element_text(margin = margin(t = 5, r = 0, b = 0, l = 0)),
+        legend.position = 'none',
+        strip.background = element_blank(),
+        strip.text.x = element_text(size = 11),
+        plot.margin=unit(c(.5,0.2,.5,0.2),"cm"))
+
+
+
+
+
+df_observations_mean_cj <- df_obs %>%
+  mutate(cj = as.integer(cj)) %>%
+  group_by(sub, cj, cor) %>% 
+  summarise_each(funs(mean)) %>%
+  group_by(coherence, manipulation)
+
+df_observations_mean_cj$rtconf_mean <- ave(df_observations_mean_cj$rtconf, list(df_observations_mean_cj$cj, df_observations_mean_cj$cor), FUN = mean)
+df_observations_mean_cj$rtconf_sd <- ave(df_observations_mean_cj$rtconf, list(df_observations_mean_cj$cj, df_observations_mean_cj$cor), FUN = sd)
+
+df_predictions_mean_cj <- df_predictions %>%
+  mutate(cj = as.integer(cj)) %>%
+  group_by(sub, cj, cor) %>% 
+  summarise_each(funs(mean)) %>%
+  group_by(coherence, manipulation)
+
+
+y <- ggplot(data = df_observations_mean_cj, aes(x = as.factor(cj), y = rtconf, color = as.factor(cor))) +
+  geom_point(size = 3, stroke = 1, shape = 16, alpha = 0.04, position = position_jitterdodge(jitter.width = 0.2, dodge.width = 0.7)) +
+  stat_summary(geom = "point", size = 3, fun = "mean", position = position_dodge(width = 0.7)) +
+  geom_errorbar(aes(ymin = rtconf_mean - rtconf_sd / sqrt(40), ymax = rtconf_mean + rtconf_sd / sqrt(40), group = as.factor(cor)), position = position_dodge(width = 0.7), size = 1, width = 0) +
+  stat_summary(data = df_predictions_mean_cj, aes(x = as.factor(cj), y = rtconf, group = as.factor(cor)), color = 'black', geom = "point", size = 1.5, stroke = 1, shape = 4, fun = "mean", position = position_dodge(width = 0.7)) +
+  scale_color_manual(values = c('#D81600', '#8FD694')) +
+  ylab(label = '') +
+  xlab(label = '') +
+  theme(axis.line = element_line(colour = 'black'),
+        panel.grid.major.x = element_blank(),
+        panel.grid.major.y = element_line(colour = '#e0e0e0', size = 0.7),
+        panel.grid.minor.x = element_blank(),
+        panel.border = element_blank(),
+        axis.ticks.length = unit(.2, 'cm'),
+        panel.background = element_blank(),
+        text = element_text(family = 'font', size = 12),
+        axis.title.y = element_text(margin = margin(t = 0, r = 5, b = 0, l = 0)),
+        axis.title.x = element_text(margin = margin(t = 5, r = 0, b = 0, l = 0)),
+        legend.position = 'none',
+        strip.background = element_blank(),
+        strip.text.x = element_text(size = 11),
+        plot.margin=unit(c(.5,0.2,.5,0.2),"cm"))
+
+
+
+ggsave(filename = 'test.png',
+       plot = ggarrange(x, y, ncol = 2, nrow = 1),
+       device = 'png',
+       width = 16,
+       height = 6,
+       units = 'cm')
+
+
+
+
 ## DDM marginal predictions ----
 
 png(file="test.png",
@@ -497,13 +714,13 @@ for (cond in 1:4){  # Loop through conditions
 
     # Draw plots
     tempC <- hist(family='font', df_obs$rt[df_obs$cor == 1 & df_obs$manipulation == condLab[cond]], 
-                  breaks=seq(0,6.2,.5), xlim = c(0,3), ylim = c(0,3000), prob = F, col = rgb(0,1,0,.25), border = "white", ylab = "", xlab = "", cex.lab = 1, cex.main = 1.5, cex.axis = 1, main = "", yaxp = c(0, 3000, 1), tck = -0.03)
+                  breaks=seq(0,6.2,.25), xlim = c(0,3), ylim = c(0,2000), prob = F, col = rgb(0,1,0,.25), border = "white", ylab = "", xlab = "", cex.lab = 1, cex.main = 1.5, cex.axis = 1, main = "", yaxp = c(0, 3000, 1), tck = -0.03)
     tempE <- hist(df_obs$rt[df_obs$cor == 0 & df_obs$manipulation == condLab[cond]], 
-                  breaks=seq(0,6.2,.5), prob = F, add = T, col = rgb(1,0,0,.25), border = 'white')
+                  breaks=seq(0,6.2,.25), prob = F, add = T, col = rgb(1,0,0,.25), border = 'white')
     Cors <- hist(df_predictions$rt[df_predictions$cor == 1 & df_predictions$manipulation == condLab[cond]], 
-                 breaks = seq(0,30,.5), plot = F)
+                 breaks = seq(0,30,.25), plot = F)
     Errs <- hist(df_predictions$rt[df_predictions$cor == 0 & df_predictions$manipulation == condLab[cond]], 
-                 breaks = seq(0,30,.5), plot = F)
+                 breaks = seq(0,30,.25), plot = F)
     lines(Cors$counts/(sum(Cors$counts)/sum(tempC$counts))~ Cors$mids, type='l', col = 'green', lwd = 3)
     lines(Errs$counts/(sum(Errs$counts)/sum(tempE$counts))~ Errs$mids, type='l', col = 'red', lwd = 3)
     #legend("topright",fill=c("white","white","green","red"),border=F,legend=c("Simulated corrects","Simulated errors","Empirical corrects","Empirical errors"),col=rep(c("Green","Red"),2),bty='n',lwd=c(1,1,-1,-1))
@@ -539,13 +756,13 @@ for (cond in 1:4){  # Loop through conditions
   
   # Draw plots
   tempC <- hist(df_obs$rtconf[df_obs$cor == 1 & df_obs$manipulation == condLab[cond]], 
-                breaks=seq(-2,6.2,.333), xlim = c(-.333,3), ylim = c(0,3800), prob = F, col = rgb(0,1,0,.25), border = "white", ylab = "", xlab = "", cex.lab = 2, cex.main = 1.5, cex.axis = 1, main = "", yaxp = c(0, 3800, 1), tck = -0.03)
+                breaks=seq(-2,6.2,.25), xlim = c(-.333,3), ylim = c(0,3000), prob = F, col = rgb(0,1,0,.25), border = "white", ylab = "", xlab = "", cex.lab = 2, cex.main = 1.5, cex.axis = 1, main = "", yaxp = c(0, 3800, 1), tck = -0.03)
   tempE <- hist(df_obs$rtconf[df_obs$cor == 0 & df_obs$manipulation == condLab[cond]], 
-                breaks=seq(-2,6.2,.333), prob = F, add = T, col = rgb(1,0,0,.25), border = 'white')
+                breaks=seq(-2,6.2,.25), prob = F, add = T, col = rgb(1,0,0,.25), border = 'white')
   Cors <- hist(df_predictions$rtconf[df_predictions$cor == 1 & df_predictions$manipulation == condLab[cond]], 
-               breaks = seq(-2,30,.333), plot = F)
+               breaks = seq(-2,30,.25), plot = F)
   Errs <- hist(df_predictions$rtconf[df_predictions$cor == 0 & df_predictions$manipulation == condLab[cond]], 
-               breaks = seq(-2,30,.333), plot = F)
+               breaks = seq(-2,30,.25), plot = F)
   lines(Cors$counts/(sum(Cors$counts)/sum(tempC$counts))~ Cors$mids, type='l', col = 'green', lwd = 3)
   lines(Errs$counts/(sum(Errs$counts)/sum(tempE$counts))~ Errs$mids, type='l', col = 'red', lwd = 3)
   #legend("topright",fill=c("white","white","green","red"),border=F,legend=c("Simulated corrects","Simulated errors","Empirical corrects","Empirical errors"),col=rep(c("Green","Red"),2),bty='n',lwd=c(1,1,-1,-1))
@@ -605,18 +822,18 @@ df_predictions_mean <- df_predictions %>%
          cj_mean = mean(cj),
          cj_sd = sd(cj))
 
-manipulations <- c('1' = 'Accurate CJ',
-                   '0' = 'Fast CJ')
+manipulations <- c('0' = '"Make fast decisions"',
+                   '1' = '"Make accurate\ndecisions"')
 
 ### RT ---- 
 
-rt <- ggplot(data = df_obs_mean, aes(x = coherence, y = rt, color = as.factor(rt_manipulation))) +
-  geom_point(size = 2.5, stroke = 1, shape = 16, alpha = 0.15, position = position_jitterdodge(jitter.width = 0.04, dodge.width = 0.07)) +
+rt <- ggplot(data = df_obs_mean, aes(x = coherence, y = rt, color = as.factor(rtconf_manipulation))) +
+  geom_point(size = 2.5, stroke = 1, shape = 16, alpha = 0.1, position = position_jitterdodge(jitter.width = 0.04, dodge.width = 0.07)) +
   stat_summary(geom = "point", size = 2.5, fun = "mean", position = position_dodge(width = 0.07)) +
   stat_summary(geom = "line", size = 1, fun = "mean", position = position_dodge(width = 0.07)) +
-  geom_errorbar(aes(ymin = rt_mean - rt_sd / sqrt(40), ymax = rt_mean + rt_sd / sqrt(40), group = as.factor(rt_manipulation)), position = position_dodge(width = 0.07), size = 1, width = 0.08) +
-  stat_summary(data = df_predictions_mean, aes(x = coherence, y = rt, group = as.factor(rt_manipulation)), color = 'black', geom = "point", size = 1.5, stroke = 1, shape = 4, fun = "mean", position = position_dodge(width = 0.07)) +
-  scale_x_continuous(labels = scales::percent_format(accuracy = 1)) +
+  geom_errorbar(aes(ymin = rt_mean - rt_sd / sqrt(40), ymax = rt_mean + rt_sd / sqrt(40), group = as.factor(rtconf_manipulation)), position = position_dodge(width = 0.07), size = 1, width = 0) +
+  stat_summary(data = df_predictions_mean, aes(x = coherence, y = rt, group = as.factor(rtconf_manipulation)), color = 'black', geom = "point", size = 1.5, stroke = 1, shape = 4, fun = "mean", position = position_dodge(width = 0.07)) +
+  scale_x_continuous(labels = scales::percent_format(accuracy = 1), breaks = c(0.1, 0.2, 0.4)) +
   scale_color_manual(values = c('#CA3C25', '#FFA630')) +
   ylab(label = 'Reaction Time (s)') +
   xlab(label = 'Coherence') +
@@ -634,17 +851,17 @@ rt <- ggplot(data = df_obs_mean, aes(x = coherence, y = rt, color = as.factor(rt
         strip.background = element_blank(),
         strip.text.x = element_text(size = 11),
         plot.margin=unit(c(.5,0.2,.5,0.2),"cm")) +
-  facet_wrap(~rtconf_manipulation, labeller = as_labeller(manipulations))
+  facet_wrap(~rt_manipulation, labeller = as_labeller(manipulations))
 
 ### confidence RT ----
 
-rtconf <- ggplot(data = df_obs_mean, aes(x = coherence, y = rtconf, color = as.factor(rt_manipulation))) +
-  geom_point(size = 2.5, stroke = 1, shape = 16, alpha = 0.15, position = position_jitterdodge(jitter.width = 0.04, dodge.width = 0.07)) +
+rtconf <- ggplot(data = df_obs_mean, aes(x = coherence, y = rtconf, color = as.factor(rtconf_manipulation))) +
+  geom_point(size = 2.5, stroke = 1, shape = 16, alpha = 0.1, position = position_jitterdodge(jitter.width = 0.04, dodge.width = 0.07)) +
   stat_summary(geom = "point", size = 2.5, fun = "mean", position = position_dodge(width = 0.07)) +
   stat_summary(geom = "line", size = 1, fun = "mean", position = position_dodge(width = 0.07)) +
-  geom_errorbar(aes(ymin = rtconf_mean - rtconf_sd / sqrt(40), ymax = rtconf_mean + rtconf_sd / sqrt(40), group = as.factor(rt_manipulation)), position = position_dodge(width = 0.07), size = 1, width = 0.08) +
-  stat_summary(data = df_predictions_mean, aes(x = coherence, y = rtconf, group = as.factor(rt_manipulation)), color = 'black', geom = "point", size = 1.5, stroke = 1, shape = 4, fun = "mean", position = position_dodge(width = 0.07)) +
-  scale_x_continuous(labels = scales::percent_format(accuracy = 1)) +
+  geom_errorbar(aes(ymin = rtconf_mean - rtconf_sd / sqrt(40), ymax = rtconf_mean + rtconf_sd / sqrt(40), group = as.factor(rtconf_manipulation)), position = position_dodge(width = 0.07), size = 1, width = 0) +
+  stat_summary(data = df_predictions_mean, aes(x = coherence, y = rtconf, group = as.factor(rtconf_manipulation)), color = 'black', geom = "point", size = 1.5, stroke = 1, shape = 4, fun = "mean", position = position_dodge(width = 0.07)) +
+  scale_x_continuous(labels = scales::percent_format(accuracy = 1), breaks = c(0.1, 0.2, 0.4)) +
   scale_color_manual(values = c('#CA3C25', '#FFA630')) +
   ylab(label = 'Confidence Reaction Time (s)') +
   xlab(label = 'Coherence') +
@@ -662,17 +879,17 @@ rtconf <- ggplot(data = df_obs_mean, aes(x = coherence, y = rtconf, color = as.f
         strip.background = element_blank(),
         strip.text.x = element_text(size = 11),
         plot.margin=unit(c(.5,0.2,.5,0.2),"cm")) +
-  facet_wrap(~rtconf_manipulation, labeller = as_labeller(manipulations))
+  facet_wrap(~rt_manipulation, labeller = as_labeller(manipulations))
 
 ### Accuracy ----
 
-cor <- ggplot(data = df_obs_mean, aes(x = coherence, y = cor, color = as.factor(rt_manipulation))) +
-  geom_point(size = 2.5, stroke = 1, shape = 16, alpha = 0.15, position = position_jitterdodge(jitter.width = 0.04, dodge.width = 0.07)) +
+cor <- ggplot(data = df_obs_mean, aes(x = coherence, y = cor, color = as.factor(rtconf_manipulation))) +
+  geom_point(size = 2.5, stroke = 1, shape = 16, alpha = 0.1, position = position_jitterdodge(jitter.width = 0.04, dodge.width = 0.07)) +
   stat_summary(geom = "point", size = 2.5, fun = "mean", position = position_dodge(width = 0.07)) +
   stat_summary(geom = "line", size = 1, fun = "mean", position = position_dodge(width = 0.07)) +
-  geom_errorbar(aes(ymin = accuracy_mean - accuracy_sd / sqrt(40), ymax = accuracy_mean + accuracy_sd / sqrt(40), group = as.factor(rt_manipulation)), position = position_dodge(width = 0.07), size = 1, width = 0.08) +
-  stat_summary(data = df_predictions_mean, aes(x = coherence, y = cor, group = as.factor(rt_manipulation)), color = 'black', geom = "point", size = 1.5, stroke = 1, shape = 4, fun = "mean", position = position_dodge(width = 0.07)) +
-  scale_x_continuous(labels = scales::percent_format(accuracy = 1)) +
+  geom_errorbar(aes(ymin = accuracy_mean - accuracy_sd / sqrt(40), ymax = accuracy_mean + accuracy_sd / sqrt(40), group = as.factor(rtconf_manipulation)), position = position_dodge(width = 0.07), size = 1, width = 0) +
+  stat_summary(data = df_predictions_mean, aes(x = coherence, y = cor, group = as.factor(rtconf_manipulation)), color = 'black', geom = "point", size = 1.5, stroke = 1, shape = 4, fun = "mean", position = position_dodge(width = 0.07)) +
+  scale_x_continuous(labels = scales::percent_format(accuracy = 1), breaks = c(0.1, 0.2, 0.4)) +
   scale_y_continuous(labels = scales::percent_format(accuracy = 1)) +
   scale_color_manual(values = c('#CA3C25', '#FFA630')) +
   ylab(label = 'Accuracy') +
@@ -691,17 +908,17 @@ cor <- ggplot(data = df_obs_mean, aes(x = coherence, y = cor, color = as.factor(
         strip.background = element_blank(),
         strip.text.x = element_text(size = 11),
         plot.margin=unit(c(.5,0.2,.5,0.2),"cm")) +
-  facet_wrap(~rtconf_manipulation, labeller = as_labeller(manipulations))
+  facet_wrap(~rt_manipulation, labeller = as_labeller(manipulations))
 
 ### Confidence judgement ----
 
-cj <- ggplot(data = df_obs_mean, aes(x = coherence, y = cj, color = as.factor(rt_manipulation))) +
-  geom_point(size = 2.5, stroke = 1, shape = 16, alpha = 0.15, position = position_jitterdodge(jitter.width = 0.04, dodge.width = 0.07)) +
+cj <- ggplot(data = df_obs_mean, aes(x = coherence, y = cj, color = as.factor(rtconf_manipulation))) +
+  geom_point(size = 2.5, stroke = 1, shape = 16, alpha = 0.1, position = position_jitterdodge(jitter.width = 0.04, dodge.width = 0.07)) +
   stat_summary(geom = "point", size = 2.5, fun = "mean", position = position_dodge(width = 0.07)) +
   stat_summary(geom = "line", size = 1, fun = "mean", position = position_dodge(width = 0.07)) +
-  geom_errorbar(aes(ymin = cj_mean - cj_sd / sqrt(40), ymax = cj_mean + cj_sd / sqrt(40), group = as.factor(rt_manipulation)), position = position_dodge(width = 0.07), size = 1, width = 0.08) +
-  stat_summary(data = df_predictions_mean, aes(x = coherence, y = cj, group = as.factor(rt_manipulation)), color = 'black', geom = "point", size = 1.5, stroke = 1, shape = 4, fun = "mean", position = position_dodge(width = 0.07)) +
-  scale_x_continuous(labels = scales::percent_format(accuracy = 1)) +
+  geom_errorbar(aes(ymin = cj_mean - cj_sd / sqrt(40), ymax = cj_mean + cj_sd / sqrt(40), group = as.factor(rtconf_manipulation)), position = position_dodge(width = 0.07), size = 1, width = 0) +
+  stat_summary(data = df_predictions_mean, aes(x = coherence, y = cj, group = as.factor(rtconf_manipulation)), color = 'black', geom = "point", size = 1.5, stroke = 1, shape = 4, fun = "mean", position = position_dodge(width = 0.07)) +
+  scale_x_continuous(labels = scales::percent_format(accuracy = 1), breaks = c(0.1, 0.2, 0.4)) +
   scale_color_manual(values = c('#CA3C25', '#FFA630')) +
   ylab(label = 'Mean Confidence Judgement') +
   xlab(label = 'Coherence') +
@@ -719,7 +936,7 @@ cj <- ggplot(data = df_obs_mean, aes(x = coherence, y = cj, color = as.factor(rt
         strip.background = element_blank(),
         strip.text.x = element_text(size = 11),
         plot.margin=unit(c(.5,0.2,.5,0.2),"cm")) +
-  facet_wrap(~rtconf_manipulation, labeller = as_labeller(manipulations))
+  facet_wrap(~rt_manipulation, labeller = as_labeller(manipulations))
 
 ggsave(filename = 'test.png',
        plot = ggarrange(rt, cor, rtconf, cj, nrow = 2, ncol = 2),
@@ -727,4 +944,19 @@ ggsave(filename = 'test.png',
        width = 17,
        height = 19,
        units = 'cm')
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 

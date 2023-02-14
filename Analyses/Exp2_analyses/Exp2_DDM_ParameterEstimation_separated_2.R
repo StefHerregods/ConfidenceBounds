@@ -23,7 +23,7 @@ sourceCpp("C:\\Users\\herre\\OneDrive\\Documenten\\GitHub\\ConfidenceBounds\\Ana
 
 # Variable settings
 
-overwrite <- F  # Overwrite already existing files?
+overwrite <- T  # Overwrite already existing files?
 
 z <- 0.5  # Starting point (accuracy-coded dataset -> 0.5)
 ntrials <- 1000  # Number of decision-making simulations per observation
@@ -411,7 +411,7 @@ for(i in 1:N){  # For each participant separately
       
       # Save individual results
       
-      save(results, file = file_name)
+      #save(results, file = file_name)
       
     }
   }

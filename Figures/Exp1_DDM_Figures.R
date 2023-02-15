@@ -744,7 +744,9 @@ ggsave(filename = 'test.png',
        height = 19,
        units = 'cm')
 
-<<<<<<< Updated upstream
+
+
+
 #Extra plot kobe
 df_obs$cond1 <- "Fast" 
 df_obs$cond1[df_obs$manipulation=="AccAcc"] <- "Acc" 
@@ -787,7 +789,6 @@ points(1:3,colMeans(temp)[1:3],pch=19,type='b',col="red",lwd=3,cex=2);
 error.bar(1:3,colMeans(temp)[1:3],matrixStats::colSds(as.matrix(temp))[1:3]/sqrt(N),length=0,lwd=3,col="red")
 points(1:3+.15,colMeans(temp)[4:6],pch=19,type='b',col=rgb(.75,.75,0,1),lwd=3,cex=2);
 error.bar(1:3+.15,colMeans(temp)[4:6],matrixStats::colSds(as.matrix(temp))[4:6]/sqrt(N),length=0,lwd=3,col=rgb(.75,.75,0,1))
-=======
 
 
 

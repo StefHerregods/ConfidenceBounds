@@ -1,3 +1,6 @@
+# All figures used in 'Modelling Speed-Accuracy Tradeoffs in the Stopping Rule 
+# for Confidence Judgments' of Experiment 1
+
 
 # Set-up ----
 
@@ -15,19 +18,7 @@ library(ggpubr)
 
 ## Give R access to the DDM simulation function in C++
 
-if(Sys.info()[["user"]]=="u0136938"){
-  sourceCpp("C:/Users/u0136938/OneDrive - KU Leuven/Documents/Projecten/Stef - sato op confidence/ConfidenceBounds\\Analyses\\Exp1_analyses\\DDM_confidence_bounds.cpp") 
-}else{
-  sourceCpp("C:\\Users\\herre\\OneDrive\\Documenten\\GitHub\\ConfidenceBounds\\Analyses\\Exp1_analyses\\DDM_confidence_bounds.cpp") 
-}
-
-## Set working directory
-
-if(Sys.info()[["user"]]=="u0136938"){
-  setwd("C:/Users/u0136938/OneDrive - KU Leuven/Documents/Projecten/Stef - sato op confidence/ConfidenceBounds/Data")
-}else{
-  setwd('C:\\Users\\herre\\Desktop\\Internship\\Results\\Exp1_Results')
-}
+sourceCpp("Analyses\\Exp1_analyses\\DDM_confidence_bounds.cpp") 
 
 ## Set font
 
@@ -39,7 +30,7 @@ windowsFonts(font = windowsFont("Times New Roman"))
 
 ## Behavioral data ----
 
-df_obs <- read.csv(file = "Exp1_data_viable.csv")
+df_obs <- read.csv(file = "Data\\Experiment_1\\Exp1_data_viable.csv")
 df_obs <- df_obs %>% mutate(rt_manipulation = ifelse(df_obs$manipulation %in% c("AccAcc", "AccFast"), 1, 0),
                             rtconf_manipulation = ifelse(df_obs$manipulation %in% c("AccAcc", "FastAcc"), 1, 0))
 
@@ -744,66 +735,62 @@ ggsave(filename = 'test.png',
        height = 19,
        units = 'cm')
 
+### Confidence resolution (type II AUC) ----
 
+df <- df_obs
+subs <- unique(df$sub);N <- length(subs)
+roc <- data.frame(matrix(NA,N,4));names(roc) <- unique(df$manipulation) 
+for(i in 1:N){
+  tempDat <- subset(df,sub==subs[i])
+  for(c in unique(df$manipulation)){
+    temp <- subset(tempDat,manipulation==c)
+    roc[i,c] <- pROC::auc(as.numeric(temp$cor),as.numeric(temp$cj))
+  }
+}
+roc_long <- reshape::melt(roc)
+roc_long <- roc_long %>% mutate(rt_manipulation = as.factor(ifelse(roc_long$variable %in% c("AccAcc", "AccFast"), 1, 0)),
+                                rtconf_manipulation = as.factor(ifelse(roc_long$variable %in% c("AccAcc", "FastAcc"), 1, 0))) %>%
+  group_by(rt_manipulation, rtconf_manipulation) %>%
+  mutate(roc_mean = mean(value),
+         roc_sd = sd(value))
 
+roc_plot <- ggplot(data = roc_long, aes(x = strtoi(rt_manipulation), y = value, color = as.factor(rtconf_manipulation))) +
+  geom_errorbar(aes(ymin = roc_mean - roc_sd / sqrt(40), ymax = roc_mean + roc_sd / sqrt(40), group = as.factor(rtconf_manipulation)), position = position_dodge(width = 0.5), size = 1, width = 0) +
+  geom_point(size = 2.5, stroke = 1, shape = 16, alpha = 0.2, position = position_jitterdodge(jitter.width = 0.2, dodge.width = 0.5)) +
+  stat_summary(geom = "line", size = 1, fun = "mean", position = position_dodge(width = 0.5)) +
+  stat_summary(geom = "point", size = 2.5, fun = "mean", position = position_dodge(width = 0.5)) +
+  scale_x_continuous(labels = c('"Make fast\ndecisions"', '"Make accurate\n decisions"'),breaks = c(0, 1)) +
+  scale_color_manual(values = c('#CA3C25', '#FFA630')) +
+  ylab(label = 'Type II AUC') +
+  xlab(label = '') +
+  theme(axis.line = element_line(colour = 'black'),
+        panel.grid.major.x = element_blank(),
+        panel.grid.major.y = element_line(colour = '#e0e0e0', size = 0.7),
+        panel.grid.minor.x = element_blank(),
+        panel.border = element_blank(),
+        axis.ticks.length = unit(.2, 'cm'),
+        panel.background = element_blank(),
+        text = element_text(family = 'font', size = 12),
+        axis.title.y = element_text(margin = margin(t = 0, r = 5, b = 0, l = 0)),
+        axis.title.x = element_text(margin = margin(t = 5, r = 0, b = 0, l = 0)),
+        legend.position = 'none',
+        strip.background = element_blank(),
+        strip.text.x = element_text(size = 11),
+        plot.margin=unit(c(.5,0.2,.5,0.2),"cm"))
 
-#Extra plot kobe
-df_obs$cond1 <- "Fast" 
-df_obs$cond1[df_obs$manipulation=="AccAcc"] <- "Acc" 
-df_obs$cond1[df_obs$manipulation=="AccFast"] <- "Acc" 
-df_obs$cond2 <- "Fast" 
-df_obs$cond2[df_obs$manipulation=="AccAcc"] <- "Acc" 
-df_obs$cond2[df_obs$manipulation=="FastAcc"] <- "Acc" 
-table(df_obs$cond1,df_obs$cond2,df_obs$manipulation)
-
-fit <- lme4::glmer(cj~coherence*cond1*cond2+(1|sub),df_obs,family=binomial)
-car::Anova(fit)
-plot(effects::effect('cond1:cond2',fit))
-data.frame(effects::effect('cond1:cond2',fit))
-plot(effects::effect('coherence:cond1',fit))
-data.frame(effects::effect('coherence:cond1',fit))
-
-temp <- with(df_obs,aggregate(cj,by=list(cond1=cond1,cond2=cond2,sub=sub),mean));temp<-reshape::cast(temp,sub~cond1+cond2)
-
-par(mfrow=c(1,1))
-locX <- t(jitter(matrix(rep(1:2,N),2,N),.35)) #jitter for individual points
-plot(colMeans(temp)[1:2],frame=F,cex.lab=1.5,type='n',ylim=range(temp),xlim=c(.75,2.25),ylab="Confidence",xlab="Choice SAT",xaxt='n');axis(1,at=1:2,labels=c('Accurate','Fast'))
-for(i in 1:N) points(locX[i,],temp[i,4:5],pch=21,bg=rgb(.75, 0,0,.25),col="white",cex=2)
-for(i in 1:N) points(locX[i,]+.15,temp[i,2:3],pch=21,bg=rgb(.75,.75,0,.25),col="white",cex=2)
-points(1:2,colMeans(temp)[1:2],pch=19,type='b',col="red",lwd=3,cex=2);
-error.bar(1:2,colMeans(temp)[1:2],matrixStats::colSds(as.matrix(temp))[1:2]/sqrt(N),length=0,lwd=3,col="red")
-points(1:2+.15,colMeans(temp)[3:4],pch=19,type='b',col=rgb(.75,.75,0,1),lwd=3,cex=2,lty=2);
-error.bar(1:2+.15,colMeans(temp)[3:4],matrixStats::colSds(as.matrix(temp))[3:4]/sqrt(N),length=0,lwd=3,col=rgb(.75,.75,0,1))
-legend("top",inset=.01,legend=c('Careful confidence','Fast confidence'),pch=19,box.lty=0,lty=1:2,col=c('red','green'),cex=1.25)
-
-
-temp <- with(df_obs,aggregate(cj,by=list(coherence=coherence,cond1=cond1,sub=sub),mean));temp<-reshape::cast(temp,sub~cond1+coherence)
-N <- dim(temp)[1]
-
-par(mfrow=c(1,1))
-locX <- t(jitter(matrix(rep(1:3,N),3,N),.35)) #jitter for individual points
-plot(colMeans(temp)[1:3],frame=F,cex.lab=1.5,type='n',ylim=range(temp),xlim=c(.5,3.5),ylab="Confidence",xlab="Coherence",xaxt='n');axis(1,at=1:3,labels=coherence_vector)
-for(i in 1:N) points(locX[i,],temp[i,5:7],pch=21,bg=rgb(.75, 0,0,.25),col="white",cex=2)
-for(i in 1:N) points(locX[i,]+.15,temp[i,2:4],pch=21,bg=rgb(.75,.75,0,.25),col="white",cex=2)
-points(1:3,colMeans(temp)[1:3],pch=19,type='b',col="red",lwd=3,cex=2);
-error.bar(1:3,colMeans(temp)[1:3],matrixStats::colSds(as.matrix(temp))[1:3]/sqrt(N),length=0,lwd=3,col="red")
-points(1:3+.15,colMeans(temp)[4:6],pch=19,type='b',col=rgb(.75,.75,0,1),lwd=3,cex=2);
-error.bar(1:3+.15,colMeans(temp)[4:6],matrixStats::colSds(as.matrix(temp))[4:6]/sqrt(N),length=0,lwd=3,col=rgb(.75,.75,0,1))
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
->>>>>>> Stashed changes
+# ANOVA on AUC
+roc_long <- reshape::melt(roc)
+roc_long$sub <- rep(1:N,4)
+roc_long$choice <- "acc"
+roc_long$choice[roc_long$variable=="FastFast"] <- "fast"
+roc_long$choice[roc_long$variable=="FastAcc"] <- "fast"
+roc_long$conf <- "acc"
+roc_long$conf[roc_long$variable=="FastFast"] <- "fast"
+roc_long$conf[roc_long$variable=="AccFast"] <- "fast"
+roc_long$conf <- factor(roc_long$conf)
+roc_long$choice <- factor(roc_long$choice)
+res.aov <- rstatix::anova_test(
+  data = roc_long, dv = value, wid = sub,
+  within = c(choice,conf)
+)
+res.aov

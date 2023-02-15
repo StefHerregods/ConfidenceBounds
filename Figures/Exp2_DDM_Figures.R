@@ -1,3 +1,5 @@
+# All figures used in 'Modelling Speed-Accuracy Tradeoffs in the Stopping Rule 
+# for Confidence Judgments' of Experiment 2
 
 
 # Set-up ----
@@ -15,13 +17,9 @@ library(ggpubr)
 library(gridExtra)
 library(rstatix)
 
-## Working directory
-
-setwd('C:\\Users\\herre\\Desktop\\Internship\\Results\\Exp2_Results')
-
 ## Give R access to the DDM simulation function in C++
 
-sourceCpp("C:\\Users\\herre\\OneDrive\\Documenten\\GitHub\\ConfidenceBounds\\Analyses\\Exp1_analyses\\DDM_confidence_bounds_separated_2.cpp") 
+sourceCpp("Analyses\\Exp1_analyses\\DDM_confidence_bounds_separated_2.cpp") 
 
 ## Set font
 
@@ -33,7 +31,7 @@ windowsFonts(font = windowsFont("Times New Roman"))
 
 ## Behavioral data ----
 
-df_obs <- read.csv(file = "Exp2_data_viable.csv")
+df_obs <- read.csv(file = "Data\\Experiment_2\\Exp2_data_viable.csv")
 df_obs <- df_obs %>% mutate(rt_manipulation = ifelse(df_obs$manipulation %in% c("AccAcc", "AccFast"), 1, 0),
                             rtconf_manipulation = ifelse(df_obs$manipulation %in% c("AccAcc", "FastAcc"), 1, 0))
 
@@ -945,18 +943,47 @@ ggsave(filename = 'test.png',
        height = 19,
        units = 'cm')
 
+### Confidence resolution (type II AUC) ----
 
+df <- df_obs
+subs <- unique(df$sub);N <- length(subs)
+roc <- data.frame(matrix(NA,N,4));names(roc) <- unique(df$manipulation) 
+for(i in 1:N){
+  tempDat <- subset(df,sub==subs[i])
+  for(c in unique(df$manipulation)){
+    temp <- subset(tempDat,manipulation==c)
+    roc[i,c] <- pROC::auc(as.numeric(temp$cor),as.numeric(temp$cj))
+  }
+}
+roc_long <- reshape::melt(roc)
+roc_long <- roc_long %>% mutate(rt_manipulation = as.factor(ifelse(roc_long$variable %in% c("AccAcc", "AccFast"), 1, 0)),
+                                rtconf_manipulation = as.factor(ifelse(roc_long$variable %in% c("AccAcc", "FastAcc"), 1, 0))) %>%
+  group_by(rt_manipulation, rtconf_manipulation) %>%
+  mutate(roc_mean = mean(value),
+         roc_sd = sd(value))
 
-
-
-
-
-
-
-
-
-
-
-
+roc_plot <- ggplot(data = roc_long, aes(x = strtoi(rt_manipulation), y = value, color = as.factor(rtconf_manipulation))) +
+  geom_errorbar(aes(ymin = roc_mean - roc_sd / sqrt(40), ymax = roc_mean + roc_sd / sqrt(40), group = as.factor(rtconf_manipulation)), position = position_dodge(width = 0.5), size = 1, width = 0) +
+  geom_point(size = 2.5, stroke = 1, shape = 16, alpha = 0.2, position = position_jitterdodge(jitter.width = 0.2, dodge.width = 0.5)) +
+  stat_summary(geom = "line", size = 1, fun = "mean", position = position_dodge(width = 0.5)) +
+  stat_summary(geom = "point", size = 2.5, fun = "mean", position = position_dodge(width = 0.5)) +
+  scale_x_continuous(labels = c('"Make fast\ndecisions"', '"Make accurate\n decisions"'),breaks = c(0, 1)) +
+  scale_color_manual(values = c('#CA3C25', '#FFA630')) +
+  ylab(label = 'Type II AUC') +
+  xlab(label = '') +
+  theme(axis.line = element_line(colour = 'black'),
+        panel.grid.major.x = element_blank(),
+        panel.grid.major.y = element_line(colour = '#e0e0e0', size = 0.7),
+        panel.grid.minor.x = element_blank(),
+        panel.border = element_blank(),
+        axis.ticks.length = unit(.2, 'cm'),
+        panel.background = element_blank(),
+        text = element_text(family = 'font', size = 12),
+        axis.title.y = element_text(margin = margin(t = 0, r = 5, b = 0, l = 0)),
+        axis.title.x = element_text(margin = margin(t = 5, r = 0, b = 0, l = 0)),
+        legend.position = 'none',
+        strip.background = element_blank(),
+        strip.text.x = element_text(size = 11),
+        plot.margin=unit(c(.5,0.2,.5,0.2),"cm"))
 
 

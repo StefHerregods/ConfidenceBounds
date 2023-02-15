@@ -1,7 +1,9 @@
-# Internship project: ConfidenceBounds (2021-2022)
-# Script contains the mixed effect models code used to analyze RT's, confidence RT's and accuracy
+# Behavioral analysis
+# Script contains the mixed effect models code used to analyze RT's, confidence RT's, accuracy and CJ
+
 
 # Set-up ----
+
 
 rm(list = ls())
 
@@ -36,23 +38,15 @@ vif.lme <- function (fit) {
   names(v) <- nam
   v }
 
-## 
+## write to excel function
 
 write.excel <- function(x,row.names=FALSE,col.names=FALSE,...) {
   write.table(x,"clipboard",sep="\t",row.names=row.names,col.names=col.names,...)
 }
 
-## Setting working directory
+## Read data
 
-## Setting working directory
-if(Sys.info()['user']=="u0136938"){
-  setwd('C:/Users/u0136938/OneDrive - KU Leuven/Documents/Projecten/Stef - sato op confidence/ConfidenceBounds/Data')
-}else{
-  setwd('C:\\Users\\herre\\Desktop\\Internship\\Results\\Exp2_Results')
-}
-
-
-df <- read.csv(file = "Exp2_data_viable.csv")
+df <- read.csv(file = "Data\\Experiment_2\\Exp2_data_viable.csv")
 
 ## Transform variables into factors
 
@@ -62,7 +56,7 @@ df <- df %>% mutate(rt_manipulation = as.factor(ifelse(df$manipulation %in% c("A
                     cor = as.factor(cor))
 
 
-# Decision RT ----
+# decision RT ----
 
 
 ## Based on correct data only
@@ -75,7 +69,7 @@ df_incorrect <- subset(df, cor == 0)
 df_correct$rt_log <- log(df_correct$rt)
 df_correct$rt_log <- scale(df_correct$rt_log, scale = FALSE)
 
-## Are random slopes necessary? -> Yes (but less for coherence)
+## Are random slopes necessary? 
 
 plot1 <- ggplot(df_correct, aes(x = as.factor(rt_manipulation), y = rt, group = sub)) +
   stat_smooth(geom='line', alpha=1, se=FALSE) +
@@ -152,27 +146,19 @@ anova(RT_11, RT_12)  # Significant
 ## Model assumptions
 
 ### (1) Linearity
-### Categorical/dummy coded predictors -> assumption met by definition
+# Categorical/dummy coded predictors -> assumption met by definition
 ### (2) Homogeneity of variance
 resid_panel(RT_12)
 ### (3) Normality assumption
 resid_panel(RT_12)
-
-### Multicollinearity - VIF
-
+### (4) Multicollinearity - VIF
 vif.lme(RT_12)
 
 ## Model interpretation
+
 Anova(RT_12)  # For p-values
 summary(RT_12)  # For estimates
 confint(RT_12, method = 'boot', parm = 'beta_')
-
-data.frame(effect('rt_manipulation', RT_12))
-data.frame(effect('rtconf_manipulation', RT_12)) 
-plot(effect('coherence', RT_12))
-plot(effect('rt_manipulation:coherence', RT_12))
-plot(effect('rtconf_manipulation:coherence', RT_12))
-plot(effect('rt_manipulation:rtconf_manipulation', RT_12))
 
 ## Further analysis interactions
 
@@ -181,13 +167,8 @@ contrast.matrix <- rbind("rt_manipulation1:rtconf_manipulation1" = c(1, 1, 0, 1,
                          "rt_manipulation1:coherence0.4" = c(1, 1, 0, 1, 1, 1, 0, 1, 0, 0, 0, 0))
 summary(multcomp::glht(RT_12, linfct = contrast.matrix))
 
-#data.frame(effect('rt_manipulation:coherence', RT_12))
-fixef(RT_12)
-ranef(RT_12)
 
-
-
-# Confidence rating RT ----
+# Confidence RT ----
 
 
 ## Are random slopes necessary? 
@@ -246,9 +227,7 @@ anova(RTconf_5, RTconf_6) # Significant
 resid_panel(RTconf_6)
 ### (3) Normality (of errors) assumption
 resid_panel(RTconf_6)
-
 ### (4) VIF
-
 vif.lme(RTconf_6)
 
 ## Model interpretation
@@ -256,15 +235,6 @@ vif.lme(RTconf_6)
 Anova(RTconf_6)
 summary(RTconf_6)
 confint(RTconf_6, method = 'boot', parm = 'beta_')
-
-data.frame(effect('rt_manipulation', RTconf_6))  
-data.frame(effect('rtconf_manipulation', RTconf_6)) 
-plot(effect('coherence', RTconf_6))
-plot(effect('rt_manipulation:rtconf_manipulation', RTconf_6))
-
-#data.frame(effect('rt_manipulation:coherence', RTconf_6))
-fixef(RTconf_6)
-ranef(RTconf_6)
 
 
 # Accuracy ----
@@ -311,7 +281,6 @@ anova(Cor_2, Cor_5)  # Not significant
 
 ### (1) Independence of errors
 # Gray lines indicate plus and minus 2 standard-error bounds (around 95% of residuals)
-
 binnedplot(fitted(Cor_2), 
            residuals(Cor_2, type = "response"), 
            nclass = NULL, 
@@ -321,11 +290,8 @@ binnedplot(fitted(Cor_2),
            cex.pts = 0.8, 
            col.pts = 1, 
            col.int = "gray")
-
 ### (2) Linearity (no continuous variables)
-
 ### (3) Absence of multicollinearity
-
 vif.lme(Cor_2)
 
 ## Model interpretation
@@ -335,11 +301,7 @@ summary(Cor_2)
 confint(Cor_2, method = 'boot', parm = 'beta_')
 
 
-data.frame(effect('rt_manipulation',Cor_2))
-data.frame(effect('rtconf_manipulation',Cor_2))
-data.frame(effect('coherence',Cor_2))
-
-# Confidence judgements ----
+# Confidence Judgments ----
 
 
 ## Are random slopes necessary? 
@@ -383,9 +345,7 @@ anova(Cj_1, Cj_4)  # Significant; BIC 60922
 resid_panel(Cj_4)
 ### (3) Normality (of errors) assumption
 resid_panel(Cj_4)
-
 ### (4) VIF
-
 vif.lme(Cj_4)  # Too high VIF rt_manipulation * rtconf_manipulation
 
 ## Model comparisons (through likelihood ratio tests)
@@ -432,85 +392,11 @@ anova(Cj_10, Cj_12) # Significant
 resid_panel(Cj_12)
 ### (3) Normality (of errors) assumption
 resid_panel(Cj_12)
-
 ### (4) VIF
-
 vif.lme(Cj_12)
 
 ## Model interpretation
+
 Anova(Cj_12)
 summary(Cj_12)
 confint(Cj_12, method = 'boot', parm = 'beta_')
-
-<<<<<<< Updated upstream
-data.frame(effect('rtconf_manipulation',Cj_12))
-temp <- data.frame(effect('coherence:rtconf_manipulation',Cj_12))
-temp$fit[1:3]-temp$fit[4:6]
-=======
-
-
-
-
-
-
-
-
-
-
-
-
-
-#Confidence resolution via type II AUC
-subs <- unique(df$sub);N <- length(subs)
-roc <- data.frame(matrix(NA,N,4));names(roc) <- unique(df$manipulation) 
-for(i in 1:N){
-  tempDat <- subset(df,sub==subs[i])
-  for(c in unique(df$manipulation)){
-    temp <- subset(tempDat,manipulation==c)
-    roc[i,c] <- pROC::auc(as.numeric(temp$cor),as.numeric(temp$cj))
-  }
-}
-roc_long <- reshape::melt(roc)
-roc_long <- roc_long %>% mutate(rt_manipulation = as.factor(ifelse(roc_long$variable %in% c("AccAcc", "AccFast"), 1, 0)),
-                                rtconf_manipulation = as.factor(ifelse(roc_long$variable %in% c("AccAcc", "FastAcc"), 1, 0))) %>%
-  group_by(rt_manipulation, rtconf_manipulation) %>%
-  mutate(roc_mean = mean(value),
-         roc_sd = sd(value))
-
-
-
-
-
-
-roc_plot <- ggplot(data = roc_long, aes(x = strtoi(rt_manipulation), y = value, color = as.factor(rtconf_manipulation))) +
-  geom_errorbar(aes(ymin = roc_mean - roc_sd / sqrt(40), ymax = roc_mean + roc_sd / sqrt(40), group = as.factor(rtconf_manipulation)), position = position_dodge(width = 0.5), size = 1, width = 0) +
-  geom_point(size = 2.5, stroke = 1, shape = 16, alpha = 0.2, position = position_jitterdodge(jitter.width = 0.2, dodge.width = 0.5)) +
-  stat_summary(geom = "line", size = 1, fun = "mean", position = position_dodge(width = 0.5)) +
-  stat_summary(geom = "point", size = 2.5, fun = "mean", position = position_dodge(width = 0.5)) +
-  scale_x_continuous(labels = c('"Make fast\ndecisions"', '"Make accurate\n decisions"'),breaks = c(0, 1)) +
-  scale_color_manual(values = c('#CA3C25', '#FFA630')) +
-  ylab(label = 'Type II AUC') +
-  xlab(label = '') +
-  theme(axis.line = element_line(colour = 'black'),
-        panel.grid.major.x = element_blank(),
-        panel.grid.major.y = element_line(colour = '#e0e0e0', size = 0.7),
-        panel.grid.minor.x = element_blank(),
-        panel.border = element_blank(),
-        axis.ticks.length = unit(.2, 'cm'),
-        panel.background = element_blank(),
-        text = element_text(family = 'font', size = 12),
-        axis.title.y = element_text(margin = margin(t = 0, r = 5, b = 0, l = 0)),
-        axis.title.x = element_text(margin = margin(t = 5, r = 0, b = 0, l = 0)),
-        legend.position = 'none',
-        strip.background = element_blank(),
-        strip.text.x = element_text(size = 11),
-        plot.margin=unit(c(.5,0.2,.5,0.2),"cm"))
-
-ggsave(filename = 'test.png',
-       plot = roc_plot,
-       device = 'png',
-       width = 9,
-       height = 7,
-       units = 'cm')
-
->>>>>>> Stashed changes

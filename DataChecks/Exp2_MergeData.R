@@ -25,4 +25,4 @@ for (j in 1:20){
 
 # Save full data set
 
-write.csv(data_full,"Exp2_data_full.csv",row.names=FALSE)
+write.csv(data_full,"Data\\Experiment_2\\Exp2_data_full.csv",row.names=FALSE)

@@ -12,13 +12,9 @@ library(dplyr)
 
 alpha <- 0.05  # Significance level
 
-# Setting working directory
-
-setwd("C:\\Users\\herre\\Desktop\\Internship\\Results\\Exp2_Results") 
-
 # Loading data
 
-data_full <- read.csv(file="Exp2_data_full.csv")
+data_full <- read.csv(file="Data\\Experiment_2\\Exp2_data_full.csv")
 colnames(data_full)[1] <- gsub('^...','',colnames(data_full)[1])
 
 # Add data checks
@@ -114,4 +110,4 @@ for(i in unique(data_viable$sub)){
 
 # Save viable data
 
-write.csv(data_viable,"Exp2_data_viable.csv",row.names=FALSE)
+write.csv(data_viable,"Data\\Experiment_2\\Exp2_data_viable.csv",row.names=FALSE)

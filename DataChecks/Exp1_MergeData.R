@@ -1,10 +1,5 @@
 # Merging all experiment 1 data + adding batch-number
 
-
-# Setting working directory
-
-setwd("C:\\Users\\herre\\Desktop\\Internship\\Results\\Exp1_Results")
-
 # Initialize data_full
 
 data_full <- NULL
@@ -17,7 +12,7 @@ for (j in 1:9){
   
   for (i in 1:40){
     
-    file_name <- paste0("Exp1_Batch",j,"\\DotsTask_sub",i,".csv",collapse="")
+    file_name <- paste0("Data\\Experiment_1\\Exp1_Batch",j,"\\DotsTask_sub",i,".csv",collapse="")
     if (file.exists(file_name)){
       
       data_temp <- read.csv(file=file_name)

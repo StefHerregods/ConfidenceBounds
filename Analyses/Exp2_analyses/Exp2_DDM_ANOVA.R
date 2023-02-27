@@ -111,10 +111,9 @@ get_anova_table(res.aov)
 plot_a2_slope_upper <- ggplot(data = df_DDM) + 
   geom_point_interactive(aes(x = manipulation, y = a2_slope_upper, data_id = sub, tooltip = sub))
 girafe(ggobj = plot_a2_slope_upper)
-df_DDM_2 <- df_DDM[!(df_DDM$sub %in% c(9, 28)),]  # Outliers removed
 
 ### Normality
-ggqqplot(df_DDM_2, 'a2_slope_upper', facet.by = c('rt_manipulation', 'rtconf_manipulation'))
+ggqqplot(df_DDM, 'a2_slope_upper', facet.by = c('rt_manipulation', 'rtconf_manipulation'))
 
 ### ANOVA
 res.aov <- anova_test(

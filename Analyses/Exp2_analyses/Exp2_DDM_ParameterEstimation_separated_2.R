@@ -1,15 +1,11 @@
 # Internship project 2021-2022
 # Script estimates DDM parameters of DDM with confidence bounds
-# Input: decision reaction times, decisions, confidence rating reaction times, binary confidence rating (high vs. low confidence)
+# Input: decision reaction times, decisions, confidence rating reaction times, confidence rating (1 to 6)
 # Based on https://github.com/kdesende/dynamic_influences_on_static_measures/blob/main/3A_experiment1_sato
   # Desender, K., Vermeylen, L., Verguts, T. (2021)
 
 
 rm(list=ls())
-
-# Setting working directory
-
-setwd('C:\\Users\\herre\\Desktop\\Internship\\Results\\Exp2_Results')
 
 # Load packages
 
@@ -19,11 +15,11 @@ library(dplyr)
 
 # Give R access to the DDM simulation function in C++
 
-sourceCpp("C:\\Users\\herre\\OneDrive\\Documenten\\GitHub\\ConfidenceBounds\\Analyses\\Exp1_analyses\\DDM_confidence_bounds_separated_2.cpp") 
+sourceCpp("Analyses\\Exp2_analyses\\DDM_confidence_bounds_separated_2.cpp") 
 
 # Variable settings
 
-overwrite <- T  # Overwrite already existing files?
+overwrite <- F  # Overwrite already existing files?
 
 z <- 0.5  # Starting point (accuracy-coded dataset -> 0.5)
 ntrials <- 1000  # Number of decision-making simulations per observation
@@ -371,7 +367,7 @@ chi_square_optim <- function(params, all_observations, returnFit){
 
 # Load data
 
-df <- read.csv(file = "Exp2_data_viable.csv")
+df <- read.csv(file = "Data\\Experiment_2\\Exp2_data_viable.csv")
 subs <- unique(df$sub)
 N<-length(subs)
 condLab <- unique(df$manipulation)  
@@ -390,7 +386,7 @@ for(i in 1:N){  # For each participant separately
     
     # Load existing individual results if these already exist
     
-    file_name <- paste0('Parameter_estimation_separated_2\\exp2_separated_2_results_sub_', i, '_', condLab[c], '.Rdata')
+    file_name <- paste0('Results\\exp2_results_sub_', i, '_', condLab[c], '.Rdata')
     if (overwrite == F & file.exists(file_name)){
 
       load(file_name)

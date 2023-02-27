@@ -7,10 +7,6 @@
 
 rm(list=ls())
 
-# Setting working directory
-
-setwd('C:\\Users\\herre\\Desktop\\Internship\\Results\\Exp1_Results')
-
 # Load packages
 
 library(Rcpp)  # To source, compile and run C++ functions
@@ -19,7 +15,7 @@ library(dplyr)
 
 # Give R access to the DDM simulation function in C++
 
-sourceCpp("C:\\Users\\herre\\OneDrive\\Documenten\\GitHub\\ConfidenceBounds\\Analyses\\Exp1_analyses\\DDM_confidence_bounds.cpp") 
+sourceCpp("Analyses\\Exp1_analyses\\DDM_confidence_bounds.cpp") 
 
 # Variable settings
 
@@ -292,7 +288,7 @@ chi_square_optim <- function(params, all_observations, returnFit){
 
 # Load data
 
-df <- read.csv(file = "Exp1_data_viable.csv")
+df <- read.csv(file = "Data\\Experiment_1\\Exp1_data_viable.csv")
 subs <- unique(df$sub)
 N<-length(subs)
 condLab <- unique(df$manipulation)  
@@ -311,7 +307,7 @@ for(i in 1:40){  # For each participant separately
     
     # Load existing individual results if these already exist
     
-    file_name <- paste0('Parameter_estimation_both_2\\exp1_simple_results_sub_', i, '_', condLab[c], '.Rdata')
+    file_name <- paste0('Results\\exp1_results_sub_', i, '_', condLab[c], '.Rdata')
     if (overwrite == F & file.exists(file_name)){
 
       load(file_name)

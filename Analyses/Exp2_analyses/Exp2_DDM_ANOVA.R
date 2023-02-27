@@ -1,3 +1,5 @@
+# Repeated measures ANOVA on the estimated DDM parameters of Exp2
+
 
 # Set-up ----
 
@@ -11,10 +13,6 @@ library(ggpubr)
 library(ggplot2)
 library(ggiraph)
 
-## Set working directory
-
-setwd('C:\\Users\\herre\\Desktop\\Internship\\Results\\Exp2_Results')
-
 
 # Load data ----
 
@@ -25,7 +23,7 @@ condLab <- c('FastFast', 'AccFast', 'AccAcc', 'FastAcc')
 j <- 1
 for (sub_id in (1:40)){  
   for (cond in 1:4){
-    file_name <- paste0('Parameter_estimation_separated_2\\exp2_separated_2_results_sub_', sub_id, '_', condLab[cond], '.Rdata')
+    file_name <- paste0('Data\\Experiment_2\\Parameter_estimation\\exp2_separated_2_results_sub_', sub_id, '_', condLab[cond], '.Rdata')
     load(file_name)
     df_DDM[j,] <- c(sub_id, condLab[cond], results$optim$bestmem[1], results$optim$bestmem[2], results$optim$bestmem[3], results$optim$bestmem[4], results$optim$bestmem[5], results$optim$bestmem[6], results$optim$bestmem[7], results$optim$bestmem[8], results$optim$bestmem[9], results$optim$bestmem[10], results$optim$bestmem[11])
     j <- j + 1

@@ -1,6 +1,7 @@
 # Modelling Speed-Accuracy Tradeoffs in the Stopping Rule for Confidence Judgments
 
 Research project at [DesenderLab](https://desenderlab.com/) (KU Leuven)  
+Preprint: https://www.biorxiv.org/content/10.1101/2023.02.27.530208v1
    
 ## Description
   

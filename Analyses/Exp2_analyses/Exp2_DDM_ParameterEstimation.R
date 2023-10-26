@@ -15,7 +15,7 @@ library(dplyr)
 
 # Give R access to the DDM simulation function in C++
 
-sourceCpp("Analyses\\Exp2_analyses\\DDM_confidence_bounds_separated_2.cpp") 
+sourceCpp("Analyses\\Exp2_analyses\\Exp2_DDM_confidence_bounds.cpp") 
 
 # Variable settings
 

@@ -47,7 +47,7 @@ NumericMatrix DDM_confidence_bounds(double v, double a, double ter, double z, in
     DATA(i,1) = resp;
     DATA(i,2) = acc;
     
-    //Post-decisional processing
+    // Post-decisional processing
     double v_post = v * postdriftmod;
     if (resp == 1){
       while ((evidence < a + a2_upper - t2*a2_slope_upper) && (evidence > a - a2_lower + t2*a2_slope_lower)){
@@ -74,5 +74,5 @@ NumericMatrix DDM_confidence_bounds(double v, double a, double ter, double z, in
     DATA(i,4) = (t + t2 + ter + ter2);
     DATA(i,5) = t2 + ter2;
   }
-  return DATA; //RT (including non-decision time), resp (1 or -1), accuracy (1 or 0), evidence2 (control variable), RTfull, RTconfidence, ConfidenceRating (high-1 or low-0)
+  return DATA; //RT (including non-decision time), resp (1 or -1), accuracy (1 or 0), evidence2 (control variable), RTfull, RTconfidence, ConfidenceRating (high-1 or low-0; based on the hitted boundary !! only relevant if confidence boundary slopes are equal)
 }

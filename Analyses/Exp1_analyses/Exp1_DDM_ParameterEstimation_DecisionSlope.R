@@ -15,7 +15,7 @@ library(dplyr)
 
 # Give R access to the DDM simulation function in C++
 
-sourceCpp("Analyses\\Exp1_analyses\\DDM_confidence_bounds_DecisionSlope.cpp") 
+sourceCpp("Analyses\\Exp1_analyses\\Exp1_DDM_confidence_bounds_DecisionSlope.cpp") 
 
 # Variable settings
 

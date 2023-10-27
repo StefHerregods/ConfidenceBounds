@@ -19,7 +19,7 @@ library(rstatix)
 
 ## Give R access to the DDM simulation function in C++
 
-sourceCpp("Analyses\\Exp1_analyses\\DDM_confidence_bounds_separated_2.cpp") 
+sourceCpp("Analyses\\Exp1_analyses\\Exp2_DDM_confidence_bounds.cpp") 
 
 ## Set font
 

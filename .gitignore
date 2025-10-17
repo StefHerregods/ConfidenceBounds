@@ -1,4 +1,8 @@
 Exp1_DotMotion_Data/
 Exp2_DotMotion_Data/  
+Data/Experiment_1/Model_parameters/
+Data/Experiment_1/Model_predictions/
+Data/Experiment_2/Model_parameters/
+Data/Experiment_2/Model_predictions/
 *.idea
 *.psydat
